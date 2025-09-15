@@ -30,7 +30,7 @@
 **Relacionado a:** RF-001 / RNF-001  
 **Área:** Backend | API  
 **Prioridad:** High  
-**Estimación:** 5d  
+**Estimación:** 2d  
 
 **Descripción:** Implementar sistema de autenticación JWT y autorización basada en roles para controlar el acceso a las funcionalidades del sistema según el tipo de usuario (Operador, Jefe de Turno, Admin, Jefe).
 
@@ -59,7 +59,7 @@
 **Relacionado a:** RF-002 / RF-003  
 **Área:** Backend | DB  
 **Prioridad:** High  
-**Estimación:** 3d  
+**Estimación:** 2d  
 
 **Descripción:** Definir y crear el esquema de datos para reportes de emergencia basado en el diccionario de datos del SRS, incluyendo validaciones y relaciones.
 
@@ -119,7 +119,7 @@
 **Relacionado a:** RF-007 / RNF-002  
 **Área:** Backend | API  
 **Prioridad:** High  
-**Estimación:** 3d  
+**Estimación:** 2d  
 
 **Descripción:** Implementar sistema de roles (Operador, Jefe de Turno, Admin, Jefe) con permisos específicos según la matriz de permisos del SRS.
 
@@ -148,7 +148,7 @@
 **Relacionado a:** RF-008  
 **Área:** Backend | API  
 **Prioridad:** Medium  
-**Estimación:** 3d  
+**Estimación:** 1-2d  
 
 **Descripción:** Crear endpoints para visualizar reportes filtrados por turno, considerando los horarios oficiales definidos en el SRS.
 
@@ -302,7 +302,7 @@
 - [ ] Crear endpoint GET /api/turnos
 - [ ] Implementar asignación de personal a turnos
 - [ ] Crear funciones helper para validar turnos
-- [ ] Implementar tests para lógica de turnos
+- [ ] Implementar tests manuales
 
 **Criterios de aceptación:**
 - CA1: El sistema debe reconocer todos los turnos del SRS
@@ -408,7 +408,7 @@
 **Relacionado a:** RF-015 / RNF-006  
 **Área:** Frontend (React Admin)  
 **Prioridad:** High  
-**Estimación:** 6d  
+**Estimación:** 3d  
 
 **Descripción:** Desarrollar interfaz de usuario completa usando React Admin con todas las funcionalidades CRUD y dashboards.
 
@@ -437,21 +437,15 @@
 
 ## Resumen de estimaciones
 
-**Total estimado:** 43 días laborales
+**Total estimado: 25 días** 
 
 **Por área:**
-- Backend/API: 25d
-- Frontend: 6d  
+- Backend/API: 15d
+- Frontend: 3d  
 - Base de datos: 2d
 - GPS (opcional): 5d
-- Testing: Manual (incluido en estimaciones)
 
-**Por prioridad:**
-- High: 20d
-- Medium: 18d  
-- Low: 5d (opcional)
-
-**Sprints sugeridos (2 semanas cada uno):**
+**Sprints:**
 - Sprint 1: ISSUE-012, ISSUE-013, ISSUE-001 (9d)
 - Sprint 2: ISSUE-002, ISSUE-004, ISSUE-003 (11d)  
 - Sprint 3: ISSUE-014, ISSUE-009 (10d)
@@ -459,23 +453,3 @@
 - Sprint 5: ISSUE-008, ISSUE-010 (6d)
 - Sprint 6: ISSUE-011 (5d - opcional)
 
-## Cómo usar este documento
-
-**Para Product Owners:**
-1. Importar issues al tablero de proyecto (Jira, GitHub Projects, etc.)
-2. Priorizar según necesidades del negocio
-3. Asignar issues a sprints considerando dependencias
-4. Revisar criterios de aceptación antes de marcar como Done
-
-**Formato CSV para importación:**
-```csv
-ID,Title,Description,Priority,Estimation,Area,Dependencies
-ISSUE-001,Implementar autenticación y autorización,Sistema JWT y roles,High,5d,Backend,ISSUE-013
-```
-
-**Nota importante:** Los endpoints REST (ISSUE-003) deben completarse antes de configurar el data provider de React Admin (ISSUE-014). El data provider necesita los endpoints funcionando para conectarse correctamente.
-
-**Vinculación con historias de usuario:**
-- Cada issue referencia requisitos funcionales específicos
-- Los criterios de aceptación mapean directamente a las historias
-- Las dependencias aseguran flujo lógico de desarrollo

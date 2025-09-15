@@ -115,70 +115,11 @@ El proyecto busca modernizar los procesos manuales actuales, mejorar la trazabil
 5. Guarda reporte y queda disponible según permisos
 6. Supervisores pueden generar estadísticas y exportar datos
 
-## Esquema de Datos Simplificado
-
-### Colecciones Principales
-
-**users**
-```javascript
-{
-  _id: ObjectId,
-  email: String (unique),
-  password: String (hashed),
-  nombre: String,
-  rol: String, // 'operador', 'jefe_turno', 'admin', 'jefe'
-  turno: String,
-  activo: Boolean,
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-**reportes**
-```javascript
-{
-  _id: ObjectId,
-  folio: Number (auto-increment, unique),
-  fechaHora: Date,
-  turno: String,
-  ubicacionGPS: {
-    lat: Number,
-    lng: Number,
-    direccion: String
-  },
-  tipoEmergencia: String, // 'prehospitalaria', 'urbana'
-  gravedad: String, // 'baja', 'media', 'alta'
-  afectaciones: String,
-  paciente: String,
-  insumosUtilizados: String,
-  responsable: String,
-  evidencias: [String], // URLs de archivos
-  observaciones: String,
-  conclusion: String,
-  creadoPor: ObjectId (ref: users),
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-**turnos**
-```javascript
-{
-  _id: ObjectId,
-  nombre: String,
-  tipo: String, // 'prehospitalario', 'urbano'
-  horarioInicio: String,
-  horarioFin: String,
-  diasSemana: [String],
-  personalAsignado: Number,
-  activo: Boolean
-}
-```
 
 ## Reglas de Seguridad y Compliance
 
 ### Autenticación y Autorización
-- Contraseñas hasheadas con bcrypt (salt rounds: 12)
+- Contraseñas hasheadas con bcrypt 
 - Tokens JWT con expiración de 8 horas
 - Refresh tokens para sesiones extendidas
 - Rate limiting: 5 intentos de login por minuto por IP
@@ -190,9 +131,7 @@ El proyecto busca modernizar los procesos manuales actuales, mejorar la trazabil
 - **Jefe:** Todos los reportes, estadísticas, exportar (no gestión usuarios)
 
 ### Protección de Datos
-- Logs de auditoría para operaciones críticas
 - Cifrado de datos sensibles en tránsito (HTTPS)
-- Backup automático diario con retención de 30 días
 - Acceso a evidencias solo para usuarios autorizados
 
 ### Compliance
@@ -203,57 +142,46 @@ El proyecto busca modernizar los procesos manuales actuales, mejorar la trazabil
 ## Non-Functional Targets
 
 ### Performance
-- **Latencia:** < 3 segundos para consultas complejas
-- **Throughput:** 100 requests/segundo concurrentes
-- **Carga de archivos:** < 30 segundos para archivos de 10MB
-- **Exportación:** < 60 segundos para reportes de 1000 registros
+- **Latencia:** baja
+- **Carga de archivos:** de hasta de 10mb
+- **Exportación:** con latencia baja
 
 ### Disponibilidad
 - **Uptime:** 99% durante horarios operativos (6:00-24:00)
-- **RTO (Recovery Time Objective):** < 4 horas
-- **RPO (Recovery Point Objective):** < 1 hora de datos
+
+
 
 ### Escalabilidad
 - Soporte inicial: 50 usuarios concurrentes
-- Escalabilidad horizontal: hasta 200 usuarios
-- Almacenamiento: 100GB inicial, escalable a 1TB
-- Base de datos: Sharding preparado para crecimiento
 
 ### Monitoring y Logs
-- Logs estructurados con Winston
 - Métricas de performance con timestamps
-- Alertas automáticas para errores críticos
-- Dashboard de monitoreo para administradores
+- Alertas de errores criticos
 
 ## Entregables y Milestones
 
-### MVP (8 semanas)
+### MVP (5 semanas)
 **Milestone 1 - Infraestructura Base (2 semanas)**
 - API REST configurada
 - Base de datos MongoDB
 - Autenticación JWT
 - CI/CD pipeline básico
 
-**Milestone 2 - Core Functionality (3 semanas)**
+**Milestone 2 - Core Functionality (1 semanas)**
 - CRUD de reportes completo
 - Sistema de roles y permisos
 - Frontend con React Admin básico
 
-**Milestone 3 - Features Avanzadas (2 semanas)**
+**Milestone 3 - Features Avanzadas (1 semanas)**
 - Subida de evidencias
 - Dashboard de estadísticas
-- Exportación PDF/Excel
+- Exportación PDF
 
 **Milestone 4 - Deployment y Testing (1 semana)**
 - Testing integral
 - Deployment a producción
 - Documentación final
 
-### Post-MVP (Fases Futuras)
-- **Fase 2:** Integración GPS y mapas interactivos
-- **Fase 3:** Aplicación móvil nativa
-- **Fase 4:** Análisis predictivo y machine learning
-- **Fase 5:** Integración con sistemas externos
 
 ## Definición de Done
 
@@ -303,63 +231,12 @@ El proyecto busca modernizar los procesos manuales actuales, mejorar la trazabil
 - Logging detallado para debugging
 - Validación de entrada en todos los endpoints
 
-## Procedimiento de Actualización
-
-### Versionado de SRS
-- **Versión Mayor (X.0.0):** Cambios arquitectónicos significativos
-- **Versión Menor (1.X.0):** Nuevas funcionalidades
-- **Versión Patch (1.0.X):** Correcciones y mejoras menores
-
-### Proceso de Cambios
-1. **Solicitud de Cambio:** Documentar en GitHub Issues
-2. **Análisis de Impacto:** Evaluar afectación a sistema existente
-3. **Aprobación:** Product Owner y Tech Lead
-4. **Actualización SRS:** Modificar documento con nueva versión
-5. **Comunicación:** Notificar a equipo de desarrollo
-6. **Implementación:** Seguir proceso de desarrollo estándar
-
-### Consulta para Futuros Agentes
-- **Documentación:** Mantener README.md actualizado
-- **Decisiones Técnicas:** Documentar en ADRs (Architecture Decision Records)
-- **APIs:** Mantener documentación Swagger actualizada
-- **Base de Datos:** Documentar cambios de schema en migraciones
-
-## Contactos y Stakeholders
-
-### Equipo del Proyecto
-- **Product Owner:** [Por definir]
-- **Tech Lead:** [Por definir]
-- **Frontend Developer:** [Por definir]
-- **Backend Developer:** [Por definir]
-- **QA Engineer:** [Por definir]
-
-### Stakeholders Alcaldía
-- **Coordinador de Emergencias:** [Por definir]
-- **Jefe de Sistemas:** [Por definir]
-- **Usuario Final (Paramédicos):** [Por definir]
-
-### Canales de Comunicación
-- **Repositorio:** GitHub (URL por definir)
-- **CI/CD:** GitHub Actions
-- **Project Management:** GitHub Projects / Jira
-- **Comunicación:** Slack / Microsoft Teams
-- **Documentación:** GitHub Wiki / Confluence
-
-## Anexos
 
 ### Referencias
 - **SRS Original:** `SRS.txt` (versión completa)
 - **Diagramas de Casos de Uso:** [Lucidchart URL en SRS]
 - **Diagramas de Actividades:** [Lucidchart URL en SRS]
 - **Matriz de Roles y Permisos:** Sección 12.4 del SRS
-
-### Archivos de Referencia
-- `package.json` - Dependencias del proyecto
-- `docker-compose.yml` - Configuración de desarrollo
-- `.env.example` - Variables de entorno requeridas
-- `API.md` - Documentación detallada de endpoints
-- `DEPLOYMENT.md` - Guía de despliegue
-- `CONTRIBUTING.md` - Guía para contribuidores
 
 ### Recursos Externos
 - **MongoDB Documentation:** https://docs.mongodb.com/
