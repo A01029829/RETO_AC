@@ -1,0 +1,109 @@
+39Diagrama de actividad 4. Proceso: Editar reportes
+40Diagrama de actividad 5. Proceso: Visualizar reportes del turno.
+41Diagrama de actividad 6. Proceso: Visualizar reportes individuales.
+42Diagrama de actividad 7. Proceso: Subir evidencias.
+43Diagrama de actividad 8. Proceso: Exportar reportes.
+4411. Estrategia de Evolución del Sistema (Cambio en las necesidades del
+usuario)
+El sistema de gestión de emergencias está diseñado como un MVP escalable, que debe ser capaz
+de evolucionar en respuesta a los cambios operativos y tecnológicos que la Alcaldía de
+Cuajimalpa pueda enfrentar en el futuro. La estrategia de evolución puede considerar los
+siguientes puntos:
+1. Escalabilidad de usuarios y datos
+El sistema debe soportar un incremento progresivo en la cantidad de reportes, usuarios, y
+evidencias digitales. Esto implica la posibilidad de escalar la base de datos y los
+servidores de acuerdo con la demanda real.
+2. Integración con GPS
+El sistema deberá implementar el uso de un rastreador GPS para determinar el área exacta
+de la emergencia a atender, al igual que una opción para visualizar un mapa interactivo
+para poder ajustar la zona de atención.
+3. Mejoras en visualización y análisis
+Los dashboards podrán evolucionar hacia un sistema con indicadores que apoyen a la
+planeación de recursos humanos, la asignación de ambulancias, y la mitigación de riesgos
+urbanos.
+4. Accesibilidad y usabilidad continua
+Con base en retroalimentación del personal operativo (paramédicos, operadores y jefes de
+turno), la interfaz podrá adaptarse para mejorar tiempos de captura y facilitar el uso en
+condiciones de emergencia (uso de guantes, baja conectividad, etc.)
+5. Seguridad informática
+El sistema permitirá reforzar sus mecanismos de seguridad (políticas de contraseñas,
+cifrado, historiales) conforme evolucionen las prácticas y las regulaciones de protección
+de datos.
+La estrategia de evolución asegura que la plataforma no quede sin evolucionar, sino que crezca
+de manera incremental, garantizando una continuidad operativa y funcional, con la adaptación a
+cambios legales y la mejora en la atención a emergencias.
+4512. Apéndice
+12.1 Diagramas de casos de uso
+https://lucid.app/lucidchart/56637d1b-27fe-4b69-b6d7-a9b4b5e0e17e/edit?viewport_loc=-4971
+%2C-1691%2C10437%2C4729%2C.Q4MUjXso07N&invitationId=inv_5f03de5c-471d-4539-a73
+d-d4b69437f5b0
+12.2 Diagramas de actividades
+https://lucid.app/lucidchart/da1b6abe-6f1b-4e35-90e8-3d00882dbfcd/edit?viewport_loc=2751%
+2C-574%2C3849%2C1485%2C0_0&invitationId=inv_25011f6f-2dd9-44c1-986b-2548c9d160c
+d
+12.3 Ejemplo visual de FRAPS
+4612.4 Roles y permisos
+Ver propios
+reportes
+Ver reportes
+de turno
+Ver todos
+los
+reportes
+Editar
+reportes
+Subir
+evidencias
+Generar
+estadísticas
+Gestionar
+usuarios
+Exportar
+reportes
+Operador ✓ ✗ ✗ ✗ ✓ ✗ ✗ ✗
+Jefe de
+Turno
+✓ ✓ ✗ ✗ ✓ ✗ ✗ ✗
+Admin. ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+Jefe ✓ ✓ ✓ ✗ ✓ ✓ ✗ ✓
+12.5 Diccionario de Datos (breve)
+Campo Descripción Tipo de Dato Obligatorio
+Folio Número consecutivo único asignado al reporte Numérico Sí
+Fecha/Hora Momento de creación y cierre del reporte Fecha/Hora Sí
+Turno Periodo laboral del personal que genera el reporte Texto Sí
+Ubicación GPS Coordenadas geográficas del incidente Coordenadas,
+dirección
+Sí
+Tipo de
+Emergencia
+Clasificación: Prehospitalaria/Urbana Texto Sí
+Gravedad Nivel: Baja, Media, Alta Texto Sí
+Afectaciones Daños humanos o materiales Texto + Numérico Opcional
+Paciente/Ciudadan
+os
+Datos básicos del atendido Texto Opcional
+Insumos Utilizados Lista de materiales aplicados (prehospitalaria) Texto Opcional
+Responsable Nombre de persona o autoridad responsable del caso Texto Opcional
+Evidencias Fotografías o firmas electrónicas Multimedia Opcional
+Observaciones Texto libre con detalles adicionales Texto largo Opcional
+Conclusión Resumen del cierre de caso Texto largo Sí
+4712.6 Turnos Oficiales
+12.6.1 Emergencias Prehospitalarias
+Turno Horario Personal Asignado
+Lun-Vie (matutino) 8:00 am - 3:00 pm 8 personas
+Lun-Vie (vespertino) 3:00 pm - 9:00 pm 8 personas
+Lun, Mie, Vie
+(nocturno)
+9:00 pm - 8:00 am 8 personas
+Mar, Jue, Dom
+(nocturno)
+9:00 pm - 8:00 am 8 personas
+Sáb, Dom, Festivos
+(día)
+8:00 am - 8:00 pm 8 personas
+Sáb, Dom, Festivos
+(nocturno)
+8:00 pm - 8:00 am 8 personas
+12.6.2 Emergencias Urbanas
+Turno Horario Personal Asignado
+Guardia Continua 24/7 7 personas
