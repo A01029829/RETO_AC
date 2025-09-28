@@ -1,4 +1,4 @@
-import { Admin, Resource, ShowGuesser } from "react-admin";
+import { Admin, Resource, ShowGuesser} from "react-admin";
 import { Layout } from "./Layout";
 import { dataProvider } from "./dataProvider";
 import { UserList } from "./users";
@@ -17,7 +17,10 @@ import { Dashboard } from './Dashboard';
 import { authProvider } from './authProvider';
 import { i18nProvider } from './i18nProvider';
 import { MyLoginPage } from './MyLoginPage';
+import { notaCreate, notaEdit, notaList, notaShow } from "./notas";
+import { operadorPage } from './operador';
 import { UserCreateForm, UserEditForm } from './useUnique';
+import { CommentBankRounded} from "@mui/icons-material";
 
 export const App = () => (
     <Admin dataProvider={dataProvider} dashboard={Dashboard} layout={Layout} authProvider={authProvider} i18nProvider={i18nProvider} loginPage={MyLoginPage}>
@@ -68,6 +71,14 @@ export const App = () => (
             create={todosCreate}
             show={ShowGuesser}
             icon={FormatListBulletedIcon}
+        />
+        <Resource 
+            name="notas"
+            list={notaList}
+            edit={notaEdit}
+            create={notaCreate}
+            show={notaShow}
+            icon={CommentBankRounded}
         />
     </Admin>
 )
