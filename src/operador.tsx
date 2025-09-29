@@ -1,5 +1,8 @@
 import { Button, useRedirect } from "react-admin";
 import { Card, CardContent, Grid, Box, Typography } from "@mui/material";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import NoteIcon from "@mui/icons-material/Note";
 
 export const OperatorPage = () => {
   const redirect = useRedirect();
@@ -9,7 +12,7 @@ export const OperatorPage = () => {
     rol: "Paramédico",
     contacto: "555-123-456",
     turno: 1,
-    //foto: "https://www.shutterstock.com/image-photo/beige-cat-doctor-medical-hat-260nw-2103390197.jpg"
+    foto: "https://www.shutterstock.com/image-photo/beige-cat-doctor-medical-hat-260nw-2103390197.jpg",
   };
 
   return (
@@ -17,7 +20,7 @@ export const OperatorPage = () => {
       <Grid>
         <Card>
           <CardContent>
-            {/*<img src={operador.foto} alt="foto" width={100} />*/}
+            <img src={operador.foto} alt="foto" width={200} />
             <Typography>
               <b>Nombre:</b> {operador.nombre}
             </Typography>
@@ -44,6 +47,7 @@ export const OperatorPage = () => {
             <Button
               label="GENERAR REPORTE"
               onClick={() => redirect("/comments/create")}
+              startIcon={<DescriptionIcon />}
             />
           </CardContent>
         </Card>
@@ -54,6 +58,7 @@ export const OperatorPage = () => {
             <Button
               label="GENERAR EVIDENCIA"
               onClick={() => redirect("/photos/create")}
+              startIcon={<PhotoCameraIcon />}
             />
           </CardContent>
         </Card>
@@ -61,7 +66,11 @@ export const OperatorPage = () => {
       <Grid>
         <Card>
           <CardContent>
-            <Button label="NOTA" onClick={() => redirect("/notas/create")} />
+            <Button
+              label="GENERAR NOTA"
+              onClick={() => redirect("/notas/create")}
+              startIcon={<NoteIcon />}
+            />
           </CardContent>
         </Card>
       </Grid>
