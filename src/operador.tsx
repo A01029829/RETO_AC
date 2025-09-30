@@ -1,5 +1,5 @@
 import { Button, useRedirect } from "react-admin";
-import { Card, CardContent, Grid, Box, Typography } from "@mui/material";
+import { Card, CardContent, Grid, Box, Typography, Stack } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import NoteIcon from "@mui/icons-material/Note";
@@ -16,17 +16,29 @@ export const OperatorPage = () => {
   };
 
   return (
-    <Box
+    <Grid
       sx={{
         backgroundColor: "#1f66ad",
         p: { xs: 1.5, md: 3 },
-        borderRadius: 4,
+        //borderRadius: 4,
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      <Box
-        sx={{ backgroundColor: "#fff", borderRadius: 3, p: { xs: 2, md: 3 } }}
+      {/* Contenedor de blanco */}
+      <Grid
+        sx={{
+          backgroundColor: "#fff",
+          borderRadius: 3,
+          p: { xs: 2, md: 4, lg: 6 },
+          width: "100%",
+          height: "100%",
+        }}
       >
-        <Box
+        <Grid
           sx={{
             display: "flex",
             alignItems: "center",
@@ -37,11 +49,17 @@ export const OperatorPage = () => {
           <Typography variant="h4" sx={{ fontWeight: 800 }}>
             EMERGENCIAS PREHOSPITALARIAS
           </Typography>
-        </Box>
+        </Grid>
 
-        <Grid container spacing={3}>
-          <Grid>
-            <Card sx={{ backgroundColor: "#e9ecef", borderRadius: 3 }}>
+        <Grid>
+          {/* Contenedor de datos */}
+          <Grid
+            container
+            spacing={2}
+            sx={{ p: { xs: 2, md: 4, lg: 6 }, width: "100%", height: "100%" }}
+            alignItems="stretch"
+          >
+            <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
               <CardContent
                 sx={{ display: "flex", alignItems: "center", gap: 3 }}
               >
@@ -59,90 +77,78 @@ export const OperatorPage = () => {
                 </Box>
               </CardContent>
             </Card>
-          </Grid>
 
-          <Grid>
-            <Card
-              sx={{
-                backgroundColor: "#e9ecef",
-                borderRadius: 3,
-                height: "100%",
-              }}
-            >
-              <CardContent sx={{ textAlign: "center" }}>
-                <Typography variant="h6">Turno</Typography>
-                <Typography variant="h2">{operador.turno}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid>
-            <Card
-              sx={{ backgroundColor: "#e9ecef", borderRadius: 3, height: 190 }}
-            >
-              <CardContent
+            <Grid>
+              <Card
                 sx={{
-                  height: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  backgroundColor: "#e9ecef",
+                  borderRadius: 3,
+                  height: "100%",
                 }}
               >
-                <Button
-                  label="GENERAR REPORTE"
-                  onClick={() => redirect("/comments/create")}
-                  startIcon={<DescriptionIcon />}
-                  sx={{ fontWeight: 800, px: 2, py: 1.5 }}
-                />
-              </CardContent>
-            </Card>
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Typography variant="h6">Turno</Typography>
+                  <Typography variant="h2">{operador.turno}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
 
-          <Grid>
-            <Card
-              sx={{ backgroundColor: "#e9ecef", borderRadius: 3, height: 190 }}
-            >
-              <CardContent
-                sx={{
-                  height: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+          {/* Contenedor de botones */}
+          <Grid
+            container
+            spacing={3}
+            sx={{ p: { xs: 2, md: 4, lg: 6 }, width: "100%", height: "100%" }}
+            alignItems="stretch"
+          >
+            {/* Generar Reporte */}
+            <Grid>
+              <Card
+                sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
               >
-                <Button
-                  label="GENERAR EVIDENCIA"
-                  onClick={() => redirect("/photos/create")}
-                  startIcon={<PhotoCameraIcon />}
-                  sx={{ fontWeight: 800, px: 2, py: 1.5 }}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid>
-            <Card
-              sx={{ backgroundColor: "#e9ecef", borderRadius: 3, height: 190 }}
-            >
-              <CardContent
-                sx={{
-                  height: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                <Stack alignItems="center" spacing={2}>
+                  <Button
+                    label="GENERAR REPORTE"
+                    onClick={() => redirect("/comments/create")}
+                    startIcon={<DescriptionIcon />}
+                    sx={{ fontWeight: 800, px: 2, py: 1.5 }}
+                  />
+                </Stack>
+              </Card>
+            </Grid>
+            {/* Generar Evidencia */}
+            <Grid>
+              <Card
+                sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
               >
-                <Button
-                  label="GENERAR NOTA"
-                  onClick={() => redirect("/notas/create")}
-                  startIcon={<NoteIcon />}
-                  sx={{ fontWeight: 800, px: 2, py: 1.5 }}
-                />
-              </CardContent>
-            </Card>
+                <Stack alignItems="center" spacing={2}>
+                  <Button
+                    label="GENERAR EVIDENCIA"
+                    onClick={() => redirect("/photos/create")}
+                    startIcon={<PhotoCameraIcon />}
+                    sx={{ fontWeight: 800, px: 2, py: 1.5 }}
+                  />
+                </Stack>
+              </Card>
+            </Grid>
+            {/* Generar Nota */}
+            <Grid>
+              <Card
+                sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
+              >
+                <Stack alignItems="center" spacing={2}>
+                  <Button
+                    label="GENERAR NOTA"
+                    onClick={() => redirect("/notas/create")}
+                    startIcon={<NoteIcon />}
+                    sx={{ fontWeight: 800, px: 2, py: 1.5 }}
+                  />
+                </Stack>
+              </Card>
+            </Grid>
           </Grid>
         </Grid>
-      </Box>
-    </Box>
+      </Grid>
+    </Grid>
   );
 };

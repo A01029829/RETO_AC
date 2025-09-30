@@ -27,6 +27,8 @@ import { notaCreate, notaEdit, notaList, notaShow } from "./notas";
 import { OperatorPage } from "./operador";
 import { UserCreateForm, UserEditForm } from "./useUnique";
 import { CommentBankRounded } from "@mui/icons-material";
+import { customTheme } from "./theme";
+import { JefeDeTurnoPage } from "./JefeDeTurno";
 
 export const App = () => (
   <Admin
@@ -36,6 +38,7 @@ export const App = () => (
     authProvider={authProvider}
     i18nProvider={i18nProvider}
     loginPage={MyLoginPage}
+    theme={customTheme}
   >
     <Resource
       name="users"
@@ -95,6 +98,7 @@ export const App = () => (
     />
     <CustomRoutes>
       <Route path="/operator" element={<OperatorPage />}></Route>
+      <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
     </CustomRoutes>
   </Admin>
 );
