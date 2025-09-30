@@ -56,29 +56,33 @@ export const OperatorPage = () => {
           <Grid
             container
             spacing={2}
-            sx={{ p: { xs: 2, md: 4, lg: 6 }, width: "100%", height: "100%" }}
+            sx={{ width: "100%", height: "100%" }}
             alignItems="stretch"
           >
-            <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
-              <CardContent
-                sx={{ display: "flex", alignItems: "center", gap: 3 }}
+            <Grid size={8}>
+              <Card
+                sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
               >
-                <img src={operador.foto} alt="foto" width={200} />
-                <Box>
-                  <Typography>
-                    <b>Nombre:</b> {operador.nombre}
-                  </Typography>
-                  <Typography>
-                    <b>Rol:</b> {operador.rol}
-                  </Typography>
-                  <Typography>
-                    <b>Contacto:</b> {operador.contacto}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
+                <CardContent
+                  sx={{ display: "flex", alignItems: "center", gap: 3 }}
+                >
+                  <img src={operador.foto} alt="foto" width={200} />
+                  <Box>
+                    <Typography>
+                      <b>Nombre:</b> {operador.nombre}
+                    </Typography>
+                    <Typography>
+                      <b>Rol:</b> {operador.rol}
+                    </Typography>
+                    <Typography>
+                      <b>Contacto:</b> {operador.contacto}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
 
-            <Grid>
+            <Grid size={4}>
               <Card
                 sx={{
                   backgroundColor: "#e9ecef",
@@ -95,14 +99,9 @@ export const OperatorPage = () => {
           </Grid>
 
           {/* Contenedor de botones */}
-          <Grid
-            container
-            spacing={3}
-            sx={{ p: { xs: 2, md: 4, lg: 6 }, width: "100%", height: "100%" }}
-            alignItems="stretch"
-          >
+          <Grid container spacing={3}>
             {/* Generar Reporte */}
-            <Grid>
+            <Grid size={4}>
               <Card
                 sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
               >
@@ -117,7 +116,7 @@ export const OperatorPage = () => {
               </Card>
             </Grid>
             {/* Generar Evidencia */}
-            <Grid>
+            <Grid size={4}>
               <Card
                 sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
               >
@@ -132,7 +131,7 @@ export const OperatorPage = () => {
               </Card>
             </Grid>
             {/* Generar Nota */}
-            <Grid>
+            <Grid size={4}>
               <Card
                 sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
               >

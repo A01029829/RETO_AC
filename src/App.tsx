@@ -27,7 +27,6 @@ import { notaCreate, notaEdit, notaList, notaShow } from "./notas";
 import { OperatorPage } from "./operador";
 import { UserCreateForm, UserEditForm } from "./useUnique";
 import { CommentBankRounded } from "@mui/icons-material";
-import { customTheme } from "./theme";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
 
 export const App = () => (
@@ -38,7 +37,6 @@ export const App = () => (
     authProvider={authProvider}
     i18nProvider={i18nProvider}
     loginPage={MyLoginPage}
-    theme={customTheme}
   >
     <Resource
       name="users"
