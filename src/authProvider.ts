@@ -3,7 +3,7 @@ import { AuthProvider } from "react-admin";
 type StoredUser = {
   id: string;
   name: string;
-  role: "admin" | "operator" | "guest";
+  role: "admin" | "operator" | "guest" | "jefeDeTurno";
 };
 
 const KEY = "ra_user";
@@ -15,8 +15,12 @@ export const authProvider: AuthProvider = {
     if (password !== "tc2007b") {
       throw new Error("Invalid credentials, please try again");
     }
-    const role: StoredUser["role"] =
-      username === "operator" ? "operator" : "admin";
+    const RoleMap: Record<string, StoredUser["role"]> = {
+      operator: "operator",
+      jefeDeTurno: "jefeDeTurno",
+      admin: "admin",
+    };
+    const role: StoredUser["role"] = RoleMap[username] ?? "admin";
     const user: StoredUser = { id: username, name: username, role };
     localStorage.setItem(KEY, JSON.stringify(user));
   },
