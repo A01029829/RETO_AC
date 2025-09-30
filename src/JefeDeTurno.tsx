@@ -59,22 +59,26 @@ export const JefeDeTurnoPage = () => {
         </Grid>
 
         {/* Generar Reporte */}
-        <Grid container spacing={3} sx={{ p: { xs: 2, md: 4, lg: 6 } }}>
-          <Grid>
+        <Grid container spacing={3}>
+          <Grid size={4}>
             <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
               <Stack alignItems="center" spacing={2}>
                 <Button
                   label="GENERAR REPORTE"
                   onClick={() => redirect("/comments/create")}
                   startIcon={<DescriptionIcon />}
-                  sx={{ fontWeight: 800, px: 2, py: 1.5 }}
+                  sx={{
+                    fontWeight: 800,
+                    px: 2,
+                    py: 1.5,
+                  }}
                 />
               </Stack>
             </Card>
           </Grid>
 
           {/* Generar Nota */}
-          <Grid>
+          <Grid size={4}>
             <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
               <Stack alignItems="center" spacing={2}>
                 <Button
@@ -88,7 +92,7 @@ export const JefeDeTurnoPage = () => {
           </Grid>
 
           {/* Turno */}
-          <Grid>
+          <Grid size={4}>
             <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
               <CardContent
                 sx={{
