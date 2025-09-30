@@ -7,6 +7,7 @@ import { commentsList, commentsEdit, commentsCreate, commentsShow } from "./comm
 import { albumList, albumEdit, albumCreate, albumShow } from "./albums";
 import { photoList, photoEdit, photoCreate, photoShow } from "./photos";
 import { todosList, todosEdit, todosCreate} from "./todos";
+import { ReporteEUCreate, ReporteEUEdit, ReporteEUShow, ReporteEUList } from "./ReportesEU";
 import PostIcon from "@mui/icons-material/Book";
 import UserIcon from "@mui/icons-material/Group";
 import CommentIcon from '@mui/icons-material/Comment';
@@ -67,6 +68,14 @@ export const App = () => (
             edit={todosEdit}
             create={todosCreate}
             show={ShowGuesser}
+            icon={FormatListBulletedIcon}
+        />
+        <Resource
+            name="Reportes Emergencias Urbanas"
+            list={ReporteEUList}
+            edit={ReporteEUEdit}
+            create={ReporteEUCreate}
+            show={ReporteEUShow}
             icon={FormatListBulletedIcon}
         />
     </Admin>
