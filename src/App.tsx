@@ -29,6 +29,7 @@ import { OperatorPage } from "./operador";
 import { UserCreateForm, UserEditForm } from "./useUnique";
 import { CommentBankRounded } from "@mui/icons-material";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
+import { OperatorUPage } from "./operatorU";
 
 export const App = () => (
     <Admin dataProvider={dataProvider} dashboard={Dashboard} layout={Layout} authProvider={authProvider} i18nProvider={i18nProvider} loginPage={MyLoginPage}>
@@ -91,6 +92,7 @@ export const App = () => (
         <CustomRoutes>
           <Route path="/operator" element={<OperatorPage />}></Route>
           <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
+          <Route path="/operatorU" element={<OperatorUPage />}></Route>
         </CustomRoutes>
     </Admin>
 );
