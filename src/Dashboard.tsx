@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, Box, Grid } from "@mui/material";
 import { usePermissions } from "react-admin";
 import { OperatorPage } from "./operador";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
+import { OperatorUPage } from "./operatorU";
 
 export const Dashboard = () => {
   const { permissions, isLoading } = usePermissions();
@@ -13,6 +14,9 @@ export const Dashboard = () => {
   }
   if (permissions === "jefeDeTurno") {
     return <JefeDeTurnoPage />;
+  }
+  if (permissions === "operatorU") {
+    return <OperatorUPage />;
   }
   return (
     <>
