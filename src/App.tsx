@@ -30,7 +30,7 @@ import { UserCreateForm, UserEditForm } from "./useUnique";
 import { CommentBankRounded } from "@mui/icons-material";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
 import { createTheme } from "@mui/material";
-
+import { OperatorUPage } from "./operatorU";
 const lightTheme = createTheme({
     palette: {
         mode: "light",
@@ -107,6 +107,7 @@ export const App = () => (
         <CustomRoutes>
           <Route path="/operator" element={<OperatorPage />}></Route>
           <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
+          <Route path="/operatorU" element={<OperatorUPage />}></Route>
         </CustomRoutes>
     </Admin>
 );
