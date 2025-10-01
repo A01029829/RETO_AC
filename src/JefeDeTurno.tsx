@@ -78,10 +78,10 @@ export const JefeDeTurnoPage = () => {
                   startIcon={<DescriptionIcon />}
                   sx={{
                     fontWeight: 800,
-                    px: 2,
-                    py: 1.5,
-                    alignItems: "center",
-                    justifyContent: "center",
+                    fontSize: { xs: 12, sm: 14, md: 16 },
+                    px: { xs: 1.25, sm: 2 },
+                    py: { xs: 1, sm: 1.5 },
+                    maxWidth: "100%",
                   }}
                 />
               </Stack>
@@ -107,10 +107,10 @@ export const JefeDeTurnoPage = () => {
                   startIcon={<NoteIcon />}
                   sx={{
                     fontWeight: 800,
-                    px: 2,
-                    py: 1.5,
-                    alignItems: "center",
-                    justifyContent: "center",
+                    fontSize: { xs: 12, sm: 14, md: 16 },
+                    px: { xs: 1.25, sm: 2 },
+                    py: { xs: 1, sm: 1.5 },
+                    maxWidth: "100%",
                   }}
                 />
               </Stack>
