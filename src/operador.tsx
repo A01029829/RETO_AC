@@ -51,14 +51,9 @@ export const OperatorPage = () => {
           </Typography>
         </Grid>
 
-        <Grid container rowSpacing={2}>
+        <Grid>
           {/* Contenedor de datos */}
-          <Grid
-            container
-            spacing={2}
-            sx={{ width: "100%", height: "100%" }}
-            alignItems="stretch"
-          >
+          <Grid container spacing={2}>
             <Grid size={8}>
               <Card
                 sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
@@ -85,25 +80,33 @@ export const OperatorPage = () => {
             <Grid size={4}>
               <Card
                 sx={{
-                  backgroundColor: "#eeeeee",
-                  borderRadius: 3,
+                  bgcolor: "#eeeeee",
                   height: "100%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <CardContent sx={{ textAlign: "center" }}>
+                <Stack alignItems="center" spacing={0.5}>
                   <Typography variant="h5" fontWeight={800}>
                     TURNO
                   </Typography>
                   <Typography variant="h3" color="primary" fontWeight={900}>
                     {operador.turno}
                   </Typography>
-                </CardContent>
+                </Stack>
               </Card>
             </Grid>
           </Grid>
+
+          <Grid
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 2,
+            }}
+          ></Grid>
 
           {/* Contenedor de botones */}
           <Grid container spacing={3}>
@@ -114,9 +117,9 @@ export const OperatorPage = () => {
                   bgcolor: "#eeeeee",
                   borderRadius: 3,
                   height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  //   display: "flex",
+                  //   alignItems: "center",
+                  //   justifyContent: "center",
                 }}
               >
                 <Stack alignItems="center" spacing={2}>
@@ -136,9 +139,9 @@ export const OperatorPage = () => {
                   bgcolor: "#eeeeee",
                   borderRadius: 3,
                   height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  //   display: "flex",
+                  //   alignItems: "center",
+                  //   justifyContent: "center",
                 }}
               >
                 <Stack alignItems="center" spacing={2}>
@@ -158,9 +161,9 @@ export const OperatorPage = () => {
                   bgcolor: "#eeeeee",
                   borderRadius: 3,
                   height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  //   display: "flex",
+                  //   alignItems: "center",
+                  //   justifyContent: "center",
                 }}
               >
                 <Stack alignItems="center" spacing={2}>
