@@ -3,7 +3,7 @@ import { AuthProvider } from "react-admin";
 type StoredUser = {
   id: string;
   name: string;
-  role: "admin" | "operator" | "guest" | "jefeDeTurno";
+  role: "admin" | "operator" | "guest" | "jefeDeTurno" | "operatorU";
 };
 
 const KEY = "ra_user";
@@ -19,6 +19,7 @@ export const authProvider: AuthProvider = {
       operator: "operator",
       jefeDeTurno: "jefeDeTurno",
       admin: "admin",
+      operatorU: "operatorU",
     };
     const role: StoredUser["role"] = RoleMap[username] ?? "admin";
     const user: StoredUser = { id: username, name: username, role };
