@@ -127,7 +127,13 @@ export const OperatorPage = () => {
                     label="GENERAR REPORTE"
                     onClick={() => redirect("/comments/create")}
                     startIcon={<DescriptionIcon />}
-                    sx={{ fontWeight: 800, px: 2, py: 1.5 }}
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { xs: 12, sm: 14, md: 16 },
+                      px: { xs: 1.25, sm: 2 },
+                      py: { xs: 1, sm: 1.5 },
+                      maxWidth: "100%",
+                    }}
                   />
                 </Stack>
               </Card>
@@ -149,7 +155,13 @@ export const OperatorPage = () => {
                     label="GENERAR EVIDENCIA"
                     onClick={() => redirect("/photos/create")}
                     startIcon={<PhotoCameraIcon />}
-                    sx={{ fontWeight: 800, px: 2, py: 1.5 }}
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { xs: 12, sm: 14, md: 16 },
+                      px: { xs: 1.25, sm: 2 },
+                      py: { xs: 1, sm: 1.5 },
+                      maxWidth: "100%",
+                    }}
                   />
                 </Stack>
               </Card>
@@ -171,7 +183,13 @@ export const OperatorPage = () => {
                     label="GENERAR NOTA"
                     onClick={() => redirect("/notas/create")}
                     startIcon={<NoteIcon />}
-                    sx={{ fontWeight: 800, px: 2, py: 1.5 }}
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { xs: 12, sm: 14, md: 16 },
+                      px: { xs: 1.25, sm: 2 },
+                      py: { xs: 1, sm: 1.5 },
+                      maxWidth: "100%",
+                    }}
                   />
                 </Stack>
               </Card>
