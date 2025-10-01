@@ -29,10 +29,25 @@ import { OperatorPage } from "./operador";
 import { UserCreateForm, UserEditForm } from "./useUnique";
 import { CommentBankRounded } from "@mui/icons-material";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
+import { createTheme } from "@mui/material";
 import { OperatorUPage } from "./operatorU";
+const lightTheme = createTheme({
+    palette: {
+        mode: "light",
+    },
+});
 
 export const App = () => (
-    <Admin dataProvider={dataProvider} dashboard={Dashboard} layout={Layout} authProvider={authProvider} i18nProvider={i18nProvider} loginPage={MyLoginPage}>
+    <Admin
+        dataProvider={dataProvider}
+        dashboard={Dashboard}
+        layout={Layout}
+        authProvider={authProvider}
+        i18nProvider={i18nProvider}
+        loginPage={MyLoginPage}
+        theme={lightTheme}
+        defaultTheme="light"
+    >
         <Resource
             name="users"
             list={UserList}
