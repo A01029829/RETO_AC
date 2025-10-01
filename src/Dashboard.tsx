@@ -1,6 +1,20 @@
 import { Card, CardContent, CardHeader, Box, Grid } from "@mui/material";
+import { usePermissions } from "react-admin";
+import { OperatorPage } from "./operador";
+import { JefeDeTurnoPage } from "./JefeDeTurno";
 
-export const Dashboard = () => (
+export const Dashboard = () => {
+  const { permissions, isLoading } = usePermissions();
+
+  if (isLoading) return null;
+
+  if (permissions === "operator") {
+    return <OperatorPage />;
+  }
+  if (permissions === "jefeDeTurno") {
+    return <JefeDeTurnoPage />;
+  }
+  return (
     <>
         <Grid size={{ xs: 12, md: 6 }}>
             <CardHeader title="PAGINA DE INICIO" />
@@ -24,4 +38,5 @@ export const Dashboard = () => (
 
         
     </>
-);
+  );
+};
