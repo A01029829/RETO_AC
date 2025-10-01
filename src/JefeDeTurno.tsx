@@ -61,7 +61,16 @@ export const JefeDeTurnoPage = () => {
         {/* Generar Reporte */}
         <Grid container spacing={3}>
           <Grid size={4}>
-            <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
+            <Card
+              sx={{
+                bgcolor: "#eeeeee",
+                borderRadius: 3,
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Stack alignItems="center" spacing={2}>
                 <Button
                   label="GENERAR REPORTE"
@@ -71,6 +80,8 @@ export const JefeDeTurnoPage = () => {
                     fontWeight: 800,
                     px: 2,
                     py: 1.5,
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 />
               </Stack>
@@ -79,13 +90,28 @@ export const JefeDeTurnoPage = () => {
 
           {/* Generar Nota */}
           <Grid size={4}>
-            <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
+            <Card
+              sx={{
+                bgcolor: "#eeeeee",
+                borderRadius: 3,
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Stack alignItems="center" spacing={2}>
                 <Button
                   label="GENERAR NOTA"
                   onClick={() => redirect("/comments/create")}
                   startIcon={<NoteIcon />}
-                  sx={{ fontWeight: 800, px: 2, py: 1.5 }}
+                  sx={{
+                    fontWeight: 800,
+                    px: 2,
+                    py: 1.5,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 />
               </Stack>
             </Card>
@@ -93,7 +119,16 @@ export const JefeDeTurnoPage = () => {
 
           {/* Turno */}
           <Grid size={4}>
-            <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
+            <Card
+              sx={{
+                bgcolor: "#eeeeee",
+                borderRadius: 3,
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <CardContent
                 sx={{
                   height: "100%",

@@ -51,7 +51,7 @@ export const OperatorPage = () => {
           </Typography>
         </Grid>
 
-        <Grid>
+        <Grid container rowSpacing={2}>
           {/* Contenedor de datos */}
           <Grid
             container
@@ -85,14 +85,21 @@ export const OperatorPage = () => {
             <Grid size={4}>
               <Card
                 sx={{
-                  backgroundColor: "#e9ecef",
+                  backgroundColor: "#eeeeee",
                   borderRadius: 3,
                   height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <CardContent sx={{ textAlign: "center" }}>
-                  <Typography variant="h6">Turno</Typography>
-                  <Typography variant="h2">{operador.turno}</Typography>
+                  <Typography variant="h5" fontWeight={800}>
+                    TURNO
+                  </Typography>
+                  <Typography variant="h3" color="primary" fontWeight={900}>
+                    {operador.turno}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -103,7 +110,14 @@ export const OperatorPage = () => {
             {/* Generar Reporte */}
             <Grid size={4}>
               <Card
-                sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
+                sx={{
+                  bgcolor: "#eeeeee",
+                  borderRadius: 3,
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 <Stack alignItems="center" spacing={2}>
                   <Button
@@ -118,7 +132,14 @@ export const OperatorPage = () => {
             {/* Generar Evidencia */}
             <Grid size={4}>
               <Card
-                sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
+                sx={{
+                  bgcolor: "#eeeeee",
+                  borderRadius: 3,
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 <Stack alignItems="center" spacing={2}>
                   <Button
@@ -133,7 +154,14 @@ export const OperatorPage = () => {
             {/* Generar Nota */}
             <Grid size={4}>
               <Card
-                sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
+                sx={{
+                  bgcolor: "#eeeeee",
+                  borderRadius: 3,
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 <Stack alignItems="center" spacing={2}>
                   <Button
