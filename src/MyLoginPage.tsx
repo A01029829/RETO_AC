@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useLogin, useNotify } from 'react-admin';
+import { useMediaQuery } from '@mui/material';
 
 export const MyLoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const login = useLogin();
     const notify = useNotify();
+    const isSmall = useMediaQuery(theme => theme.breakpoints.down('sm'));
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
@@ -24,38 +26,50 @@ export const MyLoginPage = () => {
         }}>
             <div style={{
                 display: 'flex',
-                width: '1400px',
-                height: '700px',
+                flexDirection: isSmall ? 'column' : 'row',
+                width: isSmall ? '90%' : '1400px',
+                maxWidth: '100%',
+                height: isSmall ? '90%' : '700px',
                 borderRadius: '15px',
                 overflow: 'hidden',
                 backgroundColor: 'white',
-                boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
-            }}>
-                {/* Lado izquierdo */}
+                boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                padding: '0'
+
+
+        }}>
                 <div style={{
-                    flex: 1,
-                    backgroundColor: '#e0eef1',
+                    flex: isSmall ? 'unset' : 1,
+                    backgroundColor: isSmall ? 'transparent' : '#e0eef1',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    padding: '20px',
-                    gap: '20px'
+                    padding: '40px',
+                    gap: '20px',
+                    width: '100%'
                 }}>
-                    <img src="https://cuajimalpa.gob.mx/wp-content/uploads/2025/01/logo.png" alt="Imagen 1" style={{ width: '480px', height: '140px', objectFit: 'cover', borderRadius: '0px' }} />
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Proteccion-civil-logo-gen.png" alt="Imagen 2" style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '10px' }} />
+                    <img src="https://cuajimalpa.gob.mx/wp-content/uploads/2025/01/logo.png" alt="Imagen 1" style={{ width: isSmall ? '100%' : '480px', height: '140px', objectFit: 'contain', borderRadius: '0px'}}/>
+
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Proteccion-civil-logo-gen.png" alt="Imagen 2" style={{ width: isSmall ? '120px' : '120px', height: '120px', objectFit: 'cover', borderRadius: '10px' }} />
                 </div>
 
-                {/* Lado derecho */}
                 <div style={{
-                    flex: 1,
+                    flex: isSmall ? 'unset' : 1,
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    padding: '40px',
+                    padding: isSmall ? '0px' : '40px',
                     alignItems: 'center'
                 }}>
-                    <h2 style={{ marginBottom: '30px', color: '#333', fontFamily: 'Open Sans, sans-serif', fontSize: '40px'}}>INICIO DE SESIÓN</h2>
+
+                    {!isSmall && (
+                     <h2 style={{ marginBottom: '30px', color: '#333', fontFamily: 'Open Sans, sans-serif', fontSize: '40px'}}>INICIO DE SESIÓN</h2>   
+                    )}
+
+                    {isSmall && (
+                     <h2 style={{ marginBottom: '30px', color: '#333', fontFamily: 'Open Sans, sans-serif', fontSize: '25px'}}>INICIO DE SESIÓN</h2>   
+                    )}
                     
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <input
