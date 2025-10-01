@@ -3,6 +3,7 @@ import { usePermissions } from "react-admin";
 import { OperatorPage } from "./operador";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
 import { OperatorUPage } from "./operatorU";
+import { AdminDashboard } from "./AdminDashboard.tsx";
 
 export const Dashboard = () => {
   const { permissions, isLoading } = usePermissions();
@@ -17,6 +18,9 @@ export const Dashboard = () => {
   }
   if (permissions === "operatorU") {
     return <OperatorUPage />;
+  }
+  if(permissions === "admin"){
+    return <AdminDashboard />;
   }
   return (
     <>
