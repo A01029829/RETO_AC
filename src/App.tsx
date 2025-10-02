@@ -13,7 +13,12 @@ import {
 import { albumList, albumEdit, albumCreate, albumShow } from "./albums";
 import { photoList, photoEdit, photoCreate, photoShow } from "./photos";
 import { todosList, todosEdit, todosCreate } from "./todos";
-import { ReporteEUCreate, ReporteEUEdit, ReporteEUShow, ReporteEUList } from "./ReportesEU";
+import {
+  ReporteEUCreate,
+  ReporteEUEdit,
+  ReporteEUShow,
+  ReporteEUList,
+} from "./ReportesEU";
 import PostIcon from "@mui/icons-material/Book";
 import UserIcon from "@mui/icons-material/Group";
 import CommentIcon from "@mui/icons-material/Comment";
@@ -31,67 +36,81 @@ import { CommentBankRounded } from "@mui/icons-material";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
 
 export const App = () => (
-    <Admin dataProvider={dataProvider} dashboard={Dashboard} layout={Layout} authProvider={authProvider} i18nProvider={i18nProvider} loginPage={MyLoginPage}>
-        <Resource
-            name="users"
-            list={UserList}
-            create={UserCreateForm}
-            edit={UserEditForm}
-            show={ShowGuesser}
-            icon={UserIcon}
-        />
-        <Resource
-            name="posts"
-            list={PostList}
-            edit={PostEdit}
-            create={PostCreate}
-            show={PostShow}
-            icon={PostIcon}
-        />
-        <Resource
-            name="comments"
-            list={commentsList}
-            edit={commentsEdit}
-            create={commentsCreate}
-            show={commentsShow}
-            icon={CommentIcon}
-        />
-        <Resource
-            name="albums"
-            list={albumList}
-            edit={albumEdit}
-            create={albumCreate}
-            show={albumShow}
-            icon={PhotoAlbumIcon}
-        />
-        <Resource
-            name="photos"
-            list={photoList}
-            edit={photoEdit}
-            create={photoCreate}
-            show={photoShow}
-            icon={PhotoIcon}
-        />
-        <Resource
-            name="todos"
-            list={todosList}
-            edit={todosEdit}
-            create={todosCreate}
-            show={ShowGuesser}
-            icon={FormatListBulletedIcon}
-        />
-        <Resource
-            name="Reportes Emergencias Urbanas"
-            list={ReporteEUList}
-            edit={ReporteEUEdit}
-            create={ReporteEUCreate}
-            show={ReporteEUShow}
-            icon={FormatListBulletedIcon}
-        />
-        <CustomRoutes>
-          <Route path="/operator" element={<OperatorPage />}></Route>
-          <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
-        </CustomRoutes>
-    </Admin>
+  <Admin
+    dataProvider={dataProvider}
+    dashboard={Dashboard}
+    layout={Layout}
+    authProvider={authProvider}
+    i18nProvider={i18nProvider}
+    loginPage={MyLoginPage}
+  >
+    <Resource
+      name="users"
+      list={UserList}
+      create={UserCreateForm}
+      edit={UserEditForm}
+      show={ShowGuesser}
+      icon={UserIcon}
+    />
+    <Resource
+      name="posts"
+      list={PostList}
+      edit={PostEdit}
+      create={PostCreate}
+      show={PostShow}
+      icon={PostIcon}
+    />
+    <Resource
+      name="comments"
+      list={commentsList}
+      edit={commentsEdit}
+      create={commentsCreate}
+      show={commentsShow}
+      icon={CommentIcon}
+    />
+    <Resource
+      name="albums"
+      list={albumList}
+      edit={albumEdit}
+      create={albumCreate}
+      show={albumShow}
+      icon={PhotoAlbumIcon}
+    />
+    <Resource
+      name="photos"
+      list={photoList}
+      edit={photoEdit}
+      create={photoCreate}
+      show={photoShow}
+      icon={PhotoIcon}
+    />
+    <Resource
+      name="todos"
+      list={todosList}
+      edit={todosEdit}
+      create={todosCreate}
+      show={ShowGuesser}
+      icon={FormatListBulletedIcon}
+    />
+    <Resource
+      name="Reportes Emergencias Urbanas"
+      list={ReporteEUList}
+      edit={ReporteEUEdit}
+      create={ReporteEUCreate}
+      show={ReporteEUShow}
+      icon={FormatListBulletedIcon}
+    />
+    <Resource
+      name="Notas"
+      list={notaList}
+      edit={notaEdit}
+      create={notaCreate}
+      show={notaShow}
+      icon={CommentBankRounded}
+    />
+    <CustomRoutes>
+      <Route path="/operator" element={<OperatorPage />}></Route>
+      <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
+    </CustomRoutes>
+  </Admin>
 );
-
