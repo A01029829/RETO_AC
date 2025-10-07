@@ -3,7 +3,7 @@ import { Route } from "react-router-dom";
 import { Layout } from "./Layout";
 import { dataProvider } from "./dataProvider";
 import { UserList } from "./users";
-import { PostList, PostEdit, PostCreate, PostShow } from "./posts";
+import { ReporteEHList, ReporteEHEdit, ReporteEHCreate, ReporteEHShow } from "./ReporteEH";
 import {
   commentsList,
   commentsEdit,
@@ -19,6 +19,7 @@ import {
   ReporteEUShow,
   ReporteEUList,
 } from "./ReportesEU";
+import { ReporteEHList, ReporteEHEdit, ReporteEHCreate, ReporteEHShow } from "./ReporteEH";
 import PostIcon from "@mui/icons-material/Book";
 import UserIcon from "@mui/icons-material/Group";
 import CommentIcon from "@mui/icons-material/Comment";
@@ -61,11 +62,11 @@ export const App = () => (
       icon={UserIcon}
     />
     <Resource
-      name="posts"
-      list={PostList}
-      edit={PostEdit}
-      create={PostCreate}
-      show={PostShow}
+      name="Emerg Prehospitalarias"
+      list={ReporteEHList}
+      edit={ReporteEHEdit}
+      create={ReporteEHCreate}
+      show={ReporteEHShow}
       icon={PostIcon}
     />
     <Resource
