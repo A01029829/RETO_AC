@@ -3,7 +3,7 @@ import { Route } from "react-router-dom";
 import { Layout } from "./Layout";
 import { dataProvider } from "./dataProvider";
 import { UserList } from "./users";
-import { PostList, PostEdit, PostCreate, PostShow } from "./posts";
+import { ReporteEHList, ReporteEHEdit, ReporteEHCreate, ReporteEHShow } from "./ReporteEH";
 import {
   commentsList,
   commentsEdit,
@@ -42,11 +42,11 @@ export const App = () => (
             icon={UserIcon}
         />
         <Resource
-            name="posts"
-            list={PostList}
-            edit={PostEdit}
-            create={PostCreate}
-            show={PostShow}
+            name="Emerg Prehospitalarias"
+            list={ReporteEHList}
+            edit={ReporteEHEdit}
+            create={ReporteEHCreate}
+            show={ReporteEHShow}
             icon={PostIcon}
         />
         <Resource
@@ -82,7 +82,7 @@ export const App = () => (
             icon={FormatListBulletedIcon}
         />
         <Resource
-            name="Reportes Emergencias Urbanas"
+            name="Emerg Urbanas"
             list={ReporteEUList}
             edit={ReporteEUEdit}
             create={ReporteEUCreate}
