@@ -19,7 +19,6 @@ import {
   ReporteEUShow,
   ReporteEUList,
 } from "./ReportesEU";
-import { ReporteEHList, ReporteEHEdit, ReporteEHCreate, ReporteEHShow } from "./ReporteEH";
 import PostIcon from "@mui/icons-material/Book";
 import UserIcon from "@mui/icons-material/Group";
 import CommentIcon from "@mui/icons-material/Comment";
