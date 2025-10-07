@@ -140,3 +140,8 @@ vite.config.ts.timestamp-*
 
 .vscode
 .DS_Store
+
+*.pub
+
+gitHector
+
