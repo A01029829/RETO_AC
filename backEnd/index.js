@@ -90,6 +90,8 @@ app.delete("/reportes/:id", async (req, res) => {
 });
 
 //updateOne
+// la funcion updateOne recibe un objeto JSON en el cuerpo de la solicitud
+// y actualiza el documento con el id especificado en la URL
 app.put("/reportes/:id", async(req,res)=>{
 	let valores=req.body
 	valores["id"]=Number(valores["id"])
@@ -99,13 +101,16 @@ app.put("/reportes/:id", async(req,res)=>{
 })
 
 async function connectToDB(){
-	let client=new MongoClient("mongodb://127.0.0.1:27017/tc2007b");
+	let client=new MongoClient("mongodb://127.0.0.1:27017/tc2007b" || process.env.MONGODB_URI);
 	await client.connect();
 	db=client.db();
 	console.log("conectado a la base de datos");
 }
 
-
+// Registro de usuarios
+// La funcion registra un nuevo usuario en la coleccion "usuarios402"
+// El password se guarda hasheado con argon2
+// Si el usuario ya existe, se devuelve un error 403
 app.post("/registrarse", async(req, res)=>{
 	let user=req.body.username;
 	let pass=req.body.password;
@@ -122,6 +127,10 @@ app.post("/registrarse", async(req, res)=>{
 	}
 })
 
+// Login de usuarios
+// La funcion verifica las credenciales del usuario
+// Si son correctas, devuelve un token JWT
+// Si no, devuelve un error 401
 app.post("/login", async (req, res)=>{
 	let user=req.body.username;
 	let pass=req.body.password;
@@ -136,7 +145,38 @@ app.post("/login", async (req, res)=>{
 	}
 })
 
+
+
+// middleware para verificar quien es el usuario autenticado
+const requireRole = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user){
+            return res.status(401).json({ message: 'No autorizado' });
+        }
+        if(!allowedRoles.includes(req.user.tipo)){
+            return res.status(403).json({ message: 'Acceso denegado' });
+        }
+        next();
+    }
+}
+
+//getMyReportes
+// La funcion getMyReportes devuelve los reportes creados por el usuario autenticado
+// Requiere autenticacion con JWT
+app.get("reportes/mis-reportes", async (req, res)=>{
+    try {
+        let token = req.get("Authentication");
+        let verifedToken = await jwt.verify(token, 'secretKey');
+
+    }
+    catch(error){
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
 app.listen(PORT, ()=>{
 	connectToDB();
 	console.log("aplicacion corriendo en puerto 3000");
 });
+
+
