@@ -28,12 +28,15 @@ const modoActivacionChoices = [
 export const ReporteEUList = () => (
     <List>
         <DataTable>
-            <TextField source="id" />
-            <TextField source="fecha" />
-            <TextField source="turno" />
-            <TextField source="personal_cargo" />
-            <TextField source="gravedad" />
-            <EditButton />
+            <DataTable.Col source="id" label="ID" />
+            <DataTable.Col source="fecha" label="Fecha" />
+            <DataTable.Col source="turno" label="Turno" />
+            <DataTable.Col source="personal_cargo" label="Personal a Cargo" />
+            <DataTable.Col source="tipo_servicio" label="Tipo de Servicio" />
+            <DataTable.Col source="gravedad" label="Gravedad" />
+            <DataTable.Col label="Acciones" sx={{textAlign: "right"}}>
+                <EditButton />
+            </DataTable.Col>
         </DataTable>
     </List>
 );
@@ -44,7 +47,7 @@ export const ReporteEUCreate = () => (
             <DateTimeInput required source="fecha" label="Día, Fecha y Hora"/>
             <SelectInput required source="turno" choices={turnoChoices} label= "Turno"/>
             <TextInput required source="personal_cargo" label="Nombre del Personal a Cargo"/>
-            <SelectInput required source="modo_Activacion" choices={modoActivacionChoices} label="Modo de Activación"/>
+            <SelectInput required source="modo_activacion" choices={modoActivacionChoices} label="Modo de Activación"/>
             <TextInput required source="tipo_servicio" label="Tipo de Servicio"/>
             <DateTimeInput required source="fecha_hora_atencion" label="Fecha y Hora de Atención"/>
             <NumberInput required source="tiempo_traslado" label="Tiempo de Traslado (minutos)"/>
