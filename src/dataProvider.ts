@@ -3,6 +3,7 @@ import jsonServerProvider from "ra-data-json-server";
 
 
 const fetchJsonUtil=(url:string, options:fetchUtils.Options={})=>{
+	url = url.replace(/\/$/, '');
 	if(!options.headers){
 		options.headers=new Headers({Accept: "application/json"});
 	} else if (!(options.headers instanceof Headers)) {
@@ -16,4 +17,5 @@ const fetchJsonUtil=(url:string, options:fetchUtils.Options={})=>{
 };
 
 export const dataProvider = jsonServerProvider(
-  import.meta.env.VITE_JSON_SERVER_URL, fetchJsonUtil);
+  import.meta.env.VITE_JSON_SERVER_URL, fetchJsonUtil
+);
