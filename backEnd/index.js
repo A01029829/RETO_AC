@@ -5,7 +5,11 @@ import mongodb from 'mongodb';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 
+const { MongoClient } = mongodb;  // ← AGREGADO: Desestructurar MongoClient
+
 const app = express();
+let db;  // ← AGREGADO: Declarar variable db
+
 // se usa cors para permitir solicitudes desde otros dominios
 app.use(cors());
 const PORT = process.env.PORT || 3000;
@@ -15,7 +19,7 @@ app.use(bodyParser.json());
 
 // Funcion para registrar logs de acciones
 const log = async (sujeto, objeto, accion)=>{  
-    toLog = {};
+    let toLog = {};
     toLog["timestamp"] = new Date();
     toLog["sujeto"] = sujeto;
     toLog["objeto"] = objeto;
@@ -34,7 +38,7 @@ const log = async (sujeto, objeto, accion)=>{
         if("_sort" in req.query){ // getList
             let sortBy = req.query._sort;
             let sortOrder = req.query._order === 'ASC' ? 1 : -1;
-            let incio = Number(req.query._start) || 0;
+            let inicio = Number(req.query._start) || 0;  // ← CORREGIDO: incio → inicio
             let fin = Number(req.query._end) || 10;
             let sorter = {};
             sorter[sortBy] = sortOrder;
@@ -50,10 +54,11 @@ const log = async (sujeto, objeto, accion)=>{
             for(let index in req.query.id){
                 let dataParcial = await db.collection("ejemplo402").find({id: Number(req.query.id[index])}).project({_id:0}).toArray();
                 data = await data.concat(dataParcial);
-            }    
+            }
+            res.json(data);  // ← AGREGADO: faltaba enviar respuesta
         }
         else{
-            let data = await db.colllection("ejemplo402").find({}).project({_id:0}).toArray();
+            let data = await db.collection("ejemplo402").find({}).project({_id:0}).toArray();  // ← CORREGIDO: colllection → collection
             // Los headers necesarios para que react-admin pueda interpretar la respuesta
             res.set("Access-Control-Expose-Headers", "X-Total-Count");
             res.set("X-Total-Count", data.length);
@@ -99,10 +104,10 @@ app.put("/reportes/:id", async(req,res)=>{
 })
 
 async function connectToDB(){
-	let client=new MongoClient("mongodb://127.0.0.1:27017/tc2007b");
-	await client.connect();
-	db=client.db();
-	console.log("conectado a la base de datos");
+    let client=new MongoClient("mongodb://127.0.0.1:27017");  // ← CORREGIDO: quitar /tc2007b
+    await client.connect();
+    db=client.db("proteccionCivil");  // ← CORREGIDO: especificar base de datos aquí
+    console.log("conectado a la base de datos");
 }
 
 
@@ -135,6 +140,231 @@ app.post("/login", async (req, res)=>{
 		res.sendStatus(401);
 	}
 })
+
+// REPORTES EU
+
+app.get('/reportesEU', async (req, res) => {
+    try{
+	let token=req.get("Authentication");
+	let verifiedToken=await jwt.verify(token, "secretKey");
+	let user=verifiedToken.usuario;	
+	if("_sort" in req.query){//getList
+		let sortBy=req.query._sort;
+		let sortOrder=req.query._order=="ASC"?1:-1;
+		let inicio=Number(req.query._start);
+		let fin=Number(req.query._end);
+		let sorter={}
+		sorter[sortBy]=sortOrder;
+		let data= await db.collection("reportesEU").find({}).sort(sorter).project({_id:0}).toArray();
+		res.set("Access-Control-Expose-Headers", "X-Total-Count");
+		res.set("X-Total-Count", data.length);
+		data=data.slice(inicio,fin)
+		log(user, "reportesEU", "leer");
+		res.json(data)
+	}else if("id" in req.query){
+		let data=[];
+		for(let index=0; index<req.query.id.length; index++){
+			let dataParcial=await db.collection("reportesEU").find({id: Number(req.query.id[index])}).project({_id:0}).toArray()
+			data= await data.concat(dataParcial);
+		}
+		res.json(data);
+	}else{
+		let data=await db.collection("reportesEU").find(req.query).project({_id:0}).toArray();
+		res.set("Access-Control-Expose-Headers", "X-Total-Count");
+		res.set("X-Total-Count", data.length);
+		res.json(data);
+	}
+	}catch{
+		res.sendStatus(401);
+	}
+});
+
+// GET /reportesEU/:id - Obtener un reporte específico
+app.get("/reportesEU/:id", async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let data = await db.collection("reportesEU").find({id: Number(req.params.id)}).project({_id:0}).toArray();
+        log(user, "reportesEU", "leer");
+        res.json(data[0]);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// POST /reportesEU - Crear un nuevo reporte
+app.post('/reportesEU', async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let valores = req.body;
+        
+        // Generar ID único
+        let ultimoReporte = await db.collection("reportesEU").find({}).sort({id: -1}).limit(1).toArray();
+        valores["id"] = ultimoReporte.length > 0 ? ultimoReporte[0].id + 1 : 1;
+        
+        // Agregar metadatos
+        valores["fecha_creacion"] = new Date();
+        valores["creado_por"] = user;
+        
+        await db.collection("reportesEU").insertOne(valores);
+        log(user, "reportesEU", "crear");
+        res.json(valores);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// PUT /reportesEU/:id - Actualizar un reporte
+app.put("/reportesEU/:id", async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let valores = req.body;
+        valores["id"] = Number(req.params.id);
+        valores["fecha_modificacion"] = new Date();
+        valores["modificado_por"] = user;
+        
+        await db.collection("reportesEU").updateOne({"id": valores["id"]}, {"$set": valores});
+        let data = await db.collection("reportesEU").find({"id": valores["id"]}).project({_id:0}).toArray();
+        log(user, "reportesEU", "actualizar");
+        res.json(data[0]);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// DELETE /reportesEU/:id - Eliminar un reporte
+app.delete("/reportesEU/:id", async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let data = await db.collection("reportesEU").deleteOne({id: Number(req.params.id)});
+        log(user, "reportesEU", "eliminar");
+        res.json(data);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// ==================== REPORTES EMERGENCIAS HOSPITALARIAS ====================
+
+// GET /reportesEH - Listar reportes
+app.get('/reportesEH', async (req, res) => {
+    try{
+        let token=req.get("Authentication");
+        let verifiedToken=await jwt.verify(token, "secretKey");
+        let user=verifiedToken.usuario;	
+        if("_sort" in req.query){
+            let sortBy=req.query._sort;
+            let sortOrder=req.query._order=="ASC"?1:-1;
+            let inicio=Number(req.query._start);
+            let fin=Number(req.query._end);
+            let sorter={}
+            sorter[sortBy]=sortOrder;
+            let data= await db.collection("reportesEH").find({}).sort(sorter).project({_id:0}).toArray();
+            res.set("Access-Control-Expose-Headers", "X-Total-Count");
+            res.set("X-Total-Count", data.length);
+            data=data.slice(inicio,fin)
+            log(user, "reportesEH", "leer");
+            res.json(data)
+        }else if("id" in req.query){
+            let data=[];
+            for(let index=0; index<req.query.id.length; index++){
+                let dataParcial=await db.collection("reportesEH").find({id: Number(req.query.id[index])}).project({_id:0}).toArray()
+                data= await data.concat(dataParcial);
+            }
+            res.json(data);
+        }else{
+            let data=await db.collection("reportesEH").find(req.query).project({_id:0}).toArray();
+            res.set("Access-Control-Expose-Headers", "X-Total-Count");
+            res.set("X-Total-Count", data.length);
+            res.json(data);
+        }
+    }catch{
+        res.sendStatus(401);
+    }
+});
+
+// GET /reportesEH/:id - Obtener un reporte específico
+app.get("/reportesEH/:id", async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let data = await db.collection("reportesEH").find({id: Number(req.params.id)}).project({_id:0}).toArray();
+        log(user, "reportesEH", "leer");
+        res.json(data[0]);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// POST /reportesEH - Crear un nuevo reporte
+app.post('/reportesEH', async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let valores = req.body;
+        let ultimoReporte = await db.collection("reportesEH").find({}).sort({id: -1}).limit(1).toArray();
+        valores["id"] = ultimoReporte.length > 0 ? ultimoReporte[0].id + 1 : 1;
+        valores["fecha_creacion"] = new Date();
+        valores["creado_por"] = user;
+        
+        await db.collection("reportesEH").insertOne(valores);
+        log(user, "reportesEH", "crear");
+        res.json(valores);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// PUT /reportesEH/:id - Actualizar un reporte
+app.put("/reportesEH/:id", async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let valores = req.body;
+        valores["id"] = Number(req.params.id);
+        valores["fecha_modificacion"] = new Date();
+        valores["modificado_por"] = user;
+        
+        await db.collection("reportesEH").updateOne({"id": valores["id"]}, {"$set": valores});
+        let data = await db.collection("reportesEH").find({"id": valores["id"]}).project({_id:0}).toArray();
+        log(user, "reportesEH", "actualizar");
+        res.json(data[0]);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// DELETE /reportesEH/:id - Eliminar un reporte
+app.delete("/reportesEH/:id", async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let data = await db.collection("reportesEH").deleteOne({id: Number(req.params.id)});
+        log(user, "reportesEH", "eliminar");
+        res.json(data);
+    } catch {
+        res.sendStatus(401);
+    }
+});
 
 app.listen(PORT, ()=>{
 	connectToDB();
