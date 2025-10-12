@@ -1,16 +1,10 @@
 import { AuthProvider } from "react-admin";
 
-// type StoredUser = {
-//   id: string;
-//   name: string;
-//   role: "admin" | "operator" | "guest" | "jefeDeTurno" | "operatorU";
-// };
-
 export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
     const request = new Request("http://127.0.0.1:3000/login", {
       method: "POST",
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ usuario: username, password }), // ← CAMBIO AQUÍ
       headers: new Headers({ "Content-Type": "application/json" }),
     });
     
@@ -24,7 +18,10 @@ export const authProvider: AuthProvider = {
       sessionStorage.setItem("auth", auth.token);
       sessionStorage.setItem(
         "identity",
-        JSON.stringify({ id: auth.id, fullName: auth.nombre })
+        JSON.stringify({ 
+          id: auth.id, 
+          fullName: auth.nombre,
+          role: auth.tipo})
       );
       return Promise.resolve();
     } catch {
@@ -37,9 +34,11 @@ export const authProvider: AuthProvider = {
         sessionStorage.removeItem("identity");
         return Promise.resolve();
   },
+  
   checkAuth: ()=>{
     return sessionStorage.getItem("auth")?Promise.resolve():Promise.reject()
   },
+  
   checkError: (error)=>{
       const status=error.status;
       if(status==401 || status==403){
@@ -49,19 +48,20 @@ export const authProvider: AuthProvider = {
       }
       return Promise.resolve();
   },
-  getPermissions: () =>{
-    return Promise.resolve();
-  },
+  
   getIdentity: () => {
     const identity = sessionStorage.getItem("identity");
-    //const user: StoredUser | null = raw ? JSON.parse(raw) : null;
     if (!identity) {
       return Promise.reject(new Error("No identity"));
     }
     return Promise.resolve(JSON.parse(identity));
-      //throw new Error("No identity");
-    //return { id: user.id, fullName: user.name, role: user.role };
   },
-}
 
-export default authProvider;
+  getPermissions: () =>{
+    const identity = sessionStorage.getItem("identity");
+    if (identity) {
+      return Promise.resolve(JSON.parse(identity).role);
+    }
+    return Promise.reject(new Error("No identity"));
+  },
+};

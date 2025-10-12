@@ -20,22 +20,81 @@ async function setupDatabase() {
             await db.createCollection('usuarios402');
             console.log("✅ Colección 'usuarios402' creada");
             
-            const hash = await argon2.hash("admin123", {
-                type: argon2.argon2id,
-                memoryCost: 19 * 1024,
-                timeCost: 2,
-                parallelism: 1,
-                saltLength: 16
-            });
+            // CORRECCIÓN: Crear todos los usuarios a la vez sin duplicados
+            await db.collection('usuarios402').insertMany([
+                {
+                    usuario: "admin",
+                    password: await argon2.hash("admin123", {
+                        type: argon2.argon2id,
+                        memoryCost: 19 * 1024,
+                        timeCost: 2,
+                        parallelism: 1,
+                        saltLength: 16
+                    }),
+                    nombre: "Administrador Principal",
+                    tipo: "administrador",
+                    turno: null 
+                },
+                {
+                    usuario: "operador1",
+                    password: await argon2.hash("operador123", {
+                        type: argon2.argon2id,
+                        memoryCost: 19 * 1024,
+                        timeCost: 2,
+                        parallelism: 1,
+                        saltLength: 16
+                    }),
+                    nombre: "Juan Operador",
+                    tipo: "operador",
+                    turno: "matutino"
+                },
+                {
+                    usuario: "operador2",
+                    password: await argon2.hash("operador123", {
+                        type: argon2.argon2id,
+                        memoryCost: 19 * 1024,
+                        timeCost: 2,
+                        parallelism: 1,
+                        saltLength: 16
+                    }),
+                    nombre: "Pedro Operador",
+                    tipo: "operador",
+                    turno: "vespertino"
+                },
+                {
+                    usuario: "jefeTurno1",
+                    password: await argon2.hash("jefe123", {
+                        type: argon2.argon2id,
+                        memoryCost: 19 * 1024,
+                        timeCost: 2,
+                        parallelism: 1,
+                        saltLength: 16
+                    }),
+                    nombre: "María Jefe de Turno",
+                    tipo: "jefeDeTurno",
+                    turno: "matutino"
+                },
+                {
+                    usuario: "jefeTurno2",
+                    password: await argon2.hash("jefe123", {
+                        type: argon2.argon2id,
+                        memoryCost: 19 * 1024,
+                        timeCost: 2,
+                        parallelism: 1,
+                        saltLength: 16
+                    }),
+                    nombre: "Roberto Jefe de Turno",
+                    tipo: "jefeDeTurno",
+                    turno: "vespertino"
+                }
+            ]);
             
-            await db.collection('usuarios402').insertOne({
-                usuario: "admin",
-                password: hash,
-                nombre: "Administrador",
-                tipo: "admin"
-            });
-            
-            console.log("✅ Usuario 'admin' creado con contraseña 'admin123'");
+            console.log("✅ Usuarios creados exitosamente:");
+            console.log("   - admin / admin123 (Administrador)");
+            console.log("   - operador1 / operador123 (Operador Turno Matutino)");
+            console.log("   - operador2 / operador123 (Operador Turno Vespertino)");
+            console.log("   - jefeTurno1 / jefe123 (Jefe de Turno Matutino)");
+            console.log("   - jefeTurno2 / jefe123 (Jefe de Turno Vespertino)");
         } else {
             console.log("⚠️  La colección 'usuarios402' ya existe");
         }
