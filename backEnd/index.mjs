@@ -5,6 +5,8 @@ import mongodb from 'mongodb';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 
+import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs";
+
 const { MongoClient } = mongodb;  // ← AGREGADO: Desestructurar MongoClient
 
 const app = express();
@@ -112,23 +114,116 @@ async function connectToDB(){
     console.log("conectado a la base de datos");
 }
 
-// Registro de usuarios
+// Registro de usuarios (solo admin)
 // La funcion registra un nuevo usuario en la coleccion "usuarios402"
 // El password se guarda hasheado con argon2
 // Si el usuario ya existe, se devuelve un error 403
-app.post("/registrarse", async(req, res)=>{
-	let user=req.body.username;
-	let pass=req.body.password;
-	let nombre=req.body.nombre;
-	let tipo=req.body.tipo;
-	let data=await db.collection("usuarios402").findOne({"usuario":user})
-	if(data==null){
-		const hash=await argon2.hash(pass, {type: argon2.argon2id, memoryCost: 19*1024, timeCost:2, parallelism:1, saltLength:16})
-		let usuarioAgregar={"usuario":user, "password":hash, "nombre":nombre, "tipo":tipo}
-		data=await db.collection("usuarios402").insertOne(usuarioAgregar);
-		res.sendStatus(201);
-	}else{
-		res.sendStatus(403)
+app.post("/registrarse", requirePermission('gestionar_usuarios'), async(req, res)=>{
+	try {
+		let user=req.body.username;
+		let pass=req.body.password;
+		let nombre=req.body.nombre;
+		let tipo=req.body.tipo;
+		let turno=req.body.turno || null;
+		
+		let data=await db.collection("usuarios402").findOne({"usuario":user})
+		if(data==null){
+			const hash=await argon2.hash(pass, {type: argon2.argon2id, memoryCost: 19*1024, timeCost:2, parallelism:1, saltLength:16})
+			let usuarioAgregar={"usuario":user, "password":hash, "nombre":nombre, "tipo":tipo, "turno":turno}
+			data=await db.collection("usuarios402").insertOne(usuarioAgregar);
+			log(req.user.usuario, "usuarios402", "crear");
+			res.sendStatus(201);
+		}else{
+			res.sendStatus(403)
+		}
+	} catch (error) {
+		res.status(500).json({ message: 'Error al registrar usuario', error: error.message });
+	}
+})
+
+// GET /usuarios - Listar usuarios (solo admin)
+app.get('/usuarios', requirePermission('gestionar_usuarios'), async (req, res) => {
+	try {
+		const { _start, _end, _sort, _order } = req.query;
+		
+		let sortObj = {};
+		if (_sort) {
+			sortObj[_sort] = _order === 'DESC' ? -1 : 1;
+		}
+		
+		const usuarios = await db.collection("usuarios402")
+			.find({})
+			.project({ password: 0, _id: 0 })
+			.sort(sortObj)
+			.skip(parseInt(_start) || 0)
+			.limit(parseInt(_end) - parseInt(_start) || 10)
+			.toArray();
+		
+		// Agregar campo 'id' para React Admin
+		const usuariosConId = usuarios.map(u => ({ ...u, id: u.usuario }));
+		
+		const total = await db.collection("usuarios402").countDocuments({});
+		
+		res.set('X-Total-Count', total);
+		res.set('Access-Control-Expose-Headers', 'X-Total-Count');
+		res.json(usuariosConId);
+	} catch (error) {
+		res.status(500).json({ message: 'Error al obtener usuarios', error: error.message });
+	}
+})
+
+// GET /usuarios/:id - Obtener un usuario específico (solo admin)
+app.get('/usuarios/:id', requirePermission('gestionar_usuarios'), async (req, res) => {
+	try {
+		const usuario = await db.collection("usuarios402")
+			.findOne({ usuario: req.params.id }, { projection: { password: 0, _id: 0 } });
+		
+		if (!usuario) {
+			return res.status(404).json({ message: 'Usuario no encontrado' });
+		}
+		
+		// Agregar campo 'id' para React Admin
+		const usuarioConId = { ...usuario, id: usuario.usuario };
+		
+		res.json(usuarioConId);
+	} catch (error) {
+		res.status(500).json({ message: 'Error al obtener usuario', error: error.message });
+	}
+})
+
+// PUT /usuarios/:id - Actualizar un usuario (solo admin)
+app.put('/usuarios/:id', requirePermission('gestionar_usuarios'), async (req, res) => {
+	try {
+		const { nombre, tipo, turno } = req.body;
+		const updateData = { nombre, tipo, turno };
+		
+		await db.collection("usuarios402").updateOne(
+			{ usuario: req.params.id },
+			{ $set: updateData }
+		);
+		
+		const usuario = await db.collection("usuarios402")
+			.findOne({ usuario: req.params.id }, { projection: { password: 0, _id: 0 } });
+		
+		// Agregar campo 'id' para React Admin
+		const usuarioConId = { ...usuario, id: usuario.usuario };
+		
+		log(req.user.usuario, "usuarios402", "actualizar");
+		res.json(usuarioConId);
+	} catch (error) {
+		res.status(500).json({ message: 'Error al actualizar usuario', error: error.message });
+	}
+})
+
+// DELETE /usuarios/:id - Eliminar un usuario (solo admin)
+app.delete('/usuarios/:id', requirePermission('gestionar_usuarios'), async (req, res) => {
+	try {
+		await db.collection("usuarios402").deleteOne({ usuario: req.params.id });
+		log(req.user.usuario, "usuarios402", "eliminar");
+		// React Admin espera que devuelvas el registro eliminado con su id
+		res.json({ id: req.params.id, usuario: req.params.id });
+	} catch (error) {
+		res.status(500).json({ message: 'Error al eliminar usuario', error: error.message });
 	}
 })
 
@@ -137,52 +232,60 @@ app.post("/registrarse", async(req, res)=>{
 // Si son correctas, devuelve un token JWT
 // Si no, devuelve un error 401
 app.post("/login", async (req, res)=>{
-	let user=req.body.username;
+	let user=req.body.usuario;
 	let pass=req.body.password;
 	let data=await db.collection("usuarios402").findOne({"usuario":user});
 	if(data==null){
 		res.sendStatus(401);
 	}else if(await argon2.verify(data.password, pass)){
-		let token=jwt.sign({"usuario":data.usuario, "tipo":data.tipo}, "secretKey", {expiresIn: 900})
-		res.json({"token":token, "id":data.usuario, "nombre":data.nombre, "tipo":data.tipo});
+		let token=jwt.sign({"usuario":data.usuario, "tipo":data.tipo, "turno":data.turno}, "secretKey", {expiresIn: 900})
+		res.json({"token":token, "id":data.usuario, "nombre":data.nombre, "tipo":data.tipo, "turno":data.turno});
 	}else{
 		res.sendStatus(401);
 	}
 })
 
-// REPORTES EU
+// REPORTES Emergencias Urbanas
 
 app.get('/reportesEU', async (req, res) => {
     try{
-	let token=req.get("Authentication");
-	let verifiedToken=await jwt.verify(token, "secretKey");
-	let user=verifiedToken.usuario;	
-	if("_sort" in req.query){//getList
-		let sortBy=req.query._sort;
-		let sortOrder=req.query._order=="ASC"?1:-1;
-		let inicio=Number(req.query._start);
-		let fin=Number(req.query._end);
-		let sorter={}
-		sorter[sortBy]=sortOrder;
-		let data= await db.collection("reportesEU").find({}).sort(sorter).project({_id:0}).toArray();
-		res.set("Access-Control-Expose-Headers", "X-Total-Count");
-		res.set("X-Total-Count", data.length);
-		data=data.slice(inicio,fin)
-		log(user, "reportesEU", "leer");
-		res.json(data)
-	}else if("id" in req.query){
-		let data=[];
-		for(let index=0; index<req.query.id.length; index++){
-			let dataParcial=await db.collection("reportesEU").find({id: Number(req.query.id[index])}).project({_id:0}).toArray()
-			data= await data.concat(dataParcial);
+		let token=req.get("Authentication");
+		let verifiedToken=await jwt.verify(token, "secretKey");
+		let user=verifiedToken.usuario;
+		
+		// Aplicar filtro según el rol del usuario
+		const filter = getReportFilter(verifiedToken);
+		
+		if("_sort" in req.query){//getList
+			let sortBy=req.query._sort;
+			let sortOrder=req.query._order=="ASC"?1:-1;
+			let inicio=Number(req.query._start);
+			let fin=Number(req.query._end);
+			let sorter={}
+			sorter[sortBy]=sortOrder;
+			
+			// Aplicar filtro del usuario
+			let data= await db.collection("reportesEU").find(filter).sort(sorter).project({_id:0}).toArray();
+			res.set("Access-Control-Expose-Headers", "X-Total-Count");
+			res.set("X-Total-Count", data.length);
+			data=data.slice(inicio,fin)
+			log(user, "reportesEU", "leer");
+			res.json(data)
+		}else if("id" in req.query){
+			let data=[];
+			for(let index=0; index<req.query.id.length; index++){
+				let dataParcial=await db.collection("reportesEU").find({...filter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
+				data= await data.concat(dataParcial);
+			}
+			res.json(data);
+		}else{
+			// Combinar filtro del usuario con query params
+			let combinedFilter = {...filter, ...req.query};
+			let data=await db.collection("reportesEU").find(combinedFilter).project({_id:0}).toArray();
+			res.set("Access-Control-Expose-Headers", "X-Total-Count");
+			res.set("X-Total-Count", data.length);
+			res.json(data);
 		}
-		res.json(data);
-	}else{
-		let data=await db.collection("reportesEU").find(req.query).project({_id:0}).toArray();
-		res.set("Access-Control-Expose-Headers", "X-Total-Count");
-		res.set("X-Total-Count", data.length);
-		res.json(data);
-	}
 	}catch{
 		res.sendStatus(401);
 	}
@@ -266,12 +369,15 @@ app.delete("/reportesEU/:id", async (req, res) => {
 
 // ==================== REPORTES EMERGENCIAS HOSPITALARIAS ====================
 
-// GET /reportesEH - Listar reportes
-app.get('/reportesEH', async (req, res) => {
+// GET /reportesEH - Listar reportes con permisos
+app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, res) => {
     try{
         let token=req.get("Authentication");
         let verifiedToken=await jwt.verify(token, "secretKey");
-        let user=verifiedToken.usuario;	
+        let user=verifiedToken.usuario;
+        
+        const filter = getReportFilter(verifiedToken);
+        
         if("_sort" in req.query){
             let sortBy=req.query._sort;
             let sortOrder=req.query._order=="ASC"?1:-1;
@@ -279,7 +385,8 @@ app.get('/reportesEH', async (req, res) => {
             let fin=Number(req.query._end);
             let sorter={}
             sorter[sortBy]=sortOrder;
-            let data= await db.collection("reportesEH").find({}).sort(sorter).project({_id:0}).toArray();
+
+            let data= await db.collection("reportesEH").find(filter).sort(sorter).project({_id:0}).toArray();
             res.set("Access-Control-Expose-Headers", "X-Total-Count");
             res.set("X-Total-Count", data.length);
             data=data.slice(inicio,fin)
@@ -288,12 +395,12 @@ app.get('/reportesEH', async (req, res) => {
         }else if("id" in req.query){
             let data=[];
             for(let index=0; index<req.query.id.length; index++){
-                let dataParcial=await db.collection("reportesEH").find({id: Number(req.query.id[index])}).project({_id:0}).toArray()
+                let dataParcial=await db.collection("reportesEH").find({...filter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
                 data= await data.concat(dataParcial);
             }
             res.json(data);
         }else{
-            let data=await db.collection("reportesEH").find(req.query).project({_id:0}).toArray();
+            let data=await db.collection("reportesEH").find(filter).project({_id:0}).toArray();
             res.set("Access-Control-Expose-Headers", "X-Total-Count");
             res.set("X-Total-Count", data.length);
             res.json(data);
@@ -309,8 +416,21 @@ app.get("/reportesEH/:id", async (req, res) => {
         let token = req.get("Authentication");
         let verifiedToken = await jwt.verify(token, "secretKey");
         let user = verifiedToken.usuario;
+
+        const filter = getReportFilter(verifiedToken);
+        let query = { id: Number(req.params.id) };
         
-        let data = await db.collection("reportesEH").find({id: Number(req.params.id)}).project({_id:0}).toArray();
+        // Si hay filtro, agregarlo
+        if (filter.creado_por) {
+            query.creado_por = filter.creado_por;
+        }
+        
+        let data = await db.collection("reportesEH").find(query).project({_id:0}).toArray();
+        
+        if(data.length === 0) {
+            return res.status(404).json({ message: 'Reporte no encontrado' });
+        }
+
         log(user, "reportesEH", "leer");
         res.json(data[0]);
     } catch {
@@ -319,7 +439,7 @@ app.get("/reportesEH/:id", async (req, res) => {
 });
 
 // POST /reportesEH - Crear un nuevo reporte
-app.post('/reportesEH', async (req, res) => {
+app.post('/reportesEH', requirePermission('crear_reportes'), async (req, res) => {
     try {
         let token = req.get("Authentication");
         let verifiedToken = await jwt.verify(token, "secretKey");
@@ -340,7 +460,7 @@ app.post('/reportesEH', async (req, res) => {
 });
 
 // PUT /reportesEH/:id - Actualizar un reporte
-app.put("/reportesEH/:id", async (req, res) => {
+app.put("/reportesEH/:id", requirePermission('editar_reportes'), async (req, res) => {
     try {
         let token = req.get("Authentication");
         let verifiedToken = await jwt.verify(token, "secretKey");
@@ -361,7 +481,7 @@ app.put("/reportesEH/:id", async (req, res) => {
 });
 
 // DELETE /reportesEH/:id - Eliminar un reporte
-app.delete("/reportesEH/:id", async (req, res) => {
+app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (req, res) => {
     try {
         let token = req.get("Authentication");
         let verifiedToken = await jwt.verify(token, "secretKey");

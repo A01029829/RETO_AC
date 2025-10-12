@@ -12,7 +12,6 @@ import {
 } from "./ReportesEU";
 import PostIcon from "@mui/icons-material/Book";
 import UserIcon from "@mui/icons-material/Group";
-//import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { Dashboard } from "./Dashboard";
 import { authProvider } from "./authProvider";
 import { i18nProvider } from "./i18nProvider";
@@ -23,14 +22,9 @@ import { UserCreateForm, UserEditForm } from "./useUnique";
 import { CommentBankRounded } from "@mui/icons-material";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
 import { AdminDashboard } from "./AdminDashboard";
-//import { createTheme } from "@mui/material";
 import { OperatorUPage } from "./operatorU";
 import { StatisticsPanel } from "./StatsPanel";
-// const lightTheme = createTheme({
-//   palette: {
-//     mode: "light",
-//   },
-// });
+import { UsuarioCreate, UsuarioList, UsuarioEdit } from "./registrarUsuarios";
 
 export const App = () => (
   <Admin
@@ -42,45 +36,59 @@ export const App = () => (
     loginPage={MyLoginPage}
     defaultTheme="light"
   >
-    <Resource
-      name="users"
-      list={UserList}
-      create={UserCreateForm}
-      edit={UserEditForm}
-      show={ShowGuesser}
-      icon={UserIcon}
-    />
-    <Resource
-      name="reportesEH"
-      options={{ label: 'Reportes Emergencias Hospitalarias' }}
-      list={ReporteEHList}
-      edit={ReporteEHEdit}
-      create={ReporteEHCreate}
-      show={ReporteEHShow}
-      icon={PostIcon}
-    />
-    <Resource
-      name="reportesEU"
-      options={{ label: 'Reportes Emergencias Urbanas' }}
-      list={ReporteEUList}
-      create={ReporteEUCreate}
-      edit={ReporteEUEdit}
-      show={ReporteEUShow}
-    />
-    <Resource
-      name="Notas"
-      list={notaList}
-      edit={notaEdit}
-      create={notaCreate}
-      show={notaShow}
-      icon={CommentBankRounded}
-    />
-    <CustomRoutes>
-      <Route path="/operator" element={<OperatorPage />}></Route>
-      <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
-      <Route path="/operatorU" element={<OperatorUPage />}></Route>
-      <Route path="/admin" element={<AdminDashboard />}></Route>
-      <Route path="/stats" element={<StatisticsPanel />} />
-    </CustomRoutes>
+    {(permissions) => (
+      <>
+        {/* Recurso de usuarios - Solo para administradores */}
+        {permissions === 'administrador' && (
+          <Resource
+            name="usuarios"
+            list={UsuarioList}
+            create={UsuarioCreate}
+            edit={UsuarioEdit}
+            icon={UserIcon}
+            options={{ label: 'Gestión de Usuarios' }}
+          />
+        )}
+
+        {/* Reportes Emergencias Hospitalarias - Todos los usuarios */}
+        <Resource
+          name="reportesEH"
+          options={{ label: 'Reportes Emergencias Hospitalarias' }}
+          list={ReporteEHList}
+          edit={ReporteEHEdit}
+          create={ReporteEHCreate}
+          show={ReporteEHShow}
+          icon={PostIcon}
+        />
+
+        {/* Reportes Emergencias Urbanas - Todos los usuarios */}
+        <Resource
+          name="reportesEU"
+          options={{ label: 'Reportes Emergencias Urbanas' }}
+          list={ReporteEUList}
+          create={ReporteEUCreate}
+          edit={ReporteEUEdit}
+          show={ReporteEUShow}
+        />
+
+        {/* Notas - Todos los usuarios */}
+        <Resource
+          name="Notas"
+          list={notaList}
+          edit={notaEdit}
+          create={notaCreate}
+          show={notaShow}
+          icon={CommentBankRounded}
+        />
+
+        <CustomRoutes>
+          <Route path="/operator" element={<OperatorPage />}></Route>
+          <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
+          <Route path="/operatorU" element={<OperatorUPage />}></Route>
+          <Route path="/admin" element={<AdminDashboard />}></Route>
+          <Route path="/stats" element={<StatisticsPanel />} />
+        </CustomRoutes>
+      </>
+    )}
   </Admin>
 );
