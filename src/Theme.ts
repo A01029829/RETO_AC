@@ -16,6 +16,10 @@ export const customTheme = createTheme({
       paper: "#ffffff",
     },
   },
+  sidebar: {
+    width: 240,
+    closedWidth: 55,
+  },
   components: {
     MuiMenuItem: {
       styleOverrides: {
@@ -25,5 +29,27 @@ export const customTheme = createTheme({
         },
       },
     },
+    
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          marginLeft: '16px', 
+          height: 'calc(100vh - 32px)', 
+          marginTop: '16px', 
+          marginBottom: '16px',
+          borderRadius: '0 16px 16px 0', 
+        },
+      },
+    },
+
+    RaLayout:{
+      styleOverrides: {
+        root: {
+          '& .RaLayout-contentWithSidebar': {
+            marginLeft: '16px', // Compensar el espacio de la sidebar
+          },
+        },
+      }   
+    }
   },
 });

@@ -25,6 +25,7 @@ import { AdminDashboard } from "./AdminDashboard";
 import { OperatorUPage } from "./operatorU";
 import { StatisticsPanel } from "./StatsPanel";
 import { UsuarioCreate, UsuarioList, UsuarioEdit } from "./registrarUsuarios";
+import { customTheme } from "./Theme";
 
 export const App = () => (
   <Admin
@@ -34,7 +35,7 @@ export const App = () => (
     authProvider={authProvider}
     i18nProvider={i18nProvider}
     loginPage={MyLoginPage}
-    defaultTheme="light"
+    theme={customTheme}
   >
     {(permissions) => (
       <>

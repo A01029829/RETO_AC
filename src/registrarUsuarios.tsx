@@ -27,6 +27,7 @@ const tipoChoices = [
   { id: 'administrador', name: 'Administrador' },
   { id: 'jefeDeTurno', name: 'Jefe de Turno' },
   { id: 'operador', name: 'Operador' },
+  { id: 'operatorU', name: 'Operador U' },
 ];
 
 export const UsuarioCreate = () => {
