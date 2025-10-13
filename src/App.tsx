@@ -101,7 +101,7 @@ export const App = () => (
       icon={FormatListBulletedIcon}
     />
     <Resource
-      name="Reportes Emergencias Urbanas"
+      name="Emerg Urbanas"
       list={ReporteEUList}
       edit={ReporteEUEdit}
       create={ReporteEUCreate}
