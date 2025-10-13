@@ -1,5 +1,13 @@
-import { Button, useRedirect } from "react-admin";
-import { Card, CardContent, Grid, Box, Typography, Stack } from "@mui/material";
+import { useRedirect } from "react-admin";
+import {
+  Card,
+  CardContent,
+  Grid,
+  Box,
+  Typography,
+  Button,
+  Stack,
+} from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import NoteIcon from "@mui/icons-material/Note";
@@ -124,11 +132,12 @@ export const OperatorUPage = () => {
               >
                 <Stack alignItems="center" spacing={2}>
                   <Button
-                    label="GENERAR REPORTE"
                     onClick={() => redirect("/comments/create")}
                     startIcon={<DescriptionIcon />}
                     sx={{ fontWeight: 800, px: 2, py: 1.5 }}
-                  />
+                  >
+                    GENERAR REPORTE
+                  </Button>
                 </Stack>
               </Card>
             </Grid>
@@ -146,11 +155,12 @@ export const OperatorUPage = () => {
               >
                 <Stack alignItems="center" spacing={2}>
                   <Button
-                    label="GENERAR EVIDENCIA"
                     onClick={() => redirect("/photos/create")}
                     startIcon={<PhotoCameraIcon />}
                     sx={{ fontWeight: 800, px: 2, py: 1.5 }}
-                  />
+                  >
+                    GENERAR EVIDENCIA
+                  </Button>
                 </Stack>
               </Card>
             </Grid>
@@ -168,11 +178,12 @@ export const OperatorUPage = () => {
               >
                 <Stack alignItems="center" spacing={2}>
                   <Button
-                    label="GENERAR NOTA"
                     onClick={() => redirect("/notas/create")}
                     startIcon={<NoteIcon />}
                     sx={{ fontWeight: 800, px: 2, py: 1.5 }}
-                  />
+                  >
+                    GENERAR NOTA
+                  </Button>
                 </Stack>
               </Card>
             </Grid>
