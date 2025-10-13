@@ -33,11 +33,11 @@ export const customTheme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          marginLeft: '16px', 
+          marginLeft: '0px', 
           height: 'calc(100vh - 32px)', 
           marginTop: '16px', 
           marginBottom: '16px',
-          borderRadius: '0 16px 16px 0', 
+          borderRadius: '0 0', 
         },
       },
     },
