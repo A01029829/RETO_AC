@@ -7,10 +7,10 @@ import jwt from 'jsonwebtoken';
 
 import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs";
 
-const { MongoClient } = mongodb;  // ← AGREGADO: Desestructurar MongoClient
+const { MongoClient } = mongodb;  // Desestructurar MongoClient
 
 const app = express();
-let db;  // ← AGREGADO: Declarar variable db
+let db;  
 
 // se usa cors para permitir solicitudes desde otros dominios
 app.use(cors());
@@ -40,7 +40,7 @@ const log = async (sujeto, objeto, accion)=>{
         if("_sort" in req.query){ // getList
             let sortBy = req.query._sort;
             let sortOrder = req.query._order === 'ASC' ? 1 : -1;
-            let inicio = Number(req.query._start) || 0;  // ← CORREGIDO: incio → inicio
+            let inicio = Number(req.query._start) || 0; 
             let fin = Number(req.query._end) || 10;
             let sorter = {};
             sorter[sortBy] = sortOrder;
@@ -57,10 +57,10 @@ const log = async (sujeto, objeto, accion)=>{
                 let dataParcial = await db.collection("ejemplo402").find({id: Number(req.query.id[index])}).project({_id:0}).toArray();
                 data = await data.concat(dataParcial);
             }
-            res.json(data);  // ← AGREGADO: faltaba enviar respuesta
+            res.json(data); 
         }
         else{
-            let data = await db.collection("ejemplo402").find({}).project({_id:0}).toArray();  // ← CORREGIDO: colllection → collection
+            let data = await db.collection("ejemplo402").find({}).project({_id:0}).toArray();  
             // Los headers necesarios para que react-admin pueda interpretar la respuesta
             res.set("Access-Control-Expose-Headers", "X-Total-Count");
             res.set("X-Total-Count", data.length);
@@ -108,9 +108,9 @@ app.put("/reportes/:id", async(req,res)=>{
 })
 
 async function connectToDB(){
-    let client=new MongoClient("mongodb://127.0.0.1:27017");  // ← CORREGIDO: quitar /tc2007b
+    let client=new MongoClient("mongodb://127.0.0.1:27017"); 
     await client.connect();
-    db=client.db("proteccionCivil");  // ← CORREGIDO: especificar base de datos aquí
+    db=client.db("proteccionCivil"); 
     console.log("conectado a la base de datos");
 }
 
