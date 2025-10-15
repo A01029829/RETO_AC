@@ -12,9 +12,9 @@ export const AdminDashboard = () => {
   };
 
   // TODO: Obtener reportes recientes desde el dataProvider
-  // Ejemplo: const { data: reportesRecientes } = useGetList('reportes', { 
-  //   sort: { field: 'fecha', order: 'DESC' }, 
-  //   pagination: { page: 1, perPage: 2 } 
+  // Ejemplo: const { data: reportesRecientes } = useGetList('reportes', {
+  //   sort: { field: 'fecha', order: 'DESC' },
+  //   pagination: { page: 1, perPage: 2 }
   // });
   const reportesRecientes = [
     {
@@ -22,27 +22,30 @@ export const AdminDashboard = () => {
       autor: "Bono",
       hora: "10:47 am",
       fecha: "hoy",
-      preview: "I have climbed highest mountains.\nI have run through the fields.\nOnly to be with you.\nOnly to be with you.",
+      preview:
+        "I have climbed highest mountains.\nI have run through the fields.\nOnly to be with you.\nOnly to be with you.",
     },
     {
       id: 2,
       autor: "Rick",
       hora: "13:56 pm",
       fecha: "hoy",
-      preview: "We're no strangers to love.\nYou know the rules, and so do I.\nA full commitment's what I'm thinking of.\nYou wouldn't get this far with any other guy.",
+      preview:
+        "We're no strangers to love.\nYou know the rules, and so do I.\nA full commitment's what I'm thinking of.\nYou wouldn't get this far with any other guy.",
     },
   ];
 
   // TODO: Obtener notas recientes desde el dataProvider
-  // Ejemplo: const { data: notasRecientes } = useGetList('notas', { 
-  //   sort: { field: 'fecha', order: 'DESC' }, 
-  //   pagination: { page: 1, perPage: 3 } 
+  // Ejemplo: const { data: notasRecientes } = useGetList('notas', {
+  //   sort: { field: 'fecha', order: 'DESC' },
+  //   pagination: { page: 1, perPage: 3 }
   // });
   const notasRecientes = [
     {
       id: 1,
       autor: "Bonnie",
-      contenido: "I need a hero.\nI'm holding out for a hero 'til the end of the night.",
+      contenido:
+        "I need a hero.\nI'm holding out for a hero 'til the end of the night.",
     },
     {
       id: 2,
@@ -65,7 +68,7 @@ export const AdminDashboard = () => {
   });
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 } }}>
+    <Box className="main-container" sx={{ p: { xs: 2, md: 3 } }}>
       {/* Header con título y fecha */}
       <Box
         sx={{
@@ -170,11 +173,13 @@ export const AdminDashboard = () => {
                 <Grid size={{ xs: 12, md: 6 }} key={reporte.id}>
                   <Card sx={{ bgcolor: "#fff", borderRadius: 2, p: 2 }}>
                     <Box sx={{ display: "flex", gap: 2 }}>
-                      <Avatar sx={{ bgcolor: "#5fa8d3", width: 50, height: 50 }} />
+                      <Avatar
+                        sx={{ bgcolor: "#5fa8d3", width: 50, height: 50 }}
+                      />
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body1" fontWeight={700}>
-                          Reporte generado por: {reporte.autor}, {reporte.fecha}. A las{" "}
-                          {reporte.hora}.
+                          Reporte generado por: {reporte.autor}, {reporte.fecha}
+                          . A las {reporte.hora}.
                         </Typography>
                         <Typography
                           variant="body2"
@@ -214,4 +219,4 @@ export const AdminDashboard = () => {
       </Grid>
     </Box>
   );
-}
+};
