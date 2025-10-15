@@ -108,7 +108,9 @@ app.put("/reportes/:id", async(req,res)=>{
 })
 
 async function connectToDB(){
-    let client=new MongoClient("mongodb://127.0.0.1:27017"); 
+    // Usa variable de entorno o localhost por defecto
+    const mongoUrl = process.env.MONGODB_URL || "mongodb://127.0.0.1:27017";
+    let client=new MongoClient(mongoUrl); 
     await client.connect();
     db=client.db("proteccionCivil"); 
     console.log("conectado a la base de datos");
@@ -495,9 +497,9 @@ app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (re
     }
 });
 
-app.listen(PORT, ()=>{
+app.listen(PORT, '0.0.0.0', ()=>{
 	connectToDB();
-	console.log("aplicacion corriendo en puerto 3000");
+	console.log(`aplicacion corriendo en puerto ${PORT} (accesible desde todas las interfaces)`);
 });
 
 
