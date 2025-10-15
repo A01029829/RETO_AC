@@ -142,14 +142,14 @@ const CustomSidebar = (props: any) => {
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const isSmall = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
-
+   
   return (
     <RALayout 
       sidebar={CustomSidebar}
       sx={{
         "& .RaLayout-content": {
           marginLeft: isSmall ? 0 : "50px",
-          padding: isSmall ? 1 : 3,
+          padding: isSmall ? 1 : 2,
           transition: "margin-left 0.3s ease",
         },
         "& .RaLayout-contentWithSidebar": {

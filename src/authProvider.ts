@@ -1,55 +1,67 @@
 import { AuthProvider } from "react-admin";
 
-type StoredUser = {
-  id: string;
-  name: string;
-  role: "admin" | "operator" | "guest" | "jefeDeTurno" | "operatorU";
-};
-
-const KEY = "ra_user";
-
 export const authProvider: AuthProvider = {
-  // called when the user attempts to log in
-  async login({ username, password }) {
-    // accept all username/password combinations
-    if (password !== "tc2007b") {
-      throw new Error("Invalid credentials, please try again");
-    }
-    const RoleMap: Record<string, StoredUser["role"]> = {
-      operator: "operator",
-      jefeDeTurno: "jefeDeTurno",
-      admin: "admin",
-      operatorU: "operatorU",
-    };
-    const role: StoredUser["role"] = RoleMap[username] ?? "admin";
-    const user: StoredUser = { id: username, name: username, role };
-    localStorage.setItem(KEY, JSON.stringify(user));
-  },
-  async logout() {
-    localStorage.removeItem(KEY);
-  },
-  // called when the API returns an error
-  async checkError({ status }: { status: number }) {
-    if (status === 401 || status === 403) {
-      localStorage.removeItem(KEY);
-      throw new Error("Session expired");
-    }
-  },
-  // called when the user navigates to a new location, to check for authentication
-  async checkAuth() {
-    if (!localStorage.getItem(KEY)) {
-      throw new Error("Authentication required");
+  login: async ({ username, password }) => {
+    const request = new Request("http://127.0.0.1:3000/login", {
+      method: "POST",
+      body: JSON.stringify({ usuario: username, password }), // ← CAMBIO AQUÍ
+      headers: new Headers({ "Content-Type": "application/json" }),
+    });
+    
+    try {
+      const res = await fetch(request);
+      if (res.status < 200 || res.status >= 300) {
+        throw new Error(res.statusText);
+      }
+      
+      const auth = await res.json();
+      sessionStorage.setItem("auth", auth.token);
+      sessionStorage.setItem(
+        "identity",
+        JSON.stringify({ 
+          id: auth.id, 
+          fullName: auth.nombre,
+          role: auth.tipo})
+      );
+      return Promise.resolve();
+    } catch {
+      throw new Error("Error en usuario o password");
     }
   },
-  async getPermissions() {
-    const raw = localStorage.getItem(KEY);
-    const user: StoredUser | null = raw ? JSON.parse(raw) : null;
-    return user?.role ?? "guest";
+
+  logout: ()=>{
+        sessionStorage.removeItem("auth");
+        sessionStorage.removeItem("identity");
+        return Promise.resolve();
   },
-  async getIdentity() {
-    const raw = localStorage.getItem(KEY);
-    const user: StoredUser | null = raw ? JSON.parse(raw) : null;
-    if (!user) throw new Error("No identity");
-    return { id: user.id, fullName: user.name, role: user.role };
+  
+  checkAuth: ()=>{
+    return sessionStorage.getItem("auth")?Promise.resolve():Promise.reject()
+  },
+  
+  checkError: (error)=>{
+      const status=error.status;
+      if(status==401 || status==403){
+          sessionStorage.removeItem("auth");
+          sessionStorage.removeItem("identity");
+          return Promise.reject();
+      }
+      return Promise.resolve();
+  },
+  
+  getIdentity: () => {
+    const identity = sessionStorage.getItem("identity");
+    if (!identity) {
+      return Promise.reject(new Error("No identity"));
+    }
+    return Promise.resolve(JSON.parse(identity));
+  },
+
+  getPermissions: () =>{
+    const identity = sessionStorage.getItem("identity");
+    if (identity) {
+      return Promise.resolve(JSON.parse(identity).role);
+    }
+    return Promise.reject(new Error("No identity"));
   },
 };

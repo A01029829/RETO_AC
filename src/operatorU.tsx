@@ -25,8 +25,9 @@ export const OperatorUPage = () => {
 
   return (
     <Grid
+      className="main-container"
       sx={{
-        backgroundColor: "#1f66ad",
+        //backgroundColor: "#1f66ad",
         p: { xs: 1.5, md: 3 },
         //borderRadius: 4,
         height: "100%",

@@ -9,12 +9,16 @@ export const customTheme = createTheme({
       main: "#1a3e78",
     },
     secondary: {
-      main: "#fbc02d",
+      main: "#2d6efbff",
     },
     background: {
       default: "#f5f7fa",
       paper: "#ffffff",
     },
+  },
+  sidebar: {
+    width: 240,
+    closedWidth: 55,
   },
   components: {
     MuiMenuItem: {
@@ -22,6 +26,39 @@ export const customTheme = createTheme({
         root: {
           borderRadius: "8px",
           margin: "4px 8px",
+        },
+      },
+    },
+
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          marginLeft: "0px",
+          height: "calc(100vh - 32px)",
+          marginTop: "16px",
+          marginBottom: "16px",
+          borderRadius: "0 0",
+        },
+      },
+    },
+
+    MuiCssBaseline: {
+      styleOverrides: {
+        ".main-container": {
+          border: "36px solid #1f66ad",
+          borderRadius: "12px",
+          padding: "24px",
+          backgroundColor: "#eeeeee",
+        },
+      },
+    },
+
+    RaLayout: {
+      styleOverrides: {
+        root: {
+          "& .RaLayout-contentWithSidebar": {
+            marginLeft: "16px", // Compensar el espacio de la sidebar
+          },
         },
       },
     },

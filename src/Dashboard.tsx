@@ -10,7 +10,8 @@ export const Dashboard = () => {
 
   if (isLoading) return null;
 
-  if (permissions === "operator") {
+  // Redirigir según el tipo de usuario
+  if (permissions === "operador") {
     return <OperatorPage />;
   }
   if (permissions === "jefeDeTurno") {
@@ -19,32 +20,21 @@ export const Dashboard = () => {
   if (permissions === "operatorU") {
     return <OperatorUPage />;
   }
-  if(permissions === "admin"){
+  if(permissions === "administrador"){
     return <AdminDashboard />;
   }
+  
+  // Dashboard por defecto (no debería llegar aquí)
   return (
     <>
         <Grid size={{ xs: 12, md: 6 }}>
-            <CardHeader title="PAGINA DE INICIO" />
+            <CardHeader title="PÁGINA DE INICIO" />
     
-            <Card  >
-                <CardHeader title="Integración de seguridad informática en redes y sistemas de software (Gpo 402)" />
-                <CardContent>Equipo 2 - Superhipermegaarchirequete Gran Equipo 2</CardContent>
+            <Card>
+                <CardHeader title="Protección Civil - Sistema de Reportes" />
+                <CardContent>Bienvenido al sistema</CardContent>
             </Card>
         </Grid>
-        
-        <Box>
-            <h1>REPORTES RECIENTES</h1>
-            <Card sx={{ mt: 2,
-                    backgroundColor: "#e8e8e8"
-                }}>
-                
-                <CardHeader title="Integrantes" />
-            </Card>
-        </Box>
-        
-
-        
     </>
   );
 };
