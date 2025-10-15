@@ -68,7 +68,7 @@ export const AdminDashboard = () => {
   });
 
   return (
-    <Box className="main-container" sx={{ p: { xs: 2, md: 3 } }}>
+    <Box sx={{ p: { xs: 2, md: 3 } }}>
       {/* Header con título y fecha */}
       <Box
         sx={{

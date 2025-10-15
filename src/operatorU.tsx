@@ -24,7 +24,7 @@ export const OperatorUPage = () => {
 
   return (
     <Box
-      className="main-container"
+      //className="main-container"
       sx={{
         p: { xs: 1.5, md: 3 },
         height: "100%",
@@ -34,10 +34,10 @@ export const OperatorUPage = () => {
         justifyContent: "center",
       }}
     >
-      {/* Contenedor blanco */}
+      {/* Contenedor */}
       <Box
         sx={{
-          backgroundColor: "#fff",
+          //backgroundColor: "#fff",
           borderRadius: 3,
           p: { xs: 2, md: 4, lg: 6 },
           width: "100%",
