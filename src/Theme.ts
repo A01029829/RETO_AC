@@ -29,27 +29,38 @@ export const customTheme = createTheme({
         },
       },
     },
-    
+
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          marginLeft: '0px', 
-          height: 'calc(100vh - 32px)', 
-          marginTop: '16px', 
-          marginBottom: '16px',
-          borderRadius: '0 0', 
+          marginLeft: "0px",
+          height: "calc(100vh - 32px)",
+          marginTop: "16px",
+          marginBottom: "16px",
+          borderRadius: "0 0",
         },
       },
     },
 
-    RaLayout:{
+    MuiCssBaseline: {
+      styleOverrides: {
+        ".main-container": {
+          border: "36px solid #1f66ad",
+          borderRadius: "12px",
+          padding: "24px",
+          backgroundColor: "#eeeeee",
+        },
+      },
+    },
+
+    RaLayout: {
       styleOverrides: {
         root: {
-          '& .RaLayout-contentWithSidebar': {
-            marginLeft: '16px', // Compensar el espacio de la sidebar
+          "& .RaLayout-contentWithSidebar": {
+            marginLeft: "16px", // Compensar el espacio de la sidebar
           },
         },
-      }   
-    }
+      },
+    },
   },
 });

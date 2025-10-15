@@ -1,5 +1,5 @@
 import {
-    List, DataTable, ReferenceField, Edit, SimpleForm, TextInput, ReferenceInput, Create, EditButton, Show, SimpleShowLayout, TextField, 
+    List, DataTable, Edit, SimpleForm, TextInput, Create, EditButton, Show, SimpleShowLayout, TextField, 
     useNotify, useRedirect, useRefresh, SelectInput, DateTimeInput, NumberInput, BooleanInput, TimeInput, FormDataConsumer, ImageField, 
     ImageInput,
     BooleanField,
@@ -117,6 +117,7 @@ export const ReporteEHEdit = () => {
                 <TimeInput source="hora_llegada" label="Hora de llegada" />
                 <TimeInput source="hora_traslado" label="Hora de traslado" />
                 <TimeInput source="hora_ingreso_hospital" label="Hora de ingreso al hospital" />
+                <TimeInput source="hora_salida_hospital" label="Hora de salida del hospital" />
                 <TimeInput source="hora_base" label="Hora base" />
 
                 {/* Ubicación de servicio */}
@@ -151,6 +152,7 @@ export const ReporteEHEdit = () => {
 
                 {/* DATOS DEL PACIENTE */}
                 <h2>Datos del Paciente</h2>
+                <TextInput source="paciente_nombre" label="Nombre Completo" fullWidth />
                 <SelectInput 
                     source="paciente_sexo" 
                     label="Sexo"
@@ -1371,6 +1373,7 @@ export const ReporteEHShow = () => (
             <TextField source="hora_llegada" label="Hora de llegada" />
             <TextField source="hora_traslado" label="Hora de traslado" />
             <TextField source="hora_ingreso_hospital" label="Hora de ingreso al hospital" />
+            <TextField source="hora_salida_hospital" label="Hora de salida del hospital" />
             <TextField source="hora_base" label="Hora base" />
 
             {/* Ubicación de servicio */}
@@ -1392,6 +1395,7 @@ export const ReporteEHShow = () => (
 
             {/* Datos del Paciente */}
             <h2>Datos del Paciente</h2>
+            <TextField source="paciente_nombre" label="Nombre Completo" />
             <TextField source="paciente_sexo" label="Sexo" />
             <TextField source="paciente_domicilio_calle" label="Domicilio - Calle" />
             <TextField source="paciente_domicilio_colonia" label="Domicilio - Colonia" />

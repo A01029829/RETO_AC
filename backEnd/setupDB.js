@@ -198,6 +198,7 @@ async function setupDatabase() {
                     hora_llegada: "14:45:00",
                     hora_traslado: "15:10:00",
                     hora_ingreso_hospital: "15:30:00",
+                    hora_salida_hospital: "16:00:00",
                     hora_base: "16:00:00",
                     calle: "Av. Constitución",
                     entre_calles: "Juárez y Hidalgo",
@@ -208,6 +209,7 @@ async function setupDatabase() {
                     operador: "Carlos Martínez",
                     tum: "Ana García",
                     socorrista: "Pedro Sánchez",
+                    paciente_nombre: "Juan Pérez",
                     paciente_sexo: "masculino",
                     paciente_domicilio_calle: "Calle Morelos 123",
                     paciente_domicilio_colonia: "Del Valle",
@@ -316,6 +318,7 @@ async function setupDatabase() {
                     hora_llegada: "08:32:00",
                     hora_traslado: "08:45:00",
                     hora_ingreso_hospital: "09:00:00",
+                    hora_salida_hospital: "09:30:00",
                     hora_base: "09:30:00",
                     
                     // Ubicación
@@ -332,6 +335,7 @@ async function setupDatabase() {
                     socorrista: "María González",
                     
                     // Datos del paciente
+                    paciente_nombre: "Ana Martínez",
                     paciente_sexo: "femenino",
                     paciente_domicilio_calle: "Calle Zaragoza 789",
                     paciente_domicilio_colonia: "Obispado",
@@ -439,6 +443,7 @@ async function setupDatabase() {
                     hora_llegada: "19:05:00",
                     hora_traslado: "19:20:00",
                     hora_ingreso_hospital: "19:35:00",
+                    hora_salida_hospital: "20:15:00",
                     hora_base: "20:15:00",
                     
                     // Ubicación
@@ -455,6 +460,7 @@ async function setupDatabase() {
                     socorrista: "Ricardo Vega",
                     
                     // Datos del paciente
+                    paciente_nombre: "Luis Gómez",
                     paciente_sexo: "masculino",
                     paciente_domicilio_calle: "Calle Roble 345",
                     paciente_domicilio_colonia: "Residencial Santa María",
