@@ -2,7 +2,6 @@ import { useRedirect } from "react-admin";
 import {
   Card,
   CardContent,
-  Grid,
   Box,
   Typography,
   Stack,
@@ -24,12 +23,10 @@ export const OperatorPage = () => {
   };
 
   return (
-    <Grid
+    <Box
       className="main-container"
       sx={{
-        //backgroundColor: "#1f66ad",
         p: { xs: 1.5, md: 3 },
-        //borderRadius: 4,
         height: "100%",
         width: "100%",
         display: "flex",
@@ -37,8 +34,8 @@ export const OperatorPage = () => {
         justifyContent: "center",
       }}
     >
-      {/* Contenedor de blanco */}
-      <Grid
+      {/* Contenedor blanco */}
+      <Box
         sx={{
           backgroundColor: "#fff",
           borderRadius: 3,
@@ -47,7 +44,8 @@ export const OperatorPage = () => {
           height: "100%",
         }}
       >
-        <Grid
+        {/* Header */}
+        <Box
           sx={{
             display: "flex",
             alignItems: "center",
@@ -58,157 +56,147 @@ export const OperatorPage = () => {
           <Typography variant="h4" sx={{ fontWeight: 800 }}>
             EMERGENCIAS PREHOSPITALARIAS
           </Typography>
-        </Grid>
+        </Box>
 
-        <Grid>
-          {/* Contenedor de datos */}
-          <Grid container spacing={2}>
-            <Grid size={8}>
-              <Card
-                sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}
-              >
-                <CardContent
-                  sx={{ display: "flex", alignItems: "center", gap: 3 }}
-                >
-                  <img src={operador.foto} alt="foto" width={200} />
-                  <Box>
-                    <Typography>
-                      <b>Nombre:</b> {operador.nombre}
-                    </Typography>
-                    <Typography>
-                      <b>Rol:</b> {operador.rol}
-                    </Typography>
-                    <Typography>
-                      <b>Contacto:</b> {operador.contacto}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid size={4}>
-              <Card
+        {/* Contenedor de datos (responsive con Box) */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          {/* Card Operador (2/3 en md+) */}
+          <Box sx={{ flex: { xs: "1 1 100%", md: "0 1 66%" } }}>
+            <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
+              <CardContent
                 sx={{
-                  bgcolor: "#eeeeee",
-                  height: "100%",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  gap: 3,
+                  flexWrap: "wrap",
                 }}
               >
-                <Stack alignItems="center" spacing={0.5}>
-                  <Typography variant="h5" fontWeight={800}>
-                    TURNO
+                <Box
+                  component="img"
+                  src={operador.foto}
+                  alt="foto"
+                  sx={{
+                    width: { xs: 120, sm: 160, md: 200 },
+                    height: "auto",
+                    borderRadius: 2,
+                    objectFit: "cover",
+                  }}
+                />
+                <Box>
+                  <Typography>
+                    <b>Nombre:</b> {operador.nombre}
                   </Typography>
-                  <Typography variant="h3" color="primary" fontWeight={900}>
-                    {operador.turno}
+                  <Typography>
+                    <b>Rol:</b> {operador.rol}
                   </Typography>
-                </Stack>
-              </Card>
-            </Grid>
-          </Grid>
+                  <Typography>
+                    <b>Contacto:</b> {operador.contacto}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
 
-          <Grid
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 2,
-            }}
-          ></Grid>
+          {/* Card Turno (1/3 en md+) */}
+          <Box sx={{ flex: { xs: "1 1 100%", md: "0 1 34%" } }}>
+            <Card
+              sx={{
+                bgcolor: "#eeeeee",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Stack alignItems="center" spacing={0.5}>
+                <Typography variant="h5" fontWeight={800}>
+                  TURNO
+                </Typography>
+                <Typography variant="h3" color="primary" fontWeight={900}>
+                  {operador.turno}
+                </Typography>
+              </Stack>
+            </Card>
+          </Box>
+        </Box>
 
-          {/* Contenedor de botones */}
-          <Grid container spacing={3}>
-            {/* Generar Reporte */}
-            <Grid size={4}>
-              <Card
+        {/* Contenedor de botones (grid responsivo con Box) */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 3,
+          }}
+        >
+          {/* Generar Reporte */}
+          <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
+            <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
+              <Button
+                onClick={() => redirect("/comments/create")}
+                startIcon={<DescriptionIcon />}
                 sx={{
-                  bgcolor: "#eeeeee",
-                  borderRadius: 3,
-                  height: "100%",
-                  //   display: "flex",
-                  //   alignItems: "center",
-                  //   justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: { xs: 12, sm: 14, md: 16 },
+                  px: { xs: 1.25, sm: 2 },
+                  py: { xs: 1, sm: 1.5 },
+                  maxWidth: "100%",
                 }}
               >
-                <Stack alignItems="center" spacing={2}>
-                  <Button
-                    onClick={() => redirect("/comments/create")}
-                    startIcon={<DescriptionIcon />}
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: { xs: 12, sm: 14, md: 16 },
-                      px: { xs: 1.25, sm: 2 },
-                      py: { xs: 1, sm: 1.5 },
-                      maxWidth: "100%",
-                    }}
-                  >
-                    GENERAR REPORTE
-                  </Button>
-                </Stack>
-              </Card>
-            </Grid>
-            {/* Generar Evidencia */}
-            <Grid size={4}>
-              <Card
+                GENERAR REPORTE
+              </Button>
+            </Stack>
+          </Card>
+
+          {/* Generar Evidencia */}
+          <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
+            <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
+              <Button
+                onClick={() => redirect("/photos/create")}
+                startIcon={<PhotoCameraIcon />}
                 sx={{
-                  bgcolor: "#eeeeee",
-                  borderRadius: 3,
-                  height: "100%",
-                  //   display: "flex",
-                  //   alignItems: "center",
-                  //   justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: { xs: 12, sm: 14, md: 16 },
+                  px: { xs: 1.25, sm: 2 },
+                  py: { xs: 1, sm: 1.5 },
+                  maxWidth: "100%",
                 }}
               >
-                <Stack alignItems="center" spacing={2}>
-                  <Button
-                    onClick={() => redirect("/photos/create")}
-                    startIcon={<PhotoCameraIcon />}
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: { xs: 12, sm: 14, md: 16 },
-                      px: { xs: 1.25, sm: 2 },
-                      py: { xs: 1, sm: 1.5 },
-                      maxWidth: "100%",
-                    }}
-                  >
-                    GENERAR EVIDENCIA
-                  </Button>
-                </Stack>
-              </Card>
-            </Grid>
-            {/* Generar Nota */}
-            <Grid size={4}>
-              <Card
+                GENERAR EVIDENCIA
+              </Button>
+            </Stack>
+          </Card>
+
+          {/* Generar Nota */}
+          <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
+            <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
+              <Button
+                onClick={() => redirect("/notas/create")}
+                startIcon={<NoteIcon />}
                 sx={{
-                  bgcolor: "#eeeeee",
-                  borderRadius: 3,
-                  height: "100%",
-                  //   display: "flex",
-                  //   alignItems: "center",
-                  //   justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: { xs: 12, sm: 14, md: 16 },
+                  px: { xs: 1.25, sm: 2 },
+                  py: { xs: 1, sm: 1.5 },
+                  maxWidth: "100%",
                 }}
               >
-                <Stack alignItems="center" spacing={2}>
-                  <Button
-                    onClick={() => redirect("/notas/create")}
-                    startIcon={<NoteIcon />}
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: { xs: 12, sm: 14, md: 16 },
-                      px: { xs: 1.25, sm: 2 },
-                      py: { xs: 1, sm: 1.5 },
-                      maxWidth: "100%",
-                    }}
-                  >
-                    GENERAR NOTA
-                  </Button>
-                </Stack>
-              </Card>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-    </Grid>
+                GENERAR NOTA
+              </Button>
+            </Stack>
+          </Card>
+        </Box>
+      </Box>
+    </Box>
   );
 };
