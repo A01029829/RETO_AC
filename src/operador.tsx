@@ -58,7 +58,7 @@ export const OperatorPage = () => {
           </Typography>
         </Box>
 
-        {/* Contenedor de datos (responsive con Box) */}
+        {/* Contenedor de datos */}
         <Box
           sx={{
             display: "flex",
@@ -67,7 +67,7 @@ export const OperatorPage = () => {
             mb: 3,
           }}
         >
-          {/* Card Operador (2/3 en md+) */}
+          {/* Card Operador */}
           <Box sx={{ flex: { xs: "1 1 100%", md: "0 1 66%" } }}>
             <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
               <CardContent
@@ -104,7 +104,7 @@ export const OperatorPage = () => {
             </Card>
           </Box>
 
-          {/* Card Turno (1/3 en md+) */}
+          {/* Card Turno */}
           <Box sx={{ flex: { xs: "1 1 100%", md: "0 1 34%" } }}>
             <Card
               sx={{
@@ -127,7 +127,7 @@ export const OperatorPage = () => {
           </Box>
         </Box>
 
-        {/* Contenedor de botones (grid responsivo con Box) */}
+        {/* Contenedor de botones */}
         <Box
           sx={{
             display: "grid",
