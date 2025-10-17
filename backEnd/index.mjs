@@ -4,6 +4,8 @@ import bodyParser from 'body-parser';
 import mongodb from 'mongodb';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import https from 'https';
+import fs from 'fs';
 
 import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs";
 
@@ -29,91 +31,17 @@ const log = async (sujeto, objeto, accion)=>{
     await db.collection("logs").insertOne(toLog);
 } 
 
-// Endpoint get reportes de la aplicacion
-// Requiere autenticacion con JWT
-// Soporta getList y getOne
- app.get('/reportes', async (req, res) => {
-    try {
-        let token = req.get("Authentication");
-        let verifedToken = await jwt.verify(token, 'secretKey');
-        let user = verifedToken.usuario;
-        if("_sort" in req.query){ // getList
-            let sortBy = req.query._sort;
-            let sortOrder = req.query._order === 'ASC' ? 1 : -1;
-            let inicio = Number(req.query._start) || 0; 
-            let fin = Number(req.query._end) || 10;
-            let sorter = {};
-            sorter[sortBy] = sortOrder;
-            let data= await db.collection("ejemplo402").find({}).sort(sorter).project({_id:0}).toArray();
-		    res.set("Access-Control-Expose-Headers", "X-Total-Count");
-		    res.set("X-Total-Count", data.length);
-		    data=data.slice(inicio,fin)
-		    log(user, "reportes", "leer");
-		    res.json(data)
-        }
-        else if("id" in req.query){ // getOne
-            let data = [];
-            for(let index in req.query.id){
-                let dataParcial = await db.collection("ejemplo402").find({id: Number(req.query.id[index])}).project({_id:0}).toArray();
-                data = await data.concat(dataParcial);
-            }
-            res.json(data); 
-        }
-        else{
-            let data = await db.collection("ejemplo402").find({}).project({_id:0}).toArray();  
-            // Los headers necesarios para que react-admin pueda interpretar la respuesta
-            res.set("Access-Control-Expose-Headers", "X-Total-Count");
-            res.set("X-Total-Count", data.length);
-            res.json(data);
-        }
-    }
-    catch (error) {
-        res.status(401).json({ message: 'No autorizado', error: error.message });
-    }
- });
-
- // getOne
-
-app.get("/reportes/:id", async (req, res) => {
-    let data = await db.collection("ejemplo402").find({id: Number(req.params.id)}).project({_id:0}).toArray();
-    res.json(data[0]);
-});
-
-// createOne 
-// la funcion createOne recibe un objeto JSON en el cuerpo de la solicitud
-// y lo inserta en la coleccion "ejemplo402"
-app.post('/reportes', async (req, res) => {
-    let valores = req.body;
-    valores["id"] = Number(valores["id"]);
-    let data = await db.collection("ejemplo402").insertOne(valores);
-    res.json(data);
-});
-
-//deleteOne
-// 
-app.delete("/reportes/:id", async (req, res) => {
-    let data = await db.collection("ejemplo402").deleteOne({id: Number(req.params.id)});
-    res.json(data);
-});
-
-//updateOne
-// la funcion updateOne recibe un objeto JSON en el cuerpo de la solicitud
-// y actualiza el documento con el id especificado en la URL
-app.put("/reportes/:id", async(req,res)=>{
-	let valores=req.body
-	valores["id"]=Number(valores["id"])
-	let data =await db.collection("ejemplo402").updateOne({"id":valores["id"]}, {"$set":valores})
-	data=await db.collection("ejemplo402").find({"id":valores["id"]}).project({_id:0}).toArray();
-	res.json(data[0]);
-})
-
 async function connectToDB(){
-    // Usa variable de entorno o localhost por defecto
-    const mongoUrl = process.env.MONGODB_URL || "mongodb://127.0.0.1:27017";
-    let client=new MongoClient(mongoUrl); 
-    await client.connect();
-    db=client.db("proteccionCivil"); 
-    console.log("conectado a la base de datos");
+    try {
+        const connectionString = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
+        console.log("Intentando conectar a:", connectionString); 
+        let client=new MongoClient(connectionString);
+        await client.connect();
+        db=client.db("proteccionCivil");
+        console.log("conectado a la base de datos");
+    } catch (error) {
+        console.error("Error conectando a la base de datos:", error);
+    }
 }
 
 // Registro de usuarios (solo admin)
@@ -497,9 +425,24 @@ app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (re
     }
 });
 
-app.listen(PORT, '0.0.0.0', ()=>{
-	connectToDB();
-	console.log(`aplicacion corriendo en puerto ${PORT} (accesible desde todas las interfaces)`);
+
+await process.loadEnvFile(".env");
+const options = {
+      key: fs.readFileSync('backend.key'),
+      cert: fs.readFileSync('backend.crt')
+    };
+
+https.createServer(options, app).listen(3000, async () => {
+		await connectToDB();
+      	console.log('HTTPS Server running on port 3000');
 });
+
+/*
+app.listen(PORT, async ()=>{
+	await connectToDB();
+	console.log("aplicacion corriendo en puerto 3000");
+});
+*/
+
 
 
