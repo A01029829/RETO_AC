@@ -6,6 +6,7 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import https from 'https';
 import fs from 'fs';
+import dotenv from 'dotenv';
 
 import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs";
 
@@ -426,23 +427,24 @@ app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (re
 });
 
 
-await process.loadEnvFile(".env");
+/*dotenv.config();*/
+
 const options = {
       key: fs.readFileSync('backend.key'),
       cert: fs.readFileSync('backend.crt')
     };
-
-https.createServer(options, app).listen(3000, async () => {
-		await connectToDB();
-      	console.log('HTTPS Server running on port 3000');
-});
-
 /*
+https.createServer(options, app).listen(3000, async () => {
+	await connectToDB();
+	console.log('aplicacion corriendo en puerto 3000');
+});
+*/
+
 app.listen(PORT, async ()=>{
 	await connectToDB();
 	console.log("aplicacion corriendo en puerto 3000");
 });
-*/
+
 
 
 
