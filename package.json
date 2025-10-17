@@ -14,6 +14,8 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
     "ra-data-json-server": "^5.10.1",
     "ra-i18n-polyglot": "^5.11.4",
     "react": "^19.0.0",
