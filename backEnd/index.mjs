@@ -9,10 +9,10 @@ import fs from 'fs';
 
 import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs";
 
-const { MongoClient } = mongodb;  // ← AGREGADO: Desestructurar MongoClient
+const { MongoClient } = mongodb;  // Desestructurar MongoClient
 
 const app = express();
-let db;  // ← AGREGADO: Declarar variable db
+let db;  
 
 // se usa cors para permitir solicitudes desde otros dominios
 app.use(cors());
