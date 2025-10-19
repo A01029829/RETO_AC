@@ -51,7 +51,7 @@ export const MyLoginPage = () => {
                 }}>
                     <img src="https://cuajimalpa.gob.mx/wp-content/uploads/2025/01/logo.png" alt="Imagen 1" style={{ width: isSmall ? '100%' : '480px', height: '140px', objectFit: 'contain', borderRadius: '0px'}}/>
 
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Proteccion-civil-logo-gen.png" alt="Imagen 2" style={{ width: isSmall ? '120px' : '120px', height: '120px', objectFit: 'cover', borderRadius: '10px' }} />
+                    <img src="/CuajisWBG.png" alt="Imagen 2" style={{ width: isSmall ? '120px' : '120px', height: '120px', objectFit: 'cover', borderRadius: '10px' }} />
                 </div>
 
                 <div style={{
