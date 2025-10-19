@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Layout as RALayout, CheckForApplicationUpdate, Sidebar, Menu, useSidebarState, MenuItemLink, usePermissions } from "react-admin";
 import { Box, useMediaQuery, Theme } from "@mui/material";
 import { MyBar } from "./Bar";
+import BarChartIcon from "@mui/icons-material/BarChart";
 
 // Custom Sidebar with styling
 const CustomSidebar = (props: any) => {
