@@ -20,7 +20,7 @@ async function setupDatabase() {
             await db.createCollection('usuarios402');
             console.log("✅ Colección 'usuarios402' creada");
             
-            // CORRECCIÓN: Crear todos los usuarios a la vez sin duplicados
+            // CORRECCION: Crear todos los usuarios a la vez sin duplicados
             await db.collection('usuarios402').insertMany([
                 {
                     usuario: "admin",
@@ -559,6 +559,39 @@ async function setupDatabase() {
             console.log("✅ Datos de prueba y índices de reportesEH creados");
         } else {
             console.log("⚠️  La colección 'reportesEH' ya existe");
+        }
+        
+        // ==================== NOTAS ====================
+        if (!existingCollections.includes('notas')) {
+            await db.createCollection('notas');
+            console.log("✅ Colección 'notas' creada");
+            
+            await db.collection('notas').insertMany([
+                {
+                    id: 1,
+                    contenido: "Recordatorio: Revisar inventario de equipos médicos esta semana.",
+                    creado_por: "admin",
+                    fecha_creacion: new Date(),
+                },
+                {
+                    id: 2,
+                    contenido: "Importante: Capacitación de protocolos de emergencia el viernes a las 10:00 AM.",
+                    creado_por: "jefeTurno1",
+                    fecha_creacion: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 horas antes
+                },
+                {
+                    id: 3,
+                    contenido: "Se actualizaron los procedimientos de traslado de pacientes críticos.",
+                    creado_por: "operador1",
+                    fecha_creacion: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 horas antes
+                }
+            ]);
+            
+            await db.collection('notas').createIndex({ id: 1 }, { unique: true });
+            await db.collection('notas').createIndex({ fecha_creacion: -1 });
+            console.log("✅ Datos de prueba y índices de notas creados");
+        } else {
+            console.log("⚠️  La colección 'notas' ya existe");
         }
         
         console.log("\n🎉 Base de datos configurada exitosamente!");

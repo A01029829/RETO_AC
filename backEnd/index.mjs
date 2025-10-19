@@ -29,6 +29,83 @@ const log = async (sujeto, objeto, accion)=>{
     await db.collection("logs").insertOne(toLog);
 } 
 
+// Funcion para calcular el turno actual basado en la hora y dia de la semana
+const calcularTurnoActual = () => {
+    const ahora = new Date();
+    const diaSemana = ahora.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sabado
+    const hora = ahora.getHours();
+    const minutos = ahora.getMinutes();
+    const horaDecimal = hora + minutos / 60;
+    
+    // Determinar si es dia festivo (esto deberia conectarse a una tabla de festivos)
+    // Por ahora, solo usamos sabados y domingos
+    const esFinDeSemana = diaSemana === 0 || diaSemana === 6;
+    
+    if (!esFinDeSemana) {
+        // Lunes a viernes
+        if (horaDecimal >= 8 && horaDecimal < 15) {
+            return {
+                nombre: "Turno Matutino L-V",
+                descripcion: "Lunes a viernes, de 8:00 a 15:00 horas",
+                horario: "8:00 - 15:00",
+                codigo: "LV_0815"
+            };
+        } else if (horaDecimal >= 15 && horaDecimal < 21) {
+            return {
+                nombre: "Turno Vespertino L-V",
+                descripcion: "Lunes a viernes, de 15:00 a 21:00 horas",
+                horario: "15:00 - 21:00",
+                codigo: "LV_1521"
+            };
+        } else if (horaDecimal >= 21 || horaDecimal < 8) {
+            // Turno nocturno - depende del dia
+            if (diaSemana === 1 || diaSemana === 3 || diaSemana === 5) {
+                // Lunes, miercoles, viernes
+                return {
+                    nombre: "Turno Nocturno LMV",
+                    descripcion: "Lunes, miércoles y viernes, de 21:00 a 8:00 horas",
+                    horario: "21:00 - 8:00",
+                    codigo: "LMV_2108"
+                };
+            } else {
+                // Martes, jueves
+                return {
+                    nombre: "Turno Nocturno MJD",
+                    descripcion: "Martes, jueves y domingo, de 21:00 a 8:00 horas",
+                    horario: "21:00 - 8:00",
+                    codigo: "MJD_2108"
+                };
+            }
+        }
+    } else {
+        // Sabados, domingos y dias festivos
+        if (horaDecimal >= 8 && horaDecimal < 20) {
+            return {
+                nombre: "Turno Día SD",
+                descripcion: "Sábados, domingos y días festivos, de 8:00 a 20:00 horas",
+                horario: "8:00 - 20:00",
+                codigo: "SD_0820"
+            };
+        } else {
+            // De 20:00 a 8:00
+            return {
+                nombre: "Turno Noche SD",
+                descripcion: "Sábados, domingos y días festivos, de 20:00 a 8:00 horas",
+                horario: "20:00 - 8:00",
+                codigo: "SD_2008"
+            };
+        }
+    }
+    
+    // Fallback (no deberia llegar aqui)
+    return {
+        nombre: "Sin turno definido",
+        descripcion: "No se pudo determinar el turno",
+        horario: "N/A",
+        codigo: "UNDEFINED"
+    };
+}; 
+
 // Endpoint get reportes de la aplicacion
 // Requiere autenticacion con JWT
 // Soporta getList y getOne
@@ -174,7 +251,7 @@ app.get('/usuarios', requirePermission('gestionar_usuarios'), async (req, res) =
 	}
 })
 
-// GET /usuarios/:id - Obtener un usuario específico (solo admin)
+// GET /usuarios/:id - Obtener un usuario especifico (solo admin)
 app.get('/usuarios/:id', requirePermission('gestionar_usuarios'), async (req, res) => {
 	try {
 		const usuario = await db.collection("usuarios402")
@@ -247,18 +324,53 @@ app.post("/login", async (req, res)=>{
 	}
 })
 
+// GET /me - Obtener informacion del usuario actual
+app.get("/me", async (req, res) => {
+	try {
+		let token = req.get("Authentication");
+		if (!token) {
+			return res.status(401).json({ message: 'Token no proporcionado' });
+		}
+		
+		let verifiedToken = await jwt.verify(token, "secretKey");
+		let user = verifiedToken.usuario;
+		
+		// Buscar informacion completa del usuario
+		let userData = await db.collection("usuarios402").findOne(
+			{ "usuario": user },
+			{ projection: { password: 0, _id: 0 } }
+		);
+		
+		if (!userData) {
+			return res.status(404).json({ message: 'Usuario no encontrado' });
+		}
+		
+		// Calcular turno actual basado en la hora y dia
+		const turnoActual = calcularTurnoActual();
+		
+		res.json({
+			id: userData.usuario,
+			usuario: userData.usuario,
+			nombre: userData.nombre,
+			tipo: userData.tipo,
+			turno: userData.turno,
+			turnoActual: turnoActual
+		});
+	} catch (error) {
+		res.status(401).json({ message: 'No autorizado', error: error.message });
+	}
+});
+
 // REPORTES Emergencias Urbanas
 
 app.get('/reportesEU', async (req, res) => {
     try{
 		let token=req.get("Authentication");
-		let verifiedToken=await jwt.verify(token, "secretKey");
+        let verifiedToken=await jwt.verify(token, "secretKey");
 		let user=verifiedToken.usuario;
 		
-		// Aplicar filtro según el rol del usuario
-		const filter = getReportFilter(verifiedToken);
-		
-		if("_sort" in req.query){//getList
+		// Aplicar filtro segun el rol del usuario
+		const filter = getReportFilter(verifiedToken);		if("_sort" in req.query){//getList
 			let sortBy=req.query._sort;
 			let sortOrder=req.query._order=="ASC"?1:-1;
 			let inicio=Number(req.query._start);
@@ -293,7 +405,7 @@ app.get('/reportesEU', async (req, res) => {
 	}
 });
 
-// GET /reportesEU/:id - Obtener un reporte específico
+// GET /reportesEU/:id - Obtener un reporte especifico
 app.get("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
@@ -317,7 +429,7 @@ app.post('/reportesEU', async (req, res) => {
         
         let valores = req.body;
         
-        // Generar ID único
+        // Generar ID unico
         let ultimoReporte = await db.collection("reportesEU").find({}).sort({id: -1}).limit(1).toArray();
         valores["id"] = ultimoReporte.length > 0 ? ultimoReporte[0].id + 1 : 1;
         
@@ -412,7 +524,7 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
     }
 });
 
-// GET /reportesEH/:id - Obtener un reporte específico
+// GET /reportesEH/:id - Obtener un reporte especifico
 app.get("/reportesEH/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
@@ -494,6 +606,528 @@ app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (re
         res.json(data);
     } catch {
         res.sendStatus(401);
+    }
+});
+
+
+/* DASHBOARD endpoints */
+
+app.get("/dashboard/estadisticas", requirePermission("ver_estadisticas"), async (req, res) =>{
+    
+    try{
+        let token = req.get("Authentication");
+        let verifiedToken=await jwt.verify(token, "secretKey");
+        let user=verifiedToken.usuario;
+
+        // obtener los reportes del turno actual segun la hora
+        const horaActual = new Date().getHours();
+        const turno = horaActual >= 6 && horaActual < 14 ? "matutino":
+                      horaActual >= 14 && horaActual < 22 ? "vespertino": "nocturno";
+
+        const reportesTurno = await db.collection("reportesEH").countDocuments({ turno: turno});
+
+        //calcular tiempo promedio de traslado
+        const reportesConTiempo = await db.collection("reportesEH").find({ tiempo_traslado: {$exists: true}})
+        .project({ tiempo_traslado: 1}).toArray();
+
+        const tiempoPromedio = reportesConTiempo.length >0 ? Math.round(reportesConTiempo.reduce((sum, r)=>sum +r.tiempo_traslado, 0)/ reportesConTiempo.length)
+        :0;
+
+        res.json({
+            reportesTurno1: reportesTurno,
+            tiempoPromedio: `${tiempoPromedio} minutos`
+        });
+    }
+    catch(error){
+        res.status(401).json({ message: "no autorizado", error: error.message });
+    }
+});
+
+app.get("/dashboard/reportes-recientes", async (req, res)=>{
+    try{
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+
+        const limit = parseInt(req.query.limit) || 2;
+
+        const reportes = await db.collection("reportesEH")
+        .find({}).sort({fecha_creacion: -1}).limit(limit).project({_id: 0}).toArray();
+
+        //formatear datos para el dashboard
+        const reportesFormateado = reportes.map(r =>({
+            id: r.id,
+            autor: r.creado_por || "Desconocido",
+            hora: new Date(r.fecha_creacion).toLocaleTimeString("es-MX",{
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            }),
+            fecha: "hoy",
+            preview: r.observaciones || r.trabajos_realizados || "Sin descripción"
+        }));
+
+        res.json(reportesFormateado)
+    }
+    catch(error){
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
+app.get("/dashboard/notas-recientes", async (req, res)=>{
+    try{
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+
+        const limit = parseInt(req.query.limit) || 3;
+
+        // Obtener las notas mas recientes de la coleccion 'notas'
+        const notas = await db.collection("notas")
+        .find({}).sort({fecha_creacion: -1}).limit(limit).project({_id: 0}).toArray();
+
+        //formatear datos para el dashboard
+        const notasFormateadas = notas.map(n =>({
+            id: n.id,
+            autor: n.creado_por || "Desconocido",
+            contenido: n.contenido || n.texto || "Sin contenido"
+        }));
+
+        res.json(notasFormateadas)
+    }
+    catch(error){
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
+// --------------------------------------------------------------------------------------------------------------- //
+
+
+/* Endpoints para las graficas */
+
+// GET /estadisticas/serie-temporal - Total de emergencias por fecha
+// Soporta filtros: fechaInicio, fechaFin, tipo (EH/EU), turno, gravedad
+app.get('/estadisticas/serie-temporal', requirePermission('ver_estadisticas'), async (req, res) => {
+    try {
+        // El usuario ya fue verificado por el middleware requirePermission
+        const user = req.user.usuario;
+        
+        // Obtener parametros de query
+        const { fechaInicio, fechaFin, tipo, turno, gravedad, agrupacion = 'dia' } = req.query;
+        
+        // Construir filtro base
+        let filter = {};
+        
+        // Filtro por rango de fechas
+        if (fechaInicio || fechaFin) {
+            filter.fecha = {};
+            if (fechaInicio) filter.fecha.$gte = new Date(fechaInicio);
+            if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
+        }
+        
+        // Filtro por turno
+        if (turno) filter.turno = turno;
+        
+        // Filtro por gravedad (solo para reportesEU)
+        if (gravedad && tipo === 'EU') filter.gravedad = gravedad;
+        
+        // Determinar colecciones a consultar
+        let colecciones = [];
+        if (!tipo || tipo === 'EH') colecciones.push('reportesEH');
+        if (!tipo || tipo === 'EU') colecciones.push('reportesEU');
+        
+        // Obtener datos de ambas colecciones
+        let todosLosReportes = [];
+        for (let coleccion of colecciones) {
+            let reportes = await db.collection(coleccion)
+                .find(filter)
+                .project({ fecha: 1, _id: 0 })
+                .toArray();
+            todosLosReportes = todosLosReportes.concat(reportes);
+        }
+        
+        // Agrupar por fecha segun el tipo de agrupacion
+        let agrupado = {};
+        todosLosReportes.forEach(reporte => {
+            if (!reporte.fecha) return;
+            
+            let fecha = new Date(reporte.fecha);
+            let clave;
+            
+            switch (agrupacion) {
+                case 'dia':
+                    clave = fecha.toISOString().split('T')[0]; // YYYY-MM-DD
+                    break;
+                case 'semana':
+                    // Primera fecha de la semana
+                    let primerDia = new Date(fecha);
+                    primerDia.setDate(fecha.getDate() - fecha.getDay());
+                    clave = primerDia.toISOString().split('T')[0];
+                    break;
+                case 'mes':
+                    clave = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+                    break;
+                default:
+                    clave = fecha.toISOString().split('T')[0];
+            }
+            
+            if (!agrupado[clave]) {
+                agrupado[clave] = 0;
+            }
+            agrupado[clave]++;
+        });
+        
+        // Convertir a array y ordenar
+        let resultado = Object.keys(agrupado).map(fecha => ({
+            fecha,
+            count: agrupado[fecha]
+        })).sort((a, b) => a.fecha.localeCompare(b.fecha));
+        
+        log(user, "estadisticas", "serie-temporal");
+        res.json(resultado);
+    } catch (error) {
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
+// GET /estadisticas/distribucion-tipo - Conteo por tipo de emergencia
+// Soporta filtros: fechaInicio, fechaFin, turno
+app.get('/estadisticas/distribucion-tipo', requirePermission('ver_estadisticas'), async (req, res) => {
+    try {
+        // El usuario ya fue verificado por el middleware requirePermission
+        const user = req.user.usuario;
+        
+        const { fechaInicio, fechaFin, turno } = req.query;
+        
+        // Construir filtro base
+        let filter = {};
+        if (fechaInicio || fechaFin) {
+            filter.fecha = {};
+            if (fechaInicio) filter.fecha.$gte = new Date(fechaInicio);
+            if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
+        }
+        if (turno) filter.turno = turno;
+        
+        // Contar reportes EH (Prehospitalaria)
+        const countEH = await db.collection('reportesEH').countDocuments(filter);
+        
+        // Contar reportes EU (Urbana)
+        const countEU = await db.collection('reportesEU').countDocuments(filter);
+        
+        // Contar notas sin folio
+        const countNotas = await db.collection('notas').countDocuments(filter);
+        
+        let resultado = [
+            { tipo: 'Prehospitalaria', value: countEH },
+            { tipo: 'Urbana', value: countEU },
+            { tipo: 'Notas sin folio', value: countNotas }
+        ];
+        
+        log(user, "estadisticas", "distribucion-tipo");
+        res.json(resultado);
+    } catch (error) {
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
+// GET /estadisticas/tiempo-respuesta - Promedio de tiempo de respuesta por turno
+app.get('/estadisticas/tiempo-respuesta', requirePermission('ver_estadisticas'), async (req, res) => {
+    try {
+        // El usuario ya fue verificado por el middleware requirePermission
+        const user = req.user.usuario;
+        
+        const { fechaInicio, fechaFin } = req.query;
+        
+        let filter = {};
+        if (fechaInicio || fechaFin) {
+            filter.fecha = {};
+            if (fechaInicio) filter.fecha.$gte = new Date(fechaInicio);
+            if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
+        }
+        
+        // Obtener reportes con tiempo de traslado de ambas colecciones
+        let reportesEH = await db.collection('reportesEH')
+            .find({ ...filter, tiempo_traslado: { $exists: true } })
+            .project({ turno: 1, tiempo_traslado: 1, _id: 0 })
+            .toArray();
+            
+        let reportesEU = await db.collection('reportesEU')
+            .find({ ...filter, tiempo_traslado: { $exists: true } })
+            .project({ turno: 1, tiempo_traslado: 1, _id: 0 })
+            .toArray();
+        
+        let todosReportes = [...reportesEH, ...reportesEU];
+        
+        // Agrupar por turno y calcular promedio
+        let agrupado = {};
+        todosReportes.forEach(reporte => {
+            let turnoKey = reporte.turno || 'Sin turno';
+            if (!agrupado[turnoKey]) {
+                agrupado[turnoKey] = { suma: 0, cantidad: 0 };
+            }
+            agrupado[turnoKey].suma += reporte.tiempo_traslado;
+            agrupado[turnoKey].cantidad++;
+        });
+        
+        // Calcular promedio y formatear resultado
+        let resultado = Object.keys(agrupado).map(turno => ({
+            turno: turno === '1' ? 'Matutino' : turno === '2' ? 'Vespertino' : turno === '3' ? 'Nocturno' : turno,
+            minutos: Math.round(agrupado[turno].suma / agrupado[turno].cantidad)
+        }));
+        
+        log(user, "estadisticas", "tiempo-respuesta");
+        res.json(resultado);
+    } catch (error) {
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
+// GET /estadisticas/uso-unidades - Servicios y horas por unidad
+app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), async (req, res) => {
+    try {
+        // El usuario ya fue verificado por el middleware requirePermission
+        const user = req.user.usuario;
+        
+        const { fechaInicio, fechaFin } = req.query;
+        
+        let filter = {};
+        if (fechaInicio || fechaFin) {
+            filter.fecha = {};
+            if (fechaInicio) filter.fecha.$gte = new Date(fechaInicio);
+            if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
+        }
+        
+        // Obtener reportes con informacion de unidad
+        let reportesEH = await db.collection('reportesEH')
+            .find({ ...filter, 'unidad.clave': { $exists: true } })
+            .project({ 'unidad.clave': 1, tiempo_traslado: 1, _id: 0 })
+            .toArray();
+            
+        let reportesEU = await db.collection('reportesEU')
+            .find({ ...filter, 'unidad.clave': { $exists: true } })
+            .project({ 'unidad.clave': 1, tiempo_traslado: 1, _id: 0 })
+            .toArray();
+        
+        let todosReportes = [...reportesEH, ...reportesEU];
+        
+        // Agrupar por unidad
+        let agrupado = {};
+        todosReportes.forEach(reporte => {
+            let unidad = reporte.unidad?.clave || 'Sin unidad';
+            if (!agrupado[unidad]) {
+                agrupado[unidad] = { servicios: 0, horas: 0 };
+            }
+            agrupado[unidad].servicios++;
+            agrupado[unidad].horas += (reporte.tiempo_traslado || 0) / 60; // Convertir minutos a horas
+        });
+        
+        // Formatear resultado
+        let resultado = Object.keys(agrupado).map(unidad => ({
+            unidad,
+            servicios: agrupado[unidad].servicios,
+            horas: Math.round(agrupado[unidad].horas * 10) / 10 // Redondear a 1 decimal
+        }));
+        
+        log(user, "estadisticas", "uso-unidades");
+        res.json(resultado);
+    } catch (error) {
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
+// GET /estadisticas/demografia - Distribucion de atendidos por edad y genero
+app.get('/estadisticas/demografia', requirePermission('ver_estadisticas'), async (req, res) => {
+    try {
+        // El usuario ya fue verificado por el middleware requirePermission
+        const user = req.user.usuario;
+        
+        const { fechaInicio, fechaFin } = req.query;
+        
+        let filter = {};
+        if (fechaInicio || fechaFin) {
+            filter.fecha = {};
+            if (fechaInicio) filter.fecha.$gte = new Date(fechaInicio);
+            if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
+        }
+        
+        // Obtener reportes con datos demograficos
+        let reportesEH = await db.collection('reportesEH')
+            .find({ ...filter, 'paciente.edad': { $exists: true }, 'paciente.sexo': { $exists: true } })
+            .project({ 'paciente.edad': 1, 'paciente.sexo': 1, _id: 0 })
+            .toArray();
+        
+        // Agrupar por rango de edad y sexo
+        let rangos = {
+            '0-17': { hombres: 0, mujeres: 0 },
+            '18-30': { hombres: 0, mujeres: 0 },
+            '31-60': { hombres: 0, mujeres: 0 },
+            '60+': { hombres: 0, mujeres: 0 }
+        };
+        
+        reportesEH.forEach(reporte => {
+            let edad = reporte.paciente?.edad;
+            let sexo = reporte.paciente?.sexo?.toLowerCase();
+            
+            if (edad === undefined || !sexo) return;
+            
+            let rango;
+            if (edad <= 17) rango = '0-17';
+            else if (edad <= 30) rango = '18-30';
+            else if (edad <= 60) rango = '31-60';
+            else rango = '60+';
+            
+            if (sexo === 'masculino' || sexo === 'm') {
+                rangos[rango].hombres++;
+            } else if (sexo === 'femenino' || sexo === 'f') {
+                rangos[rango].mujeres++;
+            }
+        });
+        
+        // Formatear resultado
+        let resultado = Object.keys(rangos).map(rango => ({
+            rango,
+            hombres: rangos[rango].hombres,
+            mujeres: rangos[rango].mujeres
+        }));
+        
+        log(user, "estadisticas", "demografia");
+        res.json(resultado);
+    } catch (error) {
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
+// GET /estadisticas/ultimos-reportes - Ultimos 10 reportes para el listado lateral
+app.get('/estadisticas/ultimos-reportes', requirePermission('ver_estadisticas'), async (req, res) => {
+    try {
+        // El usuario ya fue verificado por el middleware requirePermission
+        const user = req.user.usuario;
+        
+        const { limite = 10, tipo } = req.query;
+        
+        // Obtener ultimos reportes de cada tipo
+        let reportes = [];
+        
+        if (!tipo || tipo === 'EH') {
+            let reportesEH = await db.collection('reportesEH')
+                .find({})
+                .sort({ fecha: -1 })
+                .limit(parseInt(limite))
+                .project({
+                    id: 1,
+                    fecha: 1,
+                    turno: 1,
+                    ubicacion_descripcion: 1,
+                    tipo_servicio: 1,
+                    _id: 0
+                })
+                .toArray();
+            
+            reportes = reportes.concat(reportesEH.map(r => ({
+                folio: `EH-${r.id}`,
+                fecha: r.fecha,
+                tipo: r.tipo_servicio || 'Prehospitalaria',
+                turno: r.turno === '1' ? 'Matutino' : r.turno === '2' ? 'Vespertino' : 'Nocturno',
+                ubicacion: r.ubicacion_descripcion
+            })));
+        }
+        
+        if (!tipo || tipo === 'EU') {
+            let reportesEU = await db.collection('reportesEU')
+                .find({})
+                .sort({ fecha: -1 })
+                .limit(parseInt(limite))
+                .project({
+                    id: 1,
+                    fecha: 1,
+                    turno: 1,
+                    ubicacion_descripcion: 1,
+                    tipo_servicio: 1,
+                    _id: 0
+                })
+                .toArray();
+            
+            reportes = reportes.concat(reportesEU.map(r => ({
+                folio: `EU-${r.id}`,
+                fecha: r.fecha,
+                tipo: r.tipo_servicio || 'Urbana',
+                turno: r.turno === '1' ? 'Matutino' : r.turno === '2' ? 'Vespertino' : 'Nocturno',
+                ubicacion: r.ubicacion_descripcion
+            })));
+        }
+        
+        // Ordenar por fecha y limitar
+        reportes.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        reportes = reportes.slice(0, parseInt(limite));
+        
+        log(user, "estadisticas", "ultimos-reportes");
+        res.json(reportes);
+    } catch (error) {
+        res.status(401).json({ message: 'No autorizado', error: error.message });
+    }
+});
+
+// GET /estadisticas/distribucion-subtipo - Breakdown por subtipo de emergencia
+// Para el listado lateral de la grafica de distribucion
+app.get('/estadisticas/distribucion-subtipo', requirePermission('ver_estadisticas'), async (req, res) => {
+    try {
+        // El usuario ya fue verificado por el middleware requirePermission
+        const user = req.user.usuario;
+        
+        const { fechaInicio, fechaFin, turno, tipo } = req.query;
+        
+        let filter = {};
+        if (fechaInicio || fechaFin) {
+            filter.fecha = {};
+            if (fechaInicio) filter.fecha.$gte = new Date(fechaInicio);
+            if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
+        }
+        if (turno) filter.turno = turno;
+        
+        let resultado = [];
+        
+        // Obtener subtipos de reportes EH
+        if (!tipo || tipo === 'EH') {
+            let subtiposEH = await db.collection('reportesEH').aggregate([
+                { $match: filter },
+                {
+                    $group: {
+                        _id: '$tipo_servicio',
+                        count: { $sum: 1 }
+                    }
+                },
+                { $sort: { count: -1 } }
+            ]).toArray();
+            
+            resultado = resultado.concat(subtiposEH.map(s => ({
+                tipo: 'Prehospitalaria',
+                subtipo: s._id || 'Sin especificar',
+                count: s.count
+            })));
+        }
+        
+        // Obtener subtipos de reportes EU
+        if (!tipo || tipo === 'EU') {
+            let subtiposEU = await db.collection('reportesEU').aggregate([
+                { $match: filter },
+                {
+                    $group: {
+                        _id: '$tipo_servicio',
+                        count: { $sum: 1 }
+                    }
+                },
+                { $sort: { count: -1 } }
+            ]).toArray();
+            
+            resultado = resultado.concat(subtiposEU.map(s => ({
+                tipo: 'Urbana',
+                subtipo: s._id || 'Sin especificar',
+                count: s.count
+            })));
+        }
+        
+        log(user, "estadisticas", "distribucion-subtipo");
+        res.json(resultado);
+    } catch (error) {
+        res.status(401).json({ message: 'No autorizado', error: error.message });
     }
 });
 
