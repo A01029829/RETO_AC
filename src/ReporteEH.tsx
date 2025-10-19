@@ -3,7 +3,8 @@ import {
     useNotify, useRedirect, useRefresh, SelectInput, DateTimeInput, NumberInput, BooleanInput, TimeInput, FormDataConsumer, ImageField, 
     ImageInput,
     BooleanField,
-    NumberField} from "react-admin";
+    NumberField,
+    usePermissions} from "react-admin";
 
 const CondicionPacienteChoices = [
     { id: '1_1', name: 'Crítico' },
@@ -73,23 +74,29 @@ const RespiracionChoices = [
     { id: 'llora', name: 'Llora (2)' },
 ];
 
-export const ReporteEHList = () => (
-    <List filters={emergencyFilters}>
-        <DataTable>
-            <DataTable.Col source="id" label="ID" />
-            <DataTable.Col source="hora_llamada" label="Fecha/Hora Llamada" />
-            <DataTable.Col source="secciones_adicionales" label="Tipo" />
-            <DataTable.Col source="numero_ambulancia" label="Unidad" />
-            <DataTable.Col source="colonia" label="Ubicación" />
-            <DataTable.Col source="prioridad" label="Prioridad" />
-            <DataTable.Col source="hospital_traslado" label="Hospital" />
-            <DataTable.Col source="creado_por" label="Responsable" />
-            <DataTable.Col label="Acciones" sx={{textAlign: "right"}} >
-                <EditButton/>
-            </DataTable.Col>
-        </DataTable>
-    </List>
-)
+export const ReporteEHList = () => {
+    const { permissions } = usePermissions();
+    
+    return (
+        <List filters={emergencyFilters}>
+            <DataTable>
+                <DataTable.Col source="id" label="ID" />
+                <DataTable.Col source="hora_llamada" label="Fecha/Hora Llamada" />
+                <DataTable.Col source="secciones_adicionales" label="Tipo" />
+                <DataTable.Col source="numero_ambulancia" label="Unidad" />
+                <DataTable.Col source="colonia" label="Ubicación" />
+                <DataTable.Col source="prioridad" label="Prioridad" />
+                <DataTable.Col source="hospital_traslado" label="Hospital" />
+                <DataTable.Col source="creado_por" label="Responsable" />
+                {permissions !== 'operador' && (
+                    <DataTable.Col label="Acciones" sx={{textAlign: "right"}} >
+                        <EditButton/>
+                    </DataTable.Col>
+                )}
+            </DataTable>
+        </List>
+    );
+}
 
 export const ReporteEHEdit = () => {
     const notify = useNotify();
@@ -105,7 +112,7 @@ export const ReporteEHEdit = () => {
     return (
         <Edit mutationOptions={{onSuccess}}>
             <SimpleForm warnWhenUnsavedChanges>
-                <TextInput disabled source="id" label="ID" />
+                <TextInput source="id" label="ID/Folio" helperText="Editable en caso de folios salteados o no usados" />
                 
                 {/* Reportes de Emergencias Prehospitalarias */}
                 <h1>Reportes de Emergencias Prehospitalarias</h1>

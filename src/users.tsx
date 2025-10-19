@@ -2,7 +2,7 @@ import { useMediaQuery, Theme } from "@mui/material";
 import { List, DataTable, EmailField, SimpleList } from "react-admin";
 
 export const UserList = () => {
-    const isSmall = useMediaQuery<Theme>((theme) => theme.breakpoints.down("md")); //Tamaño a partir del cual se ejecutará el if (SimpleList)
+    const isSmall = useMediaQuery<Theme>((theme) => theme.breakpoints.down("md")); //Tamaño a partir del cual se ejecutara el if (SimpleList)
 
     return (
         <List>

@@ -38,6 +38,7 @@ export const App = () => (
     i18nProvider={i18nProvider}
     loginPage={MyLoginPage}
     theme={customTheme}
+    
   >
     {(permissions) => (
       <>
@@ -53,43 +54,52 @@ export const App = () => (
           />
         )}
 
-        {/* Reportes Emergencias Hospitalarias - Todos los usuarios */}
-        <Resource
-          name="reportesEH"
-          options={{ label: 'Reportes Emergencias Hospitalarias' }}
-          list={ReporteEHList}
-          edit={ReporteEHEdit}
-          create={ReporteEHCreate}
-          show={ReporteEHShow}
-          icon={PostIcon}
-        />
+        {/* Reportes Emergencias Hospitalarias - Solo para operador (EH), jefeDeTurno y administrador */}
+        {(permissions === 'operador' || permissions === 'jefeDeTurno' || permissions === 'administrador') && (
+          <Resource
+            name="reportesEH"
+            options={{ label: 'Reportes Emergencias Hospitalarias' }}
+            list={ReporteEHList}
+            edit={permissions === 'operador' ? undefined : ReporteEHEdit}
+            create={ReporteEHCreate}
+            show={ReporteEHShow}
+            icon={PostIcon}
+          />
+        )}
 
-        {/* Reportes Emergencias Urbanas - Todos los usuarios */}
-        <Resource
-          name="reportesEU"
-          options={{ label: 'Reportes Emergencias Urbanas' }}
-          list={ReporteEUList}
-          create={ReporteEUCreate}
-          edit={ReporteEUEdit}
-          show={ReporteEUShow}
-        />
+        {/* Reportes Emergencias Urbanas - Solo para operatorU, jefeDeTurno y administrador */}
+        {(permissions === 'operatorU' || permissions === 'jefeDeTurno' || permissions === 'administrador') && (
+          <Resource
+            name="reportesEU"
+            options={{ label: 'Reportes Emergencias Urbanas' }}
+            list={ReporteEUList}
+            create={ReporteEUCreate}
+            edit={permissions === 'operatorU' ? undefined : ReporteEUEdit}
+            show={ReporteEUShow}
+          />
+        )}
 
-        {/* Notas - Todos los usuarios */}
-        <Resource
-          name="Notas"
-          list={notaList}
-          edit={notaEdit}
-          create={notaCreate}
-          show={notaShow}
-          icon={CommentBankRounded}
-        />
+        {/* Notas - Para jefeDeTurno y administrador */}
+        {(permissions === 'jefeDeTurno' || permissions === 'administrador') && (
+          <Resource
+            name="Notas"
+            list={notaList}
+            edit={notaEdit}
+            create={notaCreate}
+            show={notaShow}
+            icon={CommentBankRounded}
+          />
+        )}
 
         <CustomRoutes>
           <Route path="/operator" element={<OperatorPage />}></Route>
           <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
           <Route path="/operatorU" element={<OperatorUPage />}></Route>
           <Route path="/admin" element={<AdminDashboard />}></Route>
-          <Route path="/stats" element={<StatisticsPanel />} />
+          {/* Panel de Estadísticas - Solo para administrador */}
+          {permissions === 'administrador' && (
+            <Route path="/stats" element={<StatisticsPanel />} />
+          )}
         </CustomRoutes>
       </>
     )}
