@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Layout as RALayout, CheckForApplicationUpdate, Sidebar, Menu, useSidebarState } from "react-admin";
 import { Box, useMediaQuery, Theme } from "@mui/material";
+import { MyBar } from "./Bar";
 
 // Custom Sidebar with styling
 const CustomSidebar = (props: any) => {
@@ -146,6 +147,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <RALayout 
       sidebar={CustomSidebar}
+      appBar={MyBar}
       sx={{
         "& .RaLayout-content": {
           marginLeft: isSmall ? 0 : "50px",

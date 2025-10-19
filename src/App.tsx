@@ -26,8 +26,10 @@ import { OperatorUPage } from "./operatorU";
 import { StatisticsPanel } from "./StatsPanel";
 import { UsuarioCreate, UsuarioList, UsuarioEdit } from "./registrarUsuarios";
 import { customTheme } from "./Theme";
+import { AccessibilityProvider } from "./Accessibility";
 
 export const App = () => (
+  <AccessibilityProvider>
   <Admin
     dataProvider={dataProvider}
     dashboard={Dashboard}
@@ -92,4 +94,5 @@ export const App = () => (
       </>
     )}
   </Admin>
+  </AccessibilityProvider>
 );
