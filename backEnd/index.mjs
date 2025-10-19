@@ -4,6 +4,9 @@ import bodyParser from 'body-parser';
 import mongodb from 'mongodb';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import https from 'https';
+import fs from 'fs';
+import dotenv from 'dotenv';
 
 import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs";
 
@@ -185,12 +188,16 @@ app.put("/reportes/:id", async(req,res)=>{
 })
 
 async function connectToDB(){
-    // Usa variable de entorno o localhost por defecto
-    const mongoUrl = process.env.MONGODB_URL || "mongodb://127.0.0.1:27017";
-    let client=new MongoClient(mongoUrl); 
-    await client.connect();
-    db=client.db("proteccionCivil"); 
-    console.log("conectado a la base de datos");
+    try {
+        const connectionString = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
+        console.log("Intentando conectar a:", connectionString); 
+        let client=new MongoClient(connectionString);
+        await client.connect();
+        db=client.db("proteccionCivil");
+        console.log("conectado a la base de datos");
+    } catch (error) {
+        console.error("Error conectando a la base de datos:", error);
+    }
 }
 
 // Registro de usuarios (solo admin)
