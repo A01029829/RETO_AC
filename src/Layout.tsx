@@ -142,7 +142,7 @@ const CustomSidebar = (props: any) => {
         <MenuItemLink
           to="/"
           primaryText="Tablero"
-          leftIcon={<DashboardIcon />} // Puedes cambiar el ícono si quieres
+          leftIcon={<DashboardIcon />}
           sx={{
             borderRadius: isSmall ? "6px" : isMedium ? "8px" : "10px",
             marginBottom: isSmall ? 0.5 : isMedium ? 1 : 2,
@@ -187,11 +187,8 @@ const CustomSidebar = (props: any) => {
             },
           }}
         />
-
-        {/* 🔹 Recursos automáticos */}
         <Menu.ResourceItems />
 
-        {/* 🔹 Panel de Estadísticas - Solo para administrador */}
         {permissions === "administrador" && (
           <MenuItemLink
             to="/stats"
