@@ -18,9 +18,12 @@ import {
 import { Card, CardContent, Typography, Box } from '@mui/material';
 
 const turnoChoices = [
-  { id: 'matutino', name: 'Matutino' },
-  { id: 'vespertino', name: 'Vespertino' },
-  { id: 'nocturno', name: 'Nocturno' },
+  { id: 'LV_0815', name: 'Lunes a viernes, 8:00 a 15:00 horas' },
+  { id: 'LV_1521', name: 'Lunes a viernes, 15:00 a 21:00 horas' },
+  { id: 'LMV_2108', name: 'Lunes, miércoles y viernes, 21:00 a 8:00 horas' },
+  { id: 'MJD_2108', name: 'Martes, jueves y domingo, 21:00 a 8:00 horas' },
+  { id: 'SD_0820', name: 'Sábados, domingos y festivos, 8:00 a 20:00 horas' },
+  { id: 'SD_2008', name: 'Sábados, domingos y festivos, 20:00 a 8:00 horas' },
 ];
 
 const tipoChoices = [

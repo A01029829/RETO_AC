@@ -1,63 +1,89 @@
-import { Button, useRedirect } from "react-admin";
+import { Button, useRedirect, useDataProvider } from "react-admin";
 import { Card, Grid, Box, Typography, Stack, Avatar } from "@mui/material";
+import { useEffect, useState } from "react";
+
+interface Estadisticas {
+  reportesTurno1: number;
+  tiempoPromedio: string;
+}
+
+interface ReporteReciente {
+  id: number;
+  autor: string;
+  hora: string;
+  fecha: string;
+  preview: string;
+}
+
+interface NotaReciente {
+  id: number;
+  autor: string;
+  contenido: string;
+}
 
 export const AdminDashboard = () => {
   const redirect = useRedirect();
+  const dataProvider = useDataProvider();
 
-  // TODO: Obtener estos datos desde el dataProvider cuando se integre la base de datos
-  // Ejemplo: const { data: estadisticas } = useGetOne('estadisticas', { id: 'dashboard' });
-  const estadisticas = {
-    reportesTurno1: 2, // Número de reportes en el turno actual
-    tiempoPromedio: "8 minutos", // Tiempo promedio de llegada a emergencias
-  };
+  const [estadisticas, setEstadisticas] = useState<Estadisticas>({
+    reportesTurno1: 0,
+    tiempoPromedio: "0 minutos",
+  });
 
-  // TODO: Obtener reportes recientes desde el dataProvider
-  // Ejemplo: const { data: reportesRecientes } = useGetList('reportes', {
-  //   sort: { field: 'fecha', order: 'DESC' },
-  //   pagination: { page: 1, perPage: 2 }
-  // });
-  const reportesRecientes = [
-    {
-      id: 1,
-      autor: "Bono",
-      hora: "10:47 am",
-      fecha: "hoy",
-      preview:
-        "I have climbed highest mountains.\nI have run through the fields.\nOnly to be with you.\nOnly to be with you.",
-    },
-    {
-      id: 2,
-      autor: "Rick",
-      hora: "13:56 pm",
-      fecha: "hoy",
-      preview:
-        "We're no strangers to love.\nYou know the rules, and so do I.\nA full commitment's what I'm thinking of.\nYou wouldn't get this far with any other guy.",
-    },
-  ];
+  const [reportesRecientes, setReportesRecientes] = useState<ReporteReciente[]>([]);
+  const [notasRecientes, setNotasRecientes] = useState<NotaReciente[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // TODO: Obtener notas recientes desde el dataProvider
-  // Ejemplo: const { data: notasRecientes } = useGetList('notas', {
-  //   sort: { field: 'fecha', order: 'DESC' },
-  //   pagination: { page: 1, perPage: 3 }
-  // });
-  const notasRecientes = [
-    {
-      id: 1,
-      autor: "Bonnie",
-      contenido:
-        "I need a hero.\nI'm holding out for a hero 'til the end of the night.",
-    },
-    {
-      id: 2,
-      autor: "Bonnie",
-      contenido: "He's gotta be strong, and he's got to be fast.",
-    },
-    {
-      id: 3,
-      autor: "Bonnie",
-      contenido: "And he's gotta be fresh from the fight.",
-    },
-  ];
+  useEffect(() => {
+    const cargarDatosDashboard = async () => {
+      try {
+        setLoading(true);
+
+        const [estadisticasData, reportesData, notasData] = await Promise.all([
+          dataProvider.getOne('dashboard/estadisticas', { id: 'stats' })
+            .then(({ data }) => data)
+            .catch(err => {
+              console.error('Error cargando estadisticas:', err);
+              return { reportesTurno1: 0, tiempoPromedio: "0 minutos" };
+            }),
+
+          dataProvider.getList('dashboard/reportes-recientes', {
+            pagination: { page: 1, perPage: 2 },
+            sort: { field: 'fecha', order: 'DESC' },
+            filter: {}
+          })
+            .then(({ data }) => data)
+            .catch(err => {
+              console.error('Error cargando reportes:', err);
+              return [];
+            }),
+
+          dataProvider.getList('dashboard/notas-recientes', {
+            pagination: { page: 1, perPage: 3 },
+            sort: { field: 'fecha', order: 'DESC' },
+            filter: {}
+          })
+            .then(({ data }) => data)
+            .catch(err => {
+              console.error('Error cargando notas:', err);
+              return [];
+            })
+        ]);
+
+        setEstadisticas(estadisticasData);
+        setReportesRecientes(reportesData);
+        setNotasRecientes(notasData);
+      } catch (err) {
+        console.error('Error general cargando dashboard:', err);
+        setError(err instanceof Error ? err.message : 'Error desconocido');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarDatosDashboard();
+  }, [dataProvider]);
 
   // Obtener fecha actual formateada
   const fechaActual = new Date().toLocaleDateString("es-MX", {
@@ -66,6 +92,24 @@ export const AdminDashboard = () => {
     month: "long",
     year: "numeric",
   });
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography variant="h6">Cargando dashboard...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6" color="error">
+          Error al cargar el dashboard: {error}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>

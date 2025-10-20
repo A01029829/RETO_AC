@@ -1,14 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend,} from "recharts";
-import { Card, CardContent, Typography, Box, List, ListItem, ListItemText, Divider,} from "@mui/material";
+import { Card, CardContent, Typography, Box, List, ListItem, ListItemText, Divider, CircularProgress, Alert,} from "@mui/material";
 
 // estos son colores para las gráficas :D
 const COLORS = ["#236eb1", "#f19102", "#b7cde4"];
 
+// Configuracion de la API
+const API_URL = "http://localhost:3000";
+
+// Funcion helper para obtener el token de autenticacion
+const getAuthToken = () => {
+  return sessionStorage.getItem("auth");
+};
+
+// Funcion generica para hacer fetch a los endpoints
+const fetchEstadistica = async (endpoint: string, params: any = {}) => {
+  const token = getAuthToken();
+  if (!token) throw new Error("No hay token de autenticación");
+  
+  const queryParams = new URLSearchParams(params).toString();
+  const url = queryParams ? `${API_URL}${endpoint}?${queryParams}` : `${API_URL}${endpoint}`;
+  
+  const response = await fetch(url, {
+    headers: { 
+      "Authentication": token,
+      "Content-Type": "application/json"
+    }
+  });
+  
+  if (!response.ok) throw new Error(`Error al cargar ${endpoint}`);
+  return response.json();
+};
+
 export const StatisticsPanel = () => {
-  // HECTORLUGO AQUI VA TODO LO DE LA API
-  // aquí vamos a guardar los datos que vienen del backend (ahorita estan como simulados ok?) 
-  // cuando ya exista la API, solo cambias los set"x" por los datos que traiga el fetch
+  // Estados para cada tipo de dato
   const [timeSeries, setTimeSeries] = useState<any[]>([]);
   const [distribution, setDistribution] = useState<any[]>([]);
   const [avgResponse, setAvgResponse] = useState<any[]>([]);
@@ -16,57 +41,153 @@ export const StatisticsPanel = () => {
   const [demographics, setDemographics] = useState<any[]>([]);
   const [recentReports, setRecentReports] = useState<any[]>([]);
 
+  // Estados de carga
+  const [loadingTimeSeries, setLoadingTimeSeries] = useState(true);
+  const [loadingDistribution, setLoadingDistribution] = useState(true);
+  const [loadingResponse, setLoadingResponse] = useState(true);
+  const [loadingUnits, setLoadingUnits] = useState(true);
+  const [loadingDemographics, setLoadingDemographics] = useState(true);
+  const [loadingReports, setLoadingReports] = useState(true);
+
+  // Estados de error
+  const [errorTimeSeries, setErrorTimeSeries] = useState<string | null>(null);
+  const [errorDistribution, setErrorDistribution] = useState<string | null>(null);
+  const [errorResponse, setErrorResponse] = useState<string | null>(null);
+  const [errorUnits, setErrorUnits] = useState<string | null>(null);
+  const [errorDemographics, setErrorDemographics] = useState<string | null>(null);
+  const [errorReports, setErrorReports] = useState<string | null>(null);
+
+  // Cargar serie temporal
   useEffect(() => {
-    // Y AQUI VA EL FETCH DEL API
-    // setTimeSeries es el total de emergencias por fecha (serie temporal)
-    // setDistribution es el conteo por tipo de emergencia
-    // setAvgResponse es el promedio de tiempo de respuesta
-    // setUnitUsage es el uso de unidades (por ambulancia)
-    // setDemographics es el demografía (edad/género)
-    // setRecentReports es el últimos reportes (para la lista lateral)
-    //  y ya al final de cada fetch hagan un .then(data => setX(data))
+    const loadData = async () => {
+      try {
+        setLoadingTimeSeries(true);
+        setErrorTimeSeries(null);
+        const data = await fetchEstadistica('/estadisticas/serie-temporal', { agrupacion: 'dia' });
+        setTimeSeries(data);
+      } catch (error: any) {
+        setErrorTimeSeries(error.message);
+      } finally {
+        setLoadingTimeSeries(false);
+      }
+    };
 
-    setTimeSeries([
-      { fecha: "Oct 1", count: 5 },
-      { fecha: "Oct 2", count: 9 },
-      { fecha: "Oct 3", count: 7 },
-      { fecha: "Oct 4", count: 10 },
-      { fecha: "Oct 5", count: 6 },
-    ]);
-
-    setDistribution([
-      { tipo: "Prehospitalaria", value: 45 },
-      { tipo: "Urbana", value: 30 },
-      { tipo: "Notas sin folio", value: 10 },
-    ]);
-
-    setAvgResponse([
-      { turno: "Matutino", minutos: 12 },
-      { turno: "Vespertino", minutos: 9 },
-      { turno: "Nocturno", minutos: 14 },
-    ]);
-
-    setUnitUsage([
-      { unidad: "Amb-01", servicios: 25, horas: 40 },
-      { unidad: "Amb-02", servicios: 18, horas: 32 },
-      { unidad: "Amb-03", servicios: 12, horas: 25 },
-    ]);
-
-    setDemographics([
-      { rango: "0-17", hombres: 4, mujeres: 3 },
-      { rango: "18-30", hombres: 7, mujeres: 8 },
-      { rango: "31-60", hombres: 5, mujeres: 6 },
-      { rango: "60+", hombres: 2, mujeres: 3 },
-    ]);
-
-    setRecentReports([
-      { folio: "EU-1023", fecha: "2025-10-05 14:30", tipo: "ME URGE LA PATRULLAAAAAA", turno: "Matutino", ubicacion: "Mi casa" },
-      { folio: "EU-1178", fecha: "2025-10-05 13:20", tipo: "Urbana", turno: "Matutino", ubicacion: "El Tec" },
-      { folio: "EH-1022", fecha: "2025-10-04 21:00", tipo: "Prehospitalaria", turno: "Nocturno", ubicacion: "Santa Fe" },
-    ]);
+    loadData();
+    const interval = setInterval(loadData, 60000); // Refrescar cada minuto
+    return () => clearInterval(interval);
   }, []);
 
-  // AQUI TERMINA TODO LO DE LA API HECTORLUGO
+  // Cargar distribucion
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingDistribution(true);
+        setErrorDistribution(null);
+        const data = await fetchEstadistica('/estadisticas/distribucion-tipo');
+        setDistribution(data);
+      } catch (error: any) {
+        setErrorDistribution(error.message);
+      } finally {
+        setLoadingDistribution(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cargar tiempo de respuesta
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingResponse(true);
+        setErrorResponse(null);
+        const data = await fetchEstadistica('/estadisticas/tiempo-respuesta');
+        setAvgResponse(data);
+      } catch (error: any) {
+        setErrorResponse(error.message);
+      } finally {
+        setLoadingResponse(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cargar uso de unidades
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingUnits(true);
+        setErrorUnits(null);
+        const data = await fetchEstadistica('/estadisticas/uso-unidades');
+        setUnitUsage(data);
+      } catch (error: any) {
+        setErrorUnits(error.message);
+      } finally {
+        setLoadingUnits(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cargar demografia
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingDemographics(true);
+        setErrorDemographics(null);
+        const data = await fetchEstadistica('/estadisticas/demografia');
+        setDemographics(data);
+      } catch (error: any) {
+        setErrorDemographics(error.message);
+      } finally {
+        setLoadingDemographics(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cargar ultimos reportes
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingReports(true);
+        setErrorReports(null);
+        const data = await fetchEstadistica('/estadisticas/ultimos-reportes', { limite: 10 });
+        setRecentReports(data);
+      } catch (error: any) {
+        setErrorReports(error.message);
+      } finally {
+        setLoadingReports(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 30000); // Refrescar cada 30 segundos
+    return () => clearInterval(interval);
+  }, []);
+
+  // Componente helper para mostrar errores
+  const ErrorDisplay = ({ message }: { message: string }) => (
+    <Alert severity="error">{message}</Alert>
+  );
+
+  // Componente helper para mostrar loading
+  const LoadingDisplay = () => (
+    <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+      <CircularProgress />
+    </Box>
+  );
 
   return (
     <Box p={3}>
@@ -80,15 +201,21 @@ export const StatisticsPanel = () => {
           <Card>
             <CardContent>
               <Typography variant="h6">Total de Emergencias (Serie Temporal)</Typography>
-              <ResponsiveContainer width="100%" height={350}>
-                <LineChart data={timeSeries}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="fecha" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="count" stroke="#236eb1" fill="#f19102" />
-                </LineChart>
-              </ResponsiveContainer>
+              {loadingTimeSeries ? (
+                <LoadingDisplay />
+              ) : errorTimeSeries ? (
+                <ErrorDisplay message="Error al cargar serie temporal" />
+              ) : (
+                <ResponsiveContainer width="100%" height={350}>
+                  <LineChart data={timeSeries}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="fecha" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="count" stroke="#236eb1" fill="#f19102" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -97,19 +224,25 @@ export const StatisticsPanel = () => {
           <Card style={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6">Últimos Reportes</Typography>
-              <List dense>
-                {recentReports.map((r, i) => (
-                  <React.Fragment key={i}>
-                    <ListItem>
-                      <ListItemText
-                        primary={`${r.folio} — ${r.tipo}`}
-                        secondary={`${r.fecha} • ${r.turno} • ${r.ubicacion}`}
-                      />
-                    </ListItem>
-                    <Divider />
-                  </React.Fragment>
-                ))}
-              </List>
+              {loadingReports ? (
+                <LoadingDisplay />
+              ) : errorReports ? (
+                <ErrorDisplay message="Error al cargar reportes" />
+              ) : (
+                <List dense>
+                  {recentReports && recentReports.map((r: any, i: number) => (
+                    <React.Fragment key={i}>
+                      <ListItem>
+                        <ListItemText
+                          primary={`${r.folio} — ${r.tipo}`}
+                          secondary={`${new Date(r.fecha).toLocaleString('es-MX')} • ${r.turno} • ${r.ubicacion}`}
+                        />
+                      </ListItem>
+                      <Divider />
+                    </React.Fragment>
+                  ))}
+                </List>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -118,22 +251,28 @@ export const StatisticsPanel = () => {
           <Card>
             <CardContent>
               <Typography variant="h6">Distribución por Tipo de Emergencia</Typography>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={distribution}
-                    dataKey="value"
-                    nameKey="tipo"
-                    label
-                  >
-                    {distribution.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Legend />
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {loadingDistribution ? (
+                <LoadingDisplay />
+              ) : errorDistribution ? (
+                <ErrorDisplay message="Error al cargar distribución" />
+              ) : (
+                <ResponsiveContainer width="100%" height={350}>
+                  <PieChart>
+                    <Pie
+                      data={distribution}
+                      dataKey="value"
+                      nameKey="tipo"
+                      label
+                    >
+                      {distribution && distribution.map((_: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Legend />
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -142,15 +281,21 @@ export const StatisticsPanel = () => {
           <Card>
             <CardContent>
               <Typography variant="h6">Tiempo de Respuesta Promedio (por turno)</Typography>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={avgResponse}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="turno" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="minutos" fill="#236eb1" />
-                </BarChart>
-              </ResponsiveContainer>
+              {loadingResponse ? (
+                <LoadingDisplay />
+              ) : errorResponse ? (
+                <ErrorDisplay message="Error al cargar tiempo de respuesta" />
+              ) : (
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={avgResponse}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="turno" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="minutos" fill="#236eb1" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -159,16 +304,22 @@ export const StatisticsPanel = () => {
           <Card>
             <CardContent>
               <Typography variant="h6">Utilización de Unidades</Typography>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={unitUsage}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="unidad" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="servicios" fill="#236eb1" />
-                  <Bar dataKey="horas" fill="#f19102" />
-                </BarChart>
-              </ResponsiveContainer>
+              {loadingUnits ? (
+                <LoadingDisplay />
+              ) : errorUnits ? (
+                <ErrorDisplay message="Error al cargar uso de unidades" />
+              ) : (
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={unitUsage}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="unidad" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="servicios" fill="#236eb1" />
+                    <Bar dataKey="horas" fill="#f19102" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -177,17 +328,23 @@ export const StatisticsPanel = () => {
           <Card>
             <CardContent>
               <Typography variant="h6">Demografía de Atendidos</Typography>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={demographics}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="rango" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="hombres" fill="#0088FE" />
-                  <Bar dataKey="mujeres" fill="#FF69B4" />
-                </BarChart>
-              </ResponsiveContainer>
+              {loadingDemographics ? (
+                <LoadingDisplay />
+              ) : errorDemographics ? (
+                <ErrorDisplay message="Error al cargar demografía" />
+              ) : (
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={demographics}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="rango" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="hombres" fill="#0088FE" />
+                    <Bar dataKey="mujeres" fill="#FF69B4" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
         </Box>
