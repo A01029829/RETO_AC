@@ -4,9 +4,18 @@ import { useNotify } from "react-admin";
 import { getUserAddressDetails } from "../utils/getUserAddress";
 
 const GeoAutofillOnMount = () => {
-  const { setValue, getValues } = useFormContext();
   const notify = useNotify();
   const ran = useRef(false);
+  
+  // Obtener el contexto del formulario de forma segura
+  const formContext = useFormContext();
+  
+  // Si no hay contexto, retornar null sin hacer nada
+  if (!formContext) {
+    return null;
+  }
+  
+  const { setValue, getValues } = formContext;
 
   useEffect(() => {
     if (ran.current) return;
@@ -18,26 +27,26 @@ const GeoAutofillOnMount = () => {
         if (calle || colonia || alcaldia_municipio) return;
 
         const data = await getUserAddressDetails();
-        const a = data.address ?? data;
-        console.log("Datos de dirección crudos FORM:", a);
+        console.log("Datos de dirección obtenidos:", data);
 
-        const calleStr = [a.road, a.house_number].filter(Boolean).join(" ");
+        // data ya es el objeto AddressDetails procesado
+        const calleStr = [data.road, data.house_number].filter(Boolean).join(" ");
         const coloniaStr =
-          a.neighbourhood || a.suburb || a.quarter || a.residential || "";
+          data.neighbourhood || data.suburb || "";
         const municipioStr =
-          a.city || a.town || a.village || a.municipality || a.county || "";
+          data.city || data.town || data.municipality || "";
 
-        setValue("calle", a.addressLine);
+        setValue("calle", data.addressLine || calleStr);
         setValue("colonia", coloniaStr);
         setValue("alcaldia_municipio", municipioStr);
 
         if (data.lat && data.lon) {
-          setValue("lat", parseFloat(data.lat));
-          setValue("lng", parseFloat(data.lon));
+          setValue("lat", data.lat);
+          setValue("lng", data.lon);
         }
 
         notify("Ubicación detectada y campos completados");
-        console.log("Reverse geocoding:", data.display_name || calleStr);
+        console.log("Dirección completa:", data.addressLine);
       } catch (e) {
         console.error(e);
         notify("No se pudo obtener la ubicación automáticamente", {

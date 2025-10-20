@@ -217,7 +217,7 @@ export const OperatorPage = () => {
           <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
             <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
               <Button
-                onClick={() => redirect("reportesEH/create")}
+                onClick={() => redirect("/reportesEH/create")}
                 startIcon={<DescriptionIcon />}
                 sx={{
                   fontWeight: 800,

@@ -1094,7 +1094,21 @@ function safeToNumber(v: unknown): number | undefined {
 }
 
 function CreateMap() {
-  const { control } = useFormContext();
+  const formContext = useFormContext();
+  
+  // Si no hay contexto del formulario, mostrar el mapa con ubicación por defecto
+  if (!formContext) {
+    return (
+      <Map
+        key={`${DEFAULT_CENTER.lat},${DEFAULT_CENTER.lng}`}
+        center={DEFAULT_CENTER}
+        height={420}
+        width={"100%"}
+      />
+    );
+  }
+  
+  const { control } = formContext;
 
   const latRaw = useWatch({
     control,
