@@ -1,5 +1,4 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend,} from "recharts";
 import { Card, CardContent, Typography, Box, List, ListItem, ListItemText, Divider, CircularProgress, Alert,} from "@mui/material";
 
@@ -14,15 +13,13 @@ const getAuthToken = () => {
   return sessionStorage.getItem("auth");
 };
 
-// Funciones para hacer fetch a los endpoints
-const fetchSerieTemporal = async (params: any = {}) => {
+// Funcion generica para hacer fetch a los endpoints
+const fetchEstadistica = async (endpoint: string, params: any = {}) => {
   const token = getAuthToken();
   if (!token) throw new Error("No hay token de autenticación");
   
-  
-  const { client, queryKey, meta, signal, ...cleanParams } = params;
-  const queryParams = new URLSearchParams(cleanParams).toString();
-  const url = queryParams ? `${API_URL}/estadisticas/serie-temporal?${queryParams}` : `${API_URL}/estadisticas/serie-temporal`;
+  const queryParams = new URLSearchParams(params).toString();
+  const url = queryParams ? `${API_URL}${endpoint}?${queryParams}` : `${API_URL}${endpoint}`;
   
   const response = await fetch(url, {
     headers: { 
@@ -30,137 +27,155 @@ const fetchSerieTemporal = async (params: any = {}) => {
       "Content-Type": "application/json"
     }
   });
-  if (!response.ok) throw new Error("Error al cargar serie temporal");
-  return response.json();
-};
-
-const fetchDistribucion = async (params: any = {}) => {
-  const token = getAuthToken();
-  if (!token) throw new Error("No hay token de autenticación");
   
-  const { client, queryKey, meta, signal, ...cleanParams } = params;
-  const queryParams = new URLSearchParams(cleanParams).toString();
-  const url = queryParams ? `${API_URL}/estadisticas/distribucion-tipo?${queryParams}` : `${API_URL}/estadisticas/distribucion-tipo`;
-  
-  const response = await fetch(url, {
-    headers: { 
-      "Authentication": token,
-      "Content-Type": "application/json"
-    }
-  });
-  if (!response.ok) throw new Error("Error al cargar distribucion");
-  return response.json();
-};
-
-const fetchTiempoRespuesta = async (params: any = {}) => {
-  const token = getAuthToken();
-  if (!token) throw new Error("No hay token de autenticación");
-  
-  const { client, queryKey, meta, signal, ...cleanParams } = params;
-  const queryParams = new URLSearchParams(cleanParams).toString();
-  const url = queryParams ? `${API_URL}/estadisticas/tiempo-respuesta?${queryParams}` : `${API_URL}/estadisticas/tiempo-respuesta`;
-  
-  const response = await fetch(url, {
-    headers: { 
-      "Authentication": token,
-      "Content-Type": "application/json"
-    }
-  });
-  if (!response.ok) throw new Error("Error al cargar tiempo de respuesta");
-  return response.json();
-};
-
-const fetchUsoUnidades = async (params: any = {}) => {
-  const token = getAuthToken();
-  if (!token) throw new Error("No hay token de autenticación");
-  
-  const { client, queryKey, meta, signal, ...cleanParams } = params;
-  const queryParams = new URLSearchParams(cleanParams).toString();
-  const url = queryParams ? `${API_URL}/estadisticas/uso-unidades?${queryParams}` : `${API_URL}/estadisticas/uso-unidades`;
-  
-  const response = await fetch(url, {
-    headers: { 
-      "Authentication": token,
-      "Content-Type": "application/json"
-    }
-  });
-  if (!response.ok) throw new Error("Error al cargar uso de unidades");
-  return response.json();
-};
-
-const fetchDemografia = async (params: any = {}) => {
-  const token = getAuthToken();
-  if (!token) throw new Error("No hay token de autenticación");
-  
-  const { client, queryKey, meta, signal, ...cleanParams } = params;
-  const queryParams = new URLSearchParams(cleanParams).toString();
-  const url = queryParams ? `${API_URL}/estadisticas/demografia?${queryParams}` : `${API_URL}/estadisticas/demografia`;
-  
-  const response = await fetch(url, {
-    headers: { 
-      "Authentication": token,
-      "Content-Type": "application/json"
-    }
-  });
-  if (!response.ok) throw new Error("Error al cargar demografia");
-  return response.json();
-};
-
-const fetchUltimosReportes = async (params: any = {}) => {
-  const token = getAuthToken();
-  if (!token) throw new Error("No hay token de autenticación");
-  
-  const { client, queryKey, meta, signal, ...cleanParams } = params;
-  const queryParams = new URLSearchParams(cleanParams).toString();
-  const url = queryParams ? `${API_URL}/estadisticas/ultimos-reportes?${queryParams}` : `${API_URL}/estadisticas/ultimos-reportes`;
-  
-  const response = await fetch(url, {
-    headers: { 
-      "Authentication": token,
-      "Content-Type": "application/json"
-    }
-  });
-  if (!response.ok) throw new Error("Error al cargar ultimos reportes");
+  if (!response.ok) throw new Error(`Error al cargar ${endpoint}`);
   return response.json();
 };
 
 export const StatisticsPanel = () => {
-  // Usar React Query para manejar el estado de las peticiones
-  const { data: timeSeries, isLoading: loadingTimeSeries, error: errorTimeSeries } = useQuery({
-    queryKey: ["serie-temporal"],
-    queryFn: () => fetchSerieTemporal({ agrupacion: "dia" }),
-    refetchInterval: 60000, // Refrescar cada minuto
-  });
+  // Estados para cada tipo de dato
+  const [timeSeries, setTimeSeries] = useState<any[]>([]);
+  const [distribution, setDistribution] = useState<any[]>([]);
+  const [avgResponse, setAvgResponse] = useState<any[]>([]);
+  const [unitUsage, setUnitUsage] = useState<any[]>([]);
+  const [demographics, setDemographics] = useState<any[]>([]);
+  const [recentReports, setRecentReports] = useState<any[]>([]);
 
-  const { data: distribution, isLoading: loadingDistribution, error: errorDistribution } = useQuery({
-    queryKey: ["distribucion-tipo"],
-    queryFn: fetchDistribucion,
-    refetchInterval: 60000,
-  });
+  // Estados de carga
+  const [loadingTimeSeries, setLoadingTimeSeries] = useState(true);
+  const [loadingDistribution, setLoadingDistribution] = useState(true);
+  const [loadingResponse, setLoadingResponse] = useState(true);
+  const [loadingUnits, setLoadingUnits] = useState(true);
+  const [loadingDemographics, setLoadingDemographics] = useState(true);
+  const [loadingReports, setLoadingReports] = useState(true);
 
-  const { data: avgResponse, isLoading: loadingResponse, error: errorResponse } = useQuery({
-    queryKey: ["tiempo-respuesta"],
-    queryFn: fetchTiempoRespuesta,
-    refetchInterval: 60000,
-  });
+  // Estados de error
+  const [errorTimeSeries, setErrorTimeSeries] = useState<string | null>(null);
+  const [errorDistribution, setErrorDistribution] = useState<string | null>(null);
+  const [errorResponse, setErrorResponse] = useState<string | null>(null);
+  const [errorUnits, setErrorUnits] = useState<string | null>(null);
+  const [errorDemographics, setErrorDemographics] = useState<string | null>(null);
+  const [errorReports, setErrorReports] = useState<string | null>(null);
 
-  const { data: unitUsage, isLoading: loadingUnits, error: errorUnits } = useQuery({
-    queryKey: ["uso-unidades"],
-    queryFn: fetchUsoUnidades,
-    refetchInterval: 60000,
-  });
+  // Cargar serie temporal
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingTimeSeries(true);
+        setErrorTimeSeries(null);
+        const data = await fetchEstadistica('/estadisticas/serie-temporal', { agrupacion: 'dia' });
+        setTimeSeries(data);
+      } catch (error: any) {
+        setErrorTimeSeries(error.message);
+      } finally {
+        setLoadingTimeSeries(false);
+      }
+    };
 
-  const { data: demographics, isLoading: loadingDemographics, error: errorDemographics } = useQuery({
-    queryKey: ["demografia"],
-    queryFn: fetchDemografia,
-    refetchInterval: 60000,
-  });
+    loadData();
+    const interval = setInterval(loadData, 60000); // Refrescar cada minuto
+    return () => clearInterval(interval);
+  }, []);
 
-  const { data: recentReports, isLoading: loadingReports, error: errorReports } = useQuery({
-    queryKey: ["ultimos-reportes"],
-    queryFn: () => fetchUltimosReportes({ limite: 10 }),
-    refetchInterval: 30000, // Refrescar cada 30 segundos
-  });
+  // Cargar distribucion
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingDistribution(true);
+        setErrorDistribution(null);
+        const data = await fetchEstadistica('/estadisticas/distribucion-tipo');
+        setDistribution(data);
+      } catch (error: any) {
+        setErrorDistribution(error.message);
+      } finally {
+        setLoadingDistribution(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cargar tiempo de respuesta
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingResponse(true);
+        setErrorResponse(null);
+        const data = await fetchEstadistica('/estadisticas/tiempo-respuesta');
+        setAvgResponse(data);
+      } catch (error: any) {
+        setErrorResponse(error.message);
+      } finally {
+        setLoadingResponse(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cargar uso de unidades
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingUnits(true);
+        setErrorUnits(null);
+        const data = await fetchEstadistica('/estadisticas/uso-unidades');
+        setUnitUsage(data);
+      } catch (error: any) {
+        setErrorUnits(error.message);
+      } finally {
+        setLoadingUnits(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cargar demografia
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingDemographics(true);
+        setErrorDemographics(null);
+        const data = await fetchEstadistica('/estadisticas/demografia');
+        setDemographics(data);
+      } catch (error: any) {
+        setErrorDemographics(error.message);
+      } finally {
+        setLoadingDemographics(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cargar ultimos reportes
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoadingReports(true);
+        setErrorReports(null);
+        const data = await fetchEstadistica('/estadisticas/ultimos-reportes', { limite: 10 });
+        setRecentReports(data);
+      } catch (error: any) {
+        setErrorReports(error.message);
+      } finally {
+        setLoadingReports(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 30000); // Refrescar cada 30 segundos
+    return () => clearInterval(interval);
+  }, []);
 
   // Componente helper para mostrar errores
   const ErrorDisplay = ({ message }: { message: string }) => (
