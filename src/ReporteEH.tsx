@@ -23,9 +23,11 @@ import {
   BooleanField,
   NumberField,
   usePermissions,
+  Datagrid,
+  SimpleList,
 } from "react-admin";
 import GeoAutofillOnMount from "./components/GeoAutofillOnMount";
-import { Grid } from "@mui/material";
+import { Grid, useMediaQuery } from "@mui/material";
 import Map from "./components/Map";
 import { useWatch, useFormContext } from "react-hook-form";
 
@@ -99,24 +101,54 @@ const RespiracionChoices = [
 
 export const ReporteEHList = () => {
   const { permissions } = usePermissions();
+  const isSmall = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+  const isMedium = useMediaQuery((theme) =>
+    theme.breakpoints.between("sm", "md"),
+  );
 
   return (
-    <List filters={emergencyFilters}>
-      <DataTable>
-        <DataTable.Col source="id" label="ID" />
-        <DataTable.Col source="hora_llamada" label="Fecha/Hora Llamada" />
-        <DataTable.Col source="secciones_adicionales" label="Tipo" />
-        <DataTable.Col source="numero_ambulancia" label="Unidad" />
-        <DataTable.Col source="colonia" label="Ubicación" />
-        <DataTable.Col source="prioridad" label="Prioridad" />
-        <DataTable.Col source="hospital_traslado" label="Hospital" />
-        <DataTable.Col source="creado_por" label="Responsable" />
-        {permissions !== "operador" && (
-          <DataTable.Col label="Acciones" sx={{ textAlign: "right" }}>
-            <EditButton />
-          </DataTable.Col>
-        )}
-      </DataTable>
+    <List
+      filters={emergencyFilters}
+      sx={{
+        "& .MuiPaper-root": { overflowX: "auto" },
+      }}
+    >
+      {isSmall ? (
+        <SimpleList
+          primaryText={(record) => `#${record.id} - ${record.colonia}`}
+          secondaryText={(record) =>
+            `${record.hospital_traslado || "Sin hospital"}`
+          }
+          tertiaryText={(record) => `Prioridad: ${record.prioridad}`}
+        />
+      ) : isMedium ? (
+        <Datagrid
+          rowClick="show"
+          sx={{
+            "& .MuiTableCell-root": {
+              whiteSpace: "nowrap",
+              padding: "8px 12px",
+            },
+          }}
+        >
+          <TextField source="id" label="ID" />
+          <TextField source="hora_llamada" label="Hora" />
+          <TextField source="colonia" label="Ubicación" />
+          <TextField source="prioridad" label="Prioridad" />
+          <TextField source="hospital_traslado" label="Hospital" />
+        </Datagrid>
+      ) : (
+        <Datagrid rowClick="show">
+          <TextField source="id" label="ID" />
+          <TextField source="hora_llamada" label="Fecha/Hora Llamada" />
+          <TextField source="secciones_adicionales" label="Tipo" />
+          <TextField source="numero_ambulancia" label="Unidad" />
+          <TextField source="colonia" label="Ubicación" />
+          <TextField source="prioridad" label="Prioridad" />
+          <TextField source="hospital_traslado" label="Hospital" />
+          <TextField source="creado_por" label="Responsable" />
+        </Datagrid>
+      )}
     </List>
   );
 };
