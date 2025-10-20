@@ -29,7 +29,7 @@ interface UsuarioActual {
 export const OperatorUPage = () => {
   const redirect = useRedirect();
   const dataProvider = useDataProvider();
-  
+
   const [usuario, setUsuario] = useState<UsuarioActual | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,11 +38,11 @@ export const OperatorUPage = () => {
     const cargarUsuarioActual = async () => {
       try {
         setLoading(true);
-        const { data } = await dataProvider.getOne('me', { id: 'current' });
+        const { data } = await dataProvider.getOne("me", { id: "current" });
         setUsuario(data);
       } catch (err) {
-        console.error('Error cargando usuario:', err);
-        setError(err instanceof Error ? err.message : 'Error desconocido');
+        console.error("Error cargando usuario:", err);
+        setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
         setLoading(false);
       }
@@ -53,7 +53,14 @@ export const OperatorUPage = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -147,7 +154,7 @@ export const OperatorUPage = () => {
                     <b>Rol:</b> {usuario.tipo}
                   </Typography>
                   <Typography>
-                    <b>Turno Asignado:</b> {usuario.turno || 'No asignado'}
+                    <b>Turno Asignado:</b> {usuario.turno || "No asignado"}
                   </Typography>
                 </Box>
               </CardContent>
@@ -171,13 +178,22 @@ export const OperatorUPage = () => {
                 <Typography variant="h6" fontWeight={800} textAlign="center">
                   TURNO ACTUAL
                 </Typography>
-                <Typography variant="h5" color="primary" fontWeight={900} textAlign="center">
+                <Typography
+                  variant="h5"
+                  color="primary"
+                  fontWeight={900}
+                  textAlign="center"
+                >
                   {usuario.turnoActual.nombre}
                 </Typography>
                 <Typography variant="body2" textAlign="center" sx={{ mt: 1 }}>
                   {usuario.turnoActual.horario}
                 </Typography>
-                <Typography variant="caption" textAlign="center" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  textAlign="center"
+                  color="text.secondary"
+                >
                   {usuario.turnoActual.descripcion}
                 </Typography>
               </Stack>
@@ -201,7 +217,7 @@ export const OperatorUPage = () => {
           <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
             <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
               <Button
-                onClick={() => redirect("/comments/create")}
+                onClick={() => redirect("reportesEU/create")}
                 startIcon={<DescriptionIcon />}
                 sx={{
                   fontWeight: 800,
