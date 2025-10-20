@@ -13,6 +13,7 @@ interface ReporteReciente {
   hora: string;
   fecha: string;
   preview: string;
+  tipo: string;
 }
 
 interface NotaReciente {
@@ -84,6 +85,16 @@ export const AdminDashboard = () => {
 
     cargarDatosDashboard();
   }, [dataProvider]);
+
+    const obtenerRutaReporte = (reporte: ReporteReciente): string => {
+    if (reporte.tipo === 'EH') {
+      return `/reportesEH/${reporte.id}/show`;
+    }
+    if (reporte.tipo === 'EU') {
+      return `/reportesEU/${reporte.id}/show`;
+    }
+    return `/reportesEH/${reporte.id}/show`;
+  };
 
   // Obtener fecha actual formateada
   const fechaActual = new Date().toLocaleDateString("es-MX", {
@@ -238,7 +249,7 @@ export const AdminDashboard = () => {
                         {/* TODO: Ajustar ruta según la estructura de recursos en App.tsx */}
                         <Button
                           label="Presiona aquí para ver el reporte"
-                          onClick={() => redirect(`/comments/${reporte.id}`)}
+                          onClick={() => redirect(obtenerRutaReporte(reporte))}
                           sx={{
                             mt: 1,
                             fontSize: "0.75rem",
