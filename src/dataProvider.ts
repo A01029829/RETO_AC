@@ -20,21 +20,12 @@ const baseDataProvider = jsonServerProvider(
   import.meta.env.VITE_JSON_SERVER_URL, fetchJsonUtil
 );
 
-// Extender el dataProvider para manejar endpoints del dashboard
-// react admin solo contempla crud estandar para sus metodos predefinidos
+// Extender el dataProvider para manejar endpoint de usuario actual
 export const dataProvider: DataProvider = {
-  ...baseDataProvider,  // se desctructura el provider base de react-admin
-  
+  ...baseDataProvider,
 
-  //sobreescribimos metodos para manejar nuestros endpoints
+  //sobreescribimos metodo getOne para manejar endpoint /me
   getOne: async (resource, params) => {
-    // Manejar endpoint de estadisticas del dashboard
-    if (resource === 'dashboard/estadisticas') {
-      const url = `${import.meta.env.VITE_JSON_SERVER_URL}/dashboard/estadisticas`;
-      const { json } = await fetchJsonUtil(url);
-      return { data: { id: 'stats', ...json } };
-    }
-    
     // Manejar endpoint de usuario actual
     if (resource === 'me') {
       const url = `${import.meta.env.VITE_JSON_SERVER_URL}/me`;
@@ -44,21 +35,5 @@ export const dataProvider: DataProvider = {
     
     // Para otros recursos, usar el comportamiento estandar
     return baseDataProvider.getOne(resource, params);
-  },
-  
-  getList: async (resource, params) => {
-    // Manejar endpoints del dashboard
-    if (resource === 'dashboard/reportes-recientes' || resource === 'dashboard/notas-recientes') {
-      const { pagination = { page: 1, perPage: 10 } } = params;
-      const url = `${import.meta.env.VITE_JSON_SERVER_URL}/${resource}?limit=${pagination.perPage}`;
-      const { json } = await fetchJsonUtil(url);
-      return {
-        data: json,
-        total: json.length
-      };
-    }
-    
-    // Para otros recursos, usar el comportamiento por defecto
-    return baseDataProvider.getList(resource, params);
   }
 };

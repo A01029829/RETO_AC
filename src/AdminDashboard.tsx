@@ -1,89 +1,70 @@
-import { Button, useRedirect, useDataProvider } from "react-admin";
+import { Button, useRedirect, useGetList } from "react-admin";
 import { Card, Grid, Box, Typography, Stack, Avatar } from "@mui/material";
-import { useEffect, useState } from "react";
-
-interface Estadisticas {
-  reportesTurno1: number;
-  tiempoPromedio: string;
-}
-
-interface ReporteReciente {
-  id: number;
-  autor: string;
-  hora: string;
-  fecha: string;
-  preview: string;
-}
-
-interface NotaReciente {
-  id: number;
-  autor: string;
-  contenido: string;
-}
+import { useMemo } from "react";
 
 export const AdminDashboard = () => {
   const redirect = useRedirect();
-  const dataProvider = useDataProvider();
 
-  const [estadisticas, setEstadisticas] = useState<Estadisticas>({
-    reportesTurno1: 0,
-    tiempoPromedio: "0 minutos",
-  });
+  // Uso de hooks de react Admin
+  const { data: reportesEH = [], isLoading: loadingReportes } = useGetList(
+    'reportesEH',
+    {
+      pagination: { page: 1, perPage: 100 },
+      sort: { field: 'hora_llamada', order: 'DESC' }
+    }
+  );
 
-  const [reportesRecientes, setReportesRecientes] = useState<ReporteReciente[]>([]);
-  const [notasRecientes, setNotasRecientes] = useState<NotaReciente[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: notas = [], isLoading: loadingNotas } = useGetList(
+    'notas',
+    {
+      pagination: { page: 1, perPage: 3 },
+      sort: { field: 'fecha_creacion', order: 'DESC' }
+    }
+  );
 
-  useEffect(() => {
-    const cargarDatosDashboard = async () => {
-      try {
-        setLoading(true);
+  // Calcular estadisticas
+  const estadisticas = useMemo(() => {
+    if (!reportesEH.length) {
+      return {
+        reportesTurno1: 0,
+        tiempoPromedio: "0 min",
+        reportesRecientes: []
+      };
+    }
 
-        const [estadisticasData, reportesData, notasData] = await Promise.all([
-          dataProvider.getOne('dashboard/estadisticas', { id: 'stats' })
-            .then(({ data }) => data)
-            .catch(err => {
-              console.error('Error cargando estadisticas:', err);
-              return { reportesTurno1: 0, tiempoPromedio: "0 minutos" };
-            }),
+    // Calcular estadisticas del turno actual
+    const ahora = new Date();
+    const inicioTurno = new Date(ahora);
+    inicioTurno.setHours(8, 0, 0, 0); // Turno 1: 8:00 AM
 
-          dataProvider.getList('dashboard/reportes-recientes', {
-            pagination: { page: 1, perPage: 2 },
-            sort: { field: 'fecha', order: 'DESC' },
-            filter: {}
-          })
-            .then(({ data }) => data)
-            .catch(err => {
-              console.error('Error cargando reportes:', err);
-              return [];
-            }),
+    const reportesDelTurno = reportesEH.filter((r: any) => {
+      const fechaReporte = new Date(r.hora_llamada);
+      return fechaReporte >= inicioTurno && fechaReporte <= ahora;
+    });
 
-          dataProvider.getList('dashboard/notas-recientes', {
-            pagination: { page: 1, perPage: 3 },
-            sort: { field: 'fecha', order: 'DESC' },
-            filter: {}
-          })
-            .then(({ data }) => data)
-            .catch(err => {
-              console.error('Error cargando notas:', err);
-              return [];
-            })
-        ]);
-
-        setEstadisticas(estadisticasData);
-        setReportesRecientes(reportesData);
-        setNotasRecientes(notasData);
-      } catch (err) {
-        console.error('Error general cargando dashboard:', err);
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-      } finally {
-        setLoading(false);
+    // Calcular tiempo promedio de respuesta
+    const tiemposRespuesta: number[] = [];
+    reportesDelTurno.forEach((r: any) => {
+      if (r.hora_llamada && r.hora_llegada) {
+        const llamada = new Date(r.hora_llamada);
+        const llegada = new Date(`${llamada.toDateString()} ${r.hora_llegada}`);
+        const diferencia = Math.abs(llegada.getTime() - llamada.getTime());
+        tiemposRespuesta.push(diferencia / 60000); // convertir a minutos
       }
-    };
+    });
 
-    cargarDatosDashboard();
-  }, [dataProvider]);
+    const promedio = tiemposRespuesta.length > 0
+      ? tiemposRespuesta.reduce((a, b) => a + b, 0) / tiemposRespuesta.length
+      : 0;
+
+    return {
+      reportesTurno1: reportesDelTurno.length,
+      tiempoPromedio: `${Math.round(promedio)} min`,
+      reportesRecientes: reportesEH.slice(0, 2) // Solo los 2 mas recientes
+    };
+  }, [reportesEH]);
+
+  const loading = loadingReportes || loadingNotas;
 
   // Obtener fecha actual formateada
   const fechaActual = new Date().toLocaleDateString("es-MX", {
@@ -93,20 +74,29 @@ export const AdminDashboard = () => {
     year: "numeric",
   });
 
+  // Funcion para formatear la fecha del reporte
+  const formatearFecha = (fechaStr: string) => {
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleDateString("es-MX", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // Funcion para formatear la hora del reporte
+  const formatearHora = (fechaStr: string) => {
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <Typography variant="h6">Cargando dashboard...</Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h6" color="error">
-          Error al cargar el dashboard: {error}
-        </Typography>
       </Box>
     );
   }
@@ -168,7 +158,7 @@ export const AdminDashboard = () => {
                 Emergencia:
               </Typography>
               <Typography variant="h4" fontWeight={900}>
-                {estadisticas.tiempoPromedio}.
+                {estadisticas.tiempoPromedio}
               </Typography>
             </Box>
           </Card>
@@ -189,12 +179,12 @@ export const AdminDashboard = () => {
               NOTAS RECIENTES
             </Typography>
             <Stack spacing={2}>
-              {notasRecientes.map((nota) => (
+              {notas.map((nota: any) => (
                 <Box key={nota.id} sx={{ display: "flex", gap: 1.5 }}>
                   <Avatar sx={{ bgcolor: "#5fa8d3", width: 40, height: 40 }} />
                   <Box>
                     <Typography variant="body2" fontWeight={700}>
-                      Por: {nota.autor}
+                      Por: {nota.creado_por}
                     </Typography>
                     <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
                       {nota.contenido}
@@ -213,7 +203,7 @@ export const AdminDashboard = () => {
               REPORTES RECIENTES:
             </Typography>
             <Grid container spacing={3}>
-              {reportesRecientes.map((reporte) => (
+              {estadisticas.reportesRecientes.map((reporte: any) => (
                 <Grid size={{ xs: 12, md: 6 }} key={reporte.id}>
                   <Card sx={{ bgcolor: "#fff", borderRadius: 2, p: 2 }}>
                     <Box sx={{ display: "flex", gap: 2 }}>
@@ -222,8 +212,8 @@ export const AdminDashboard = () => {
                       />
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body1" fontWeight={700}>
-                          Reporte generado por: {reporte.autor}, {reporte.fecha}
-                          . A las {reporte.hora}.
+                          Reporte generado por: {reporte.creado_por || 'Desconocido'}, {formatearFecha(reporte.hora_llamada)}
+                          . A las {formatearHora(reporte.hora_llamada)}.
                         </Typography>
                         <Typography
                           variant="body2"
@@ -233,12 +223,12 @@ export const AdminDashboard = () => {
                             color: "#666",
                           }}
                         >
-                          {reporte.preview}
+                          {reporte.secciones_adicionales || 'Sin tipo'} - {reporte.colonia || 'Sin ubicación'}
+                          {reporte.paciente_nombre && ` - Paciente: ${reporte.paciente_nombre}`}
                         </Typography>
-                        {/* TODO: Ajustar ruta según la estructura de recursos en App.tsx */}
                         <Button
                           label="Presiona aquí para ver el reporte"
-                          onClick={() => redirect(`/comments/${reporte.id}`)}
+                          onClick={() => redirect(`/reportesEH/${reporte.id}`)}
                           sx={{
                             mt: 1,
                             fontSize: "0.75rem",

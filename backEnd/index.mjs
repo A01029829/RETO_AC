@@ -616,96 +616,144 @@ app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (re
     }
 });
 
+// ==================== NOTAS ====================
 
-/* DASHBOARD endpoints */
-
-app.get("/dashboard/estadisticas", requirePermission("ver_estadisticas"), async (req, res) =>{
-    
-    try{
-        let token = req.get("Authentication");
-        let verifiedToken=await jwt.verify(token, "secretKey");
-        let user=verifiedToken.usuario;
-
-        // obtener los reportes del turno actual segun la hora
-        const horaActual = new Date().getHours();
-        const turno = horaActual >= 6 && horaActual < 14 ? "matutino":
-                      horaActual >= 14 && horaActual < 22 ? "vespertino": "nocturno";
-
-        const reportesTurno = await db.collection("reportesEH").countDocuments({ turno: turno});
-
-        //calcular tiempo promedio de traslado
-        const reportesConTiempo = await db.collection("reportesEH").find({ tiempo_traslado: {$exists: true}})
-        .project({ tiempo_traslado: 1}).toArray();
-
-        const tiempoPromedio = reportesConTiempo.length >0 ? Math.round(reportesConTiempo.reduce((sum, r)=>sum +r.tiempo_traslado, 0)/ reportesConTiempo.length)
-        :0;
-
-        res.json({
-            reportesTurno1: reportesTurno,
-            tiempoPromedio: `${tiempoPromedio} minutos`
-        });
-    }
-    catch(error){
-        res.status(401).json({ message: "no autorizado", error: error.message });
-    }
-});
-
-app.get("/dashboard/reportes-recientes", async (req, res)=>{
-    try{
+// GET /notas - Listar notas
+app.get('/notas', async (req, res) => {
+    try {
         let token = req.get("Authentication");
         let verifiedToken = await jwt.verify(token, "secretKey");
-
-        const limit = parseInt(req.query.limit) || 2;
-
-        const reportes = await db.collection("reportesEH")
-        .find({}).sort({fecha_creacion: -1}).limit(limit).project({_id: 0}).toArray();
-
-        //formatear datos para el dashboard
-        const reportesFormateado = reportes.map(r =>({
-            id: r.id,
-            autor: r.creado_por || "Desconocido",
-            hora: new Date(r.fecha_creacion).toLocaleTimeString("es-MX",{
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true
-            }),
-            fecha: "hoy",
-            preview: r.observaciones || r.trabajos_realizados || "Sin descripción"
-        }));
-
-        res.json(reportesFormateado)
-    }
-    catch(error){
-        res.status(401).json({ message: 'No autorizado', error: error.message });
+        let user = verifiedToken.usuario;
+        
+        if ("_sort" in req.query) {
+            let sortField = req.query._sort;
+            let sortOrder = req.query._order === 'ASC' ? 1 : -1;
+            let sortObj = {};
+            sortObj[sortField] = sortOrder;
+            
+            let start = parseInt(req.query._start) || 0;
+            let end = parseInt(req.query._end) || 10;
+            
+            let data = await db.collection("notas")
+                .find({})
+                .project({_id: 0})
+                .sort(sortObj)
+                .skip(start)
+                .limit(end - start)
+                .toArray();
+            
+            let total = await db.collection("notas").countDocuments({});
+            
+            res.set('X-Total-Count', total);
+            res.set('Access-Control-Expose-Headers', 'X-Total-Count');
+            res.json(data);
+        } else {
+            let data = await db.collection("notas")
+                .find({})
+                .project({_id: 0})
+                .toArray();
+            
+            let total = data.length;
+            res.set('X-Total-Count', total);
+            res.set('Access-Control-Expose-Headers', 'X-Total-Count');
+            res.json(data);
+        }
+        
+        log(user, "notas", "listar");
+    } catch {
+        res.sendStatus(401);
     }
 });
 
-app.get("/dashboard/notas-recientes", async (req, res)=>{
-    try{
+// GET /notas/:id - Obtener una nota específica
+app.get("/notas/:id", async (req, res) => {
+    try {
         let token = req.get("Authentication");
         let verifiedToken = await jwt.verify(token, "secretKey");
-
-        const limit = parseInt(req.query.limit) || 3;
-
-        // Obtener las notas mas recientes de la coleccion 'notas'
-        const notas = await db.collection("notas")
-        .find({}).sort({fecha_creacion: -1}).limit(limit).project({_id: 0}).toArray();
-
-        //formatear datos para el dashboard
-        const notasFormateadas = notas.map(n =>({
-            id: n.id,
-            autor: n.creado_por || "Desconocido",
-            contenido: n.contenido || n.texto || "Sin contenido"
-        }));
-
-        res.json(notasFormateadas)
-    }
-    catch(error){
-        res.status(401).json({ message: 'No autorizado', error: error.message });
+        let user = verifiedToken.usuario;
+        
+        let data = await db.collection("notas")
+            .find({id: Number(req.params.id)})
+            .project({_id: 0})
+            .toArray();
+        
+        log(user, "notas", "leer");
+        res.json(data[0]);
+    } catch {
+        res.sendStatus(401);
     }
 });
 
-// --------------------------------------------------------------------------------------------------------------- //
+// POST /notas - Crear una nueva nota
+app.post('/notas', async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let valores = req.body;
+        
+        // Generar ID único
+        let ultimaNota = await db.collection("notas")
+            .find({})
+            .sort({id: -1})
+            .limit(1)
+            .toArray();
+        valores["id"] = ultimaNota.length > 0 ? ultimaNota[0].id + 1 : 1;
+        
+        // Agregar metadatos
+        valores["fecha_creacion"] = new Date();
+        valores["creado_por"] = user;
+        
+        await db.collection("notas").insertOne(valores);
+        log(user, "notas", "crear");
+        res.json(valores);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// PUT /notas/:id - Actualizar una nota
+app.put("/notas/:id", async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let valores = req.body;
+        valores["id"] = Number(req.params.id);
+        
+        await db.collection("notas").updateOne(
+            {"id": valores["id"]}, 
+            {"$set": valores}
+        );
+        
+        let data = await db.collection("notas")
+            .find({"id": valores["id"]})
+            .project({_id: 0})
+            .toArray();
+        
+        log(user, "notas", "actualizar");
+        res.json(data[0]);
+    } catch {
+        res.sendStatus(401);
+    }
+});
+
+// DELETE /notas/:id - Eliminar una nota
+app.delete("/notas/:id", async (req, res) => {
+    try {
+        let token = req.get("Authentication");
+        let verifiedToken = await jwt.verify(token, "secretKey");
+        let user = verifiedToken.usuario;
+        
+        let data = await db.collection("notas").deleteOne({id: Number(req.params.id)});
+        log(user, "notas", "eliminar");
+        res.json(data);
+    } catch {
+        res.sendStatus(401);
+    }
+});
 
 
 /* Endpoints para las graficas */
