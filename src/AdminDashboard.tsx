@@ -46,10 +46,42 @@ export const AdminDashboard = () => {
     const tiemposRespuesta: number[] = [];
     reportesDelTurno.forEach((r: any) => {
       if (r.hora_llamada && r.hora_llegada) {
-        const llamada = new Date(r.hora_llamada);
-        const llegada = new Date(`${llamada.toDateString()} ${r.hora_llegada}`);
-        const diferencia = Math.abs(llegada.getTime() - llamada.getTime());
-        tiemposRespuesta.push(diferencia / 60000); // convertir a minutos
+        try {
+          console.log('Procesando reporte:', {
+            id: r.id,
+            hora_llamada: r.hora_llamada,
+            hora_llegada: r.hora_llegada,
+            tipo_hora_llamada: typeof r.hora_llamada,
+            tipo_hora_llegada: typeof r.hora_llegada
+          });
+
+          const llamada = new Date(r.hora_llamada);
+          
+          // Verificar si hora_llegada es string o Date
+          let llegada: Date;
+          if (typeof r.hora_llegada === 'string') {
+            // Si es string en formato "HH:mm:ss"
+            const [horas, minutos, segundos] = r.hora_llegada.split(':').map(Number);
+            llegada = new Date(llamada);
+            llegada.setHours(horas, minutos, segundos || 0);
+            
+            // Si la hora de llegada es menor que la de llamada, probablemente cruzó la medianoche
+            if (llegada < llamada) {
+              llegada.setDate(llegada.getDate() + 1);
+            }
+          } else {
+            // Si es un objeto Date
+            llegada = new Date(r.hora_llegada);
+          }
+          
+          const diferencia = Math.abs(llegada.getTime() - llamada.getTime());
+          const minutos = diferencia / 60000;
+          
+          console.log('Tiempo calculado:', minutos, 'minutos');
+          tiemposRespuesta.push(minutos);
+        } catch (error) {
+          console.error('Error calculando tiempo de respuesta:', error, r);
+        }
       }
     });
 
@@ -228,7 +260,7 @@ export const AdminDashboard = () => {
                         </Typography>
                         <Button
                           label="Presiona aquí para ver el reporte"
-                          onClick={() => redirect(`/reportesEH/${reporte.id}`)}
+                          onClick={() => redirect(`/reportesEH/${reporte.id}/show`)}
                           sx={{
                             mt: 1,
                             fontSize: "0.75rem",
