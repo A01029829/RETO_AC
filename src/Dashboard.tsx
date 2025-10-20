@@ -1,11 +1,20 @@
 import { Card, CardContent, CardHeader, Box, Grid } from "@mui/material";
-import { usePermissions } from "react-admin";
+import { useDataProvider, usePermissions, useGetOne } from "react-admin";
 import { OperatorPage } from "./operador";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
 import { OperatorUPage } from "./operatorU";
 import { AdminDashboard } from "./AdminDashboard.tsx";
+import { useEffect, useState } from "react";
+
 
 export const Dashboard = () => {
+  const dataProvider = useDataProvider();
+  const {estadisticas, setEstadisticas} = useState({
+    reportesTurno1: 0, tiempoPromedio: "0 minutos"
+  });
+  const[reportesRecientes, setReportesRecientes] = useState([]);
+  const [notasRecientes, setNotasRecientes] = useState([]);
+
   const { permissions, isLoading } = usePermissions();
 
   if (isLoading) return null;

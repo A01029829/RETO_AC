@@ -1,16 +1,17 @@
 import {
     List, DataTable, EditButton, Edit, SimpleForm, 
     TextInput, Create, Show, SimpleShowLayout, TextField, ImageField, 
-    DateTimeInput, SelectInput, NumberInput, ImageInput
+    DateTimeInput, SelectInput, NumberInput, ImageInput,
+    usePermissions
 } from "react-admin";
 
 const turnoChoices = [
-    { id: '1', name: 'Lunes a viernes, de 8:00 a 15:00 horas' },
-                { id: '2', name: 'Lunes a viernes, de 15:00 a 21:00 horas' },
-                { id: '3', name: 'Lunes, miércoles y viernes, de 21:00 a 8:00 horas' },
-                { id: '4', name: 'Martes, jueves y domingo, de 21:00 a 8:00 horas' },
-                { id: '5', name: 'Sábados, domingos y días festivos, de 8:00 a 20:00 horas' },
-                { id: '6', name: 'Sábados, domingos y días festivos, de 20:00 a 8:00 horas' }
+    { id: 'LV_0815', name: 'Lunes a viernes, 8:00 a 15:00 horas' },
+    { id: 'LV_1521', name: 'Lunes a viernes, 15:00 a 21:00 horas' },
+    { id: 'LMV_2108', name: 'Lunes, miércoles y viernes, 21:00 a 8:00 horas' },
+    { id: 'MJD_2108', name: 'Martes, jueves y domingo, 21:00 a 8:00 horas' },
+    { id: 'SD_0820', name: 'Sábados, domingos y festivos, 8:00 a 20:00 horas' },
+    { id: 'SD_2008', name: 'Sábados, domingos y festivos, 20:00 a 8:00 horas' }
 ];
 
 const gravedadChoices = [
@@ -25,21 +26,27 @@ const modoActivacionChoices = [
     { id: 'seguimiento_oficio', name: 'Seguimiento de Oficio' }
 ];
 
-export const ReporteEUList = () => (
-    <List>
-        <DataTable>
-            <DataTable.Col source="id" label="ID" />
-            <DataTable.Col source="fecha" label="Fecha" />
-            <DataTable.Col source="turno" label="Turno" />
-            <DataTable.Col source="personal_cargo" label="Personal a Cargo" />
-            <DataTable.Col source="tipo_servicio" label="Tipo de Servicio" />
-            <DataTable.Col source="gravedad" label="Gravedad" />
-            <DataTable.Col label="Acciones" sx={{textAlign: "right"}}>
-                <EditButton />
-            </DataTable.Col>
-        </DataTable>
-    </List>
-);
+export const ReporteEUList = () => {
+    const { permissions } = usePermissions();
+    
+    return (
+        <List>
+            <DataTable>
+                <DataTable.Col source="id" label="ID" />
+                <DataTable.Col source="fecha" label="Fecha" />
+                <DataTable.Col source="turno" label="Turno" />
+                <DataTable.Col source="personal_cargo" label="Personal a Cargo" />
+                <DataTable.Col source="tipo_servicio" label="Tipo de Servicio" />
+                <DataTable.Col source="gravedad" label="Gravedad" />
+                {permissions !== 'operador' && (
+                    <DataTable.Col label="Acciones" sx={{textAlign: "right"}}>
+                        <EditButton />
+                    </DataTable.Col>
+                )}
+            </DataTable>
+        </List>
+    );
+}
 
 export const ReporteEUCreate = () => (
     <Create>
@@ -70,7 +77,7 @@ export const ReporteEUCreate = () => (
 export const ReporteEUEdit = () => (
     <Edit>
         <SimpleForm>
-            <TextInput source="id" disabled />
+            <TextInput source="id" label="ID/Folio" helperText="Editable en caso de folios salteados o no usados" />
             <DateTimeInput source="fecha_hora" label="Día, fecha y hora" required/>
             <SelectInput source="turno" choices={turnoChoices} label="Turno" required/>
             <TextInput source="personal_cargo" label="Nombre del personal a cargo" required multiline/>
