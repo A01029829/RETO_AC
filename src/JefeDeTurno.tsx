@@ -73,7 +73,7 @@ export const JefeDeTurnoPage = () => {
             >
               <Stack alignItems="center" spacing={2}>
                 <Button
-                  onClick={() => redirect("/comments/create")}
+                  onClick={() => redirect("/reportesEH/create")}
                   startIcon={<DescriptionIcon />}
                   sx={{
                     fontWeight: 800,
