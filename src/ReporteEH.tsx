@@ -24,6 +24,9 @@ import {
   NumberField,
 } from "react-admin";
 import GeoAutofillOnMount from "./components/GeoAutofillOnMount";
+import { Grid } from "@mui/material";
+import Map from "./components/Map";
+import { useWatch, useFormContext } from "react-hook-form";
 
 const CondicionPacienteChoices = [
   { id: "1_1", name: "Crítico" },
@@ -1038,6 +1041,50 @@ export const ReporteEHEdit = () => {
   );
 };
 
+const DEFAULT_CENTER = { lat: 32.389, lng: -117.02144 };
+
+function safeToNumber(v: unknown): number | undefined {
+  if (v === undefined || v === null || v === "") return undefined;
+  const s = typeof v === "string" ? v.replace(",", ".") : v;
+  const n = Number(s as any);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function CreateMap() {
+  const { control } = useFormContext();
+
+  const latRaw = useWatch({
+    control,
+    name: "lat",
+    defaultValue: DEFAULT_CENTER.lat,
+  });
+  const lngRaw = useWatch({
+    control,
+    name: "lng",
+    defaultValue: DEFAULT_CENTER.lng,
+  });
+
+  const latNum = safeToNumber(latRaw);
+  const lngNum = safeToNumber(lngRaw);
+
+  const hasValid =
+    latNum !== undefined &&
+    lngNum !== undefined &&
+    Math.abs(latNum) <= 90 &&
+    Math.abs(lngNum) <= 180;
+
+  const center = hasValid ? { lat: latNum!, lng: lngNum! } : DEFAULT_CENTER;
+
+  return (
+    <Map
+      key={`${center.lat},${center.lng}`}
+      center={center}
+      height={420}
+      width={"100%"}
+    />
+  );
+}
+
 export const ReporteEHCreate = () => {
   return (
     <Create>
@@ -1061,33 +1108,61 @@ export const ReporteEHCreate = () => {
         {/* Ubicación de servicio */}
 
         <h2>Ubicación de servicio</h2>
-        <TextInput source="calle" label="Calle" fullWidth />
-        <TextInput
-          source="entre_calles"
-          label="Entre (calle 1 y calle 2)"
-          fullWidth
-        />
-        <TextInput source="colonia" label="Colonia o comunidad" fullWidth />
-        <TextInput
-          source="alcaldia_municipio"
-          label="Alcaldía o municipio"
-          fullWidth
-        />
+        <Grid container spacing={2} sx={{ width: "100%" }}>
+          {/* Columna izquierda: inputs */}
+          <Grid size={{ xs: 12, md: 5 }}>
+            <TextInput source="calle" label="Calle" fullWidth />
+            <TextInput
+              source="entre_calles"
+              label="Entre (calle 1 y calle 2)"
+              fullWidth
+            />
+            <TextInput source="colonia" label="Colonia o comunidad" fullWidth />
+            <TextInput
+              source="alcaldia_municipio"
+              label="Alcaldía o municipio"
+              fullWidth
+            />
 
-        <SelectInput
-          source="lugar_ocurrencia"
-          label="Lugar de ocurrencia"
-          choices={[
-            { id: "transporte_publico", name: "Transporte público" },
-            { id: "escuela", name: "Escuela" },
-            { id: "trabajo", name: "Trabajo" },
-            { id: "hogar", name: "Hogar" },
-            { id: "recreacion_deporte", name: "Recreación y deporte" },
-            { id: "via_publica", name: "Vía pública" },
-            { id: "otra", name: "Otra" },
-          ]}
-        />
-        <TextInput source="lugar_ocurrencia_otra" label="Otra (especificar)" />
+            {/* Guarda también coordenadas (oculto o visible) */}
+            <NumberInput
+              source="lat"
+              label="Latitud"
+              fullWidth
+              sx={{ display: "none" }}
+            />
+            <NumberInput
+              source="lng"
+              label="Longitud"
+              fullWidth
+              sx={{ display: "none" }}
+            />
+
+            <SelectInput
+              source="lugar_ocurrencia"
+              label="Lugar de ocurrencia"
+              choices={[
+                { id: "transporte_publico", name: "Transporte público" },
+                { id: "escuela", name: "Escuela" },
+                { id: "trabajo", name: "Trabajo" },
+                { id: "hogar", name: "Hogar" },
+                { id: "recreacion_deporte", name: "Recreación y deporte" },
+                { id: "via_publica", name: "Vía pública" },
+                { id: "otra", name: "Otra" },
+              ]}
+            />
+            <TextInput
+              source="lugar_ocurrencia_otra"
+              label="Otra (especificar)"
+              fullWidth
+            />
+          </Grid>
+
+          {/* Columna derecha: mapa */}
+          <Grid size={{ xs: 12, md: 7 }}>
+            <CreateMap />
+          </Grid>
+        </Grid>
 
         {/* CONTROL */}
         <h2>Control</h2>

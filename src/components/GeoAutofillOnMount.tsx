@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { useNotify } from "react-admin";
 import { getUserAddressDetails } from "../utils/getUserAddress";
+import { parse } from "path";
 
 const GeoAutofillOnMount = () => {
   const { setValue, getValues } = useFormContext();
@@ -32,8 +33,8 @@ const GeoAutofillOnMount = () => {
         setValue("alcaldia_municipio", municipioStr);
 
         if (data.lat && data.lon) {
-          setValue("latitud", data.lat);
-          setValue("longitud", data.lon);
+          setValue("lat", parseFloat(data.lat));
+          setValue("lng", parseFloat(data.lon));
         }
 
         notify("Ubicación detectada y campos completados");
