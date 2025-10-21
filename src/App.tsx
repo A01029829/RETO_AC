@@ -17,6 +17,8 @@ import {
 } from "./ReportesEU";
 import PostIcon from "@mui/icons-material/Book";
 import UserIcon from "@mui/icons-material/Group";
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import { Dashboard } from "./Dashboard";
 import { authProvider } from "./authProvider";
 import { i18nProvider } from "./i18nProvider";
@@ -69,7 +71,7 @@ export const App = () => (
               edit={permissions === "operador" ? undefined : ReporteEHEdit}
               create={ReporteEHCreate}
               show={ReporteEHShow}
-              icon={PostIcon}
+              icon={LocalHospitalIcon}
             />
           )}
 
@@ -84,6 +86,7 @@ export const App = () => (
               create={ReporteEUCreate}
               edit={permissions === "operatorU" ? undefined : ReporteEUEdit}
               show={ReporteEUShow}
+	      icon={ApartmentIcon}
             />
           )}
 
