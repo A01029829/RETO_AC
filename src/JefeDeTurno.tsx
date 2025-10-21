@@ -9,6 +9,8 @@ import {
   Button,
   Box,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import NoteIcon from "@mui/icons-material/Note";
@@ -19,6 +21,9 @@ import { useMemo } from "react";
 
 export const JefeDeTurnoPage = () => {
   const redirect = useRedirect();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   
 
   const { data: usuarioActual, isLoading: loadingUsuario } = useGetOne('me', { id: 'current' });
@@ -85,68 +90,81 @@ export const JefeDeTurnoPage = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            mb: 2,
+            mb: { xs: 1.5, sm: 2 },
           }}
         >
-          <Typography variant="h4" fontWeight={800}>
+          <Typography 
+            variant={isMobile ? "h5" : isTablet ? "h4" : "h4"} 
+            fontWeight={800}
+            sx={{ 
+              fontSize: { xs: "1.25rem", sm: "1.75rem", md: "2.125rem" },
+              lineHeight: 1.2,
+            }}
+          >
             EMERGENCIAS PREHOSPITALARIAS
           </Typography>
         </Grid>
 
         {/* Generar Reporte */}
-        <Grid container spacing={3}>
-          <Grid size={3}>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 bgcolor: "#eeeeee",
                 borderRadius: 3,
                 height: "100%",
+                minHeight: { xs: 100, sm: 120 },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Stack alignItems="center" spacing={2}>
+              <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
                 <Button
                   onClick={() => redirect("/reportesEH/create")}
-                  startIcon={<DescriptionIcon />}
+                  startIcon={!isMobile && <DescriptionIcon />}
                   sx={{
                     fontWeight: 800,
-                    fontSize: { xs: 12, sm: 14, md: 16 },
-                    px: { xs: 1.25, sm: 2 },
-                    py: { xs: 1, sm: 1.5 },
+                    fontSize: { xs: 11, sm: 13, md: 16 },
+                    px: { xs: 1, sm: 1.5, md: 2 },
+                    py: { xs: 0.75, sm: 1.25, md: 1.5 },
                     maxWidth: "100%",
+                    textAlign: "center",
                   }}
+                  fullWidth={isMobile}
                 >
-                  GENERAR REPORTE
+                  {isMobile ? "GENERAR REPORTE" : "GENERAR REPORTE PREHOSPITALARIO"}
                 </Button>
               </Stack>
             </Card>
           </Grid>
 
           {/* Ver Reportes */}
-          <Grid size={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 bgcolor: "#eeeeee",
                 borderRadius: 3,
                 height: "100%",
+                minHeight: { xs: 100, sm: 120 },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Stack alignItems="center" spacing={2}>
+              <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
                 <Button
                   onClick={() => redirect("/reportesEH")}
-                  startIcon={<AssessmentIcon />}
+                  startIcon={!isMobile && <AssessmentIcon />}
                   sx={{
                     fontWeight: 800,
-                    fontSize: { xs: 12, sm: 14, md: 16 },
-                    px: { xs: 1.25, sm: 2 },
-                    py: { xs: 1, sm: 1.5 },
+                    fontSize: { xs: 11, sm: 13, md: 16 },
+                    px: { xs: 1, sm: 1.5, md: 2 },
+                    py: { xs: 0.75, sm: 1.25, md: 1.5 },
                     maxWidth: "100%",
+                    textAlign: "center",
                   }}
+                  fullWidth={isMobile}
                 >
                   VER REPORTES
                 </Button>
@@ -155,28 +173,31 @@ export const JefeDeTurnoPage = () => {
           </Grid>
 
           {/* Generar Nota */}
-          <Grid size={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 bgcolor: "#eeeeee",
                 borderRadius: 3,
                 height: "100%",
+                minHeight: { xs: 100, sm: 120 },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Stack alignItems="center" spacing={2}>
+              <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
                 <Button
                   onClick={() => redirect("/notas/create")}
-                  startIcon={<NoteIcon />}
+                  startIcon={!isMobile && <NoteIcon />}
                   sx={{
                     fontWeight: 800,
-                    fontSize: { xs: 12, sm: 14, md: 16 },
-                    px: { xs: 1.25, sm: 2 },
-                    py: { xs: 1, sm: 1.5 },
+                    fontSize: { xs: 11, sm: 13, md: 16 },
+                    px: { xs: 1, sm: 1.5, md: 2 },
+                    py: { xs: 0.75, sm: 1.25, md: 1.5 },
                     maxWidth: "100%",
+                    textAlign: "center",
                   }}
+                  fullWidth={isMobile}
                 >
                   GENERAR NOTA
                 </Button>
@@ -185,12 +206,13 @@ export const JefeDeTurnoPage = () => {
           </Grid>
 
           {/* Turno */}
-          <Grid size={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 bgcolor: "#eeeeee",
                 borderRadius: 3,
                 height: "100%",
+                minHeight: { xs: 100, sm: 120 },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -202,21 +224,31 @@ export const JefeDeTurnoPage = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  p: { xs: 1.5, sm: 2 },
                 }}
               >
                 <Stack alignItems="center" spacing={0.5}>
-                  <Typography variant="h5" fontWeight={800}>
+                  <Typography variant={isMobile ? "h6" : "h5"} fontWeight={800}>
                     MI TURNO
                   </Typography>
-                  <Typography variant="h6" color="primary" fontWeight={700} textAlign="center">
+                  <Typography 
+                    variant={isMobile ? "body1" : "h6"} 
+                    color="primary" 
+                    fontWeight={700} 
+                    textAlign="center"
+                  >
                     {usuarioActual.turno || 'No asignado'}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 1 }}>
-                    Turno actual del sistema:
-                  </Typography>
-                  <Typography variant="h6" color="primary" fontWeight={700} textAlign="center">
-                    {usuarioActual.turnoActual?.nombre || 'N/A'}
-                  </Typography>
+                  {!isMobile && (
+                    <>
+                      <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 1 }}>
+                        Turno actual del sistema:
+                      </Typography>
+                      <Typography variant="h6" color="primary" fontWeight={700} textAlign="center">
+                        {usuarioActual.turnoActual?.nombre || 'N/A'}
+                      </Typography>
+                    </>
+                  )}
                 </Stack>
               </CardContent>
             </Card>
@@ -224,14 +256,19 @@ export const JefeDeTurnoPage = () => {
         </Grid>
 
         {/* Personas activas */}
-        <Grid mt={4}>
-          <Typography variant="h5" fontWeight={800} gutterBottom>
+        <Grid mt={{ xs: 2, sm: 3, md: 4 }}>
+          <Typography 
+            variant={isMobile ? "h6" : "h5"} 
+            fontWeight={800} 
+            gutterBottom
+            sx={{ mb: { xs: 1, sm: 2 } }}
+          >
             PERSONAS ACTIVAS EN MI TURNO: ({usuariosMismoTurno.length})
           </Typography>
 
           <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3 }}>
             {usuariosMismoTurno.length === 0 ? (
-              <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Box sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
                 <Typography variant="body1" color="text.secondary">
                   No hay otros usuarios asignados a tu turno
                 </Typography>
@@ -239,33 +276,53 @@ export const JefeDeTurnoPage = () => {
             ) : (
               <Grid
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 2.5, md: 3 },
                   display: "grid",
                   gridTemplateColumns: {
                     xs: "repeat(2, 1fr)",
                     sm: "repeat(3, 1fr)",
                     md: "repeat(4, 1fr)",
+                    lg: "repeat(5, 1fr)",
                   },
-                  gap: 3,
+                  gap: { xs: 2, sm: 2.5, md: 3 },
                 }}
               >
                 {usuariosMismoTurno.map((persona) => (
                   <Stack key={persona.id} alignItems="center" spacing={1}>
                     <Avatar
                       sx={{
-                        width: 100,
-                        height: 100,
+                        width: { xs: 60, sm: 80, md: 100 },
+                        height: { xs: 60, sm: 80, md: 100 },
                         bgcolor: "transparent",
-                        border: "6px solid",
+                        border: { xs: "4px solid", sm: "5px solid", md: "6px solid" },
                         borderColor: "primary.main",
                       }}
                     >
-                      <PersonIcon sx={{ fontSize: 60, color: "primary.main" }} />
+                      <PersonIcon 
+                        sx={{ 
+                          fontSize: { xs: 40, sm: 50, md: 60 }, 
+                          color: "primary.main" 
+                        }} 
+                      />
                     </Avatar>
-                    <Typography variant="body2" fontWeight={700} textAlign="center">
+                    <Typography 
+                      variant={isMobile ? "caption" : "body2"} 
+                      fontWeight={700} 
+                      textAlign="center"
+                      sx={{
+                        wordBreak: "break-word",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
                       {persona.nombre}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" textAlign="center">
+                    <Typography 
+                      variant="caption" 
+                      color="text.secondary" 
+                      textAlign="center"
+                      sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}
+                    >
                       {persona.tipo}
                     </Typography>
                   </Stack>
