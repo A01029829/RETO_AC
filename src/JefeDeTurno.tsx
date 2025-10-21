@@ -26,7 +26,7 @@ export const JefeDeTurnoPage = () => {
   return (
     <Grid
       sx={{
-        backgroundColor: "#1f66ad",
+        //backgroundColor: "#1f66ad",
         p: { xs: 1.5, md: 3 },
         //borderRadius: 4,
         height: "100%",
@@ -38,7 +38,7 @@ export const JefeDeTurnoPage = () => {
     >
       <Grid
         sx={{
-          backgroundColor: "#fff",
+          //backgroundColor: "#fff",
           borderRadius: 3,
           p: { xs: 2, md: 4, lg: 6 },
           width: "100%",
