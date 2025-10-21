@@ -136,6 +136,9 @@ export const ReporteEHList = () => {
           <TextField source="colonia" label="Ubicación" />
           <TextField source="prioridad" label="Prioridad" />
           <TextField source="hospital_traslado" label="Hospital" />
+          {(permissions === "jefeDeTurno" || permissions === "administrador") && (
+            <TextField source="creado_por" label="Creado por" />
+          )}
         </Datagrid>
       ) : (
         <Datagrid rowClick="show">
@@ -146,7 +149,9 @@ export const ReporteEHList = () => {
           <TextField source="colonia" label="Ubicación" />
           <TextField source="prioridad" label="Prioridad" />
           <TextField source="hospital_traslado" label="Hospital" />
-          <TextField source="creado_por" label="Responsable" />
+          {(permissions === "jefeDeTurno" || permissions === "administrador") && (
+            <TextField source="creado_por" label="Creado por" />
+          )}
         </Datagrid>
       )}
     </List>

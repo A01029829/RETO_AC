@@ -5,8 +5,7 @@ import { Card, CardContent, Typography, Box, List, ListItem, ListItemText, Divid
 // estos son colores para las gráficas :D
 const COLORS = ["#236eb1", "#f19102", "#b7cde4"];
 
-// Configuracion de la API
-const API_URL = "https://localhost:3000";
+const API_URL = import.meta.env.VITE_JSON_SERVER_URL || "https://localhost:3000";
 
 // Funcion helper para obtener el token de autenticacion
 const getAuthToken = () => {
@@ -21,6 +20,8 @@ const fetchEstadistica = async (endpoint: string, params: any = {}) => {
   const queryParams = new URLSearchParams(params).toString();
   const url = queryParams ? `${API_URL}${endpoint}?${queryParams}` : `${API_URL}${endpoint}`;
   
+  console.log('Fetching estadistica:', url); // Debug log
+  
   const response = await fetch(url, {
     headers: { 
       "Authentication": token,
@@ -28,7 +29,11 @@ const fetchEstadistica = async (endpoint: string, params: any = {}) => {
     }
   });
   
-  if (!response.ok) throw new Error(`Error al cargar ${endpoint}`);
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Error response:', response.status, errorText);
+    throw new Error(`Error al cargar ${endpoint}: ${response.status}`);
+  }
   return response.json();
 };
 

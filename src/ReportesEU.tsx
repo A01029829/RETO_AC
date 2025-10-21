@@ -77,7 +77,10 @@ export const ReporteEUList = () => {
             <TextField source="turno" label="Turno" />
             <TextField source="tipo_servicio" label="Servicio" />
             <TextField source="gravedad" label="Gravedad" />
-            {permissions !== "operador" && <EditButton />}
+            {(permissions === "jefeDeTurno" || permissions === "administrador") && (
+              <TextField source="creado_por" label="Creado por" />
+            )}
+            {permissions !== "operador" && permissions !== "operatorU" && <EditButton />}
           </Datagrid>
         </Box>
       ) : (
@@ -88,7 +91,10 @@ export const ReporteEUList = () => {
           <TextField source="personal_cargo" label="Personal a Cargo" />
           <TextField source="tipo_servicio" label="Tipo de Servicio" />
           <TextField source="gravedad" label="Gravedad" />
-          {permissions !== "operador" && <EditButton />}
+          {(permissions === "jefeDeTurno" || permissions === "administrador") && (
+            <TextField source="creado_por" label="Creado por" />
+          )}
+          {permissions !== "operador" && permissions !== "operatorU" && <EditButton />}
         </Datagrid>
       )}
     </List>
