@@ -20,7 +20,7 @@ const fetchEstadistica = async (endpoint: string, params: any = {}) => {
   const queryParams = new URLSearchParams(params).toString();
   const url = queryParams ? `${API_URL}${endpoint}?${queryParams}` : `${API_URL}${endpoint}`;
   
-  console.log('Fetching estadistica:', url); // Debug log
+  console.log('Fetching estadistica:', url);
   
   const response = await fetch(url, {
     headers: { 
@@ -62,7 +62,6 @@ export const StatisticsPanel = () => {
   const [errorDemographics, setErrorDemographics] = useState<string | null>(null);
   const [errorReports, setErrorReports] = useState<string | null>(null);
 
-  // Cargar serie temporal
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -78,7 +77,7 @@ export const StatisticsPanel = () => {
     };
 
     loadData();
-    const interval = setInterval(loadData, 60000); // Refrescar cada minuto
+    const interval = setInterval(loadData, 60000); // Refresh
     return () => clearInterval(interval);
   }, []);
 
@@ -178,16 +177,16 @@ export const StatisticsPanel = () => {
     };
 
     loadData();
-    const interval = setInterval(loadData, 30000); // Refrescar cada 30 segundos
+    const interval = setInterval(loadData, 30000); // Refresh
     return () => clearInterval(interval);
   }, []);
 
-  // Componente helper para mostrar errores
+  // Manejo de errores
   const ErrorDisplay = ({ message }: { message: string }) => (
     <Alert severity="error">{message}</Alert>
   );
 
-  // Componente helper para mostrar loading
+  // Componente loading
   const LoadingDisplay = () => (
     <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
       <CircularProgress />

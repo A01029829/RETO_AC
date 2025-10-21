@@ -5,7 +5,7 @@ export const authProvider: AuthProvider = {
     const apiUrl = import.meta.env.VITE_JSON_SERVER_URL || "https://127.0.0.1:3000";
     const request = new Request(`${apiUrl}/login`, {
       method: "POST",
-      body: JSON.stringify({ usuario: username, password }), // ← CAMBIO AQUÍ
+      body: JSON.stringify({ usuario: username, password }),
       headers: new Headers({ "Content-Type": "application/json" }),
     });
     

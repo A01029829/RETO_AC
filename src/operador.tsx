@@ -78,7 +78,6 @@ export const OperatorPage = () => {
 
   return (
     <Box
-      //className="main-container"
       sx={{
         p: { xs: 1.5, md: 3 },
         height: "100%",
@@ -88,10 +87,8 @@ export const OperatorPage = () => {
         justifyContent: "center",
       }}
     >
-      {/* Contenedor blanco */}
       <Box
         sx={{
-          //backgroundColor: "#fff",
           borderRadius: 3,
           p: { xs: 2, md: 4, lg: 6 },
           width: "100%",
@@ -112,7 +109,7 @@ export const OperatorPage = () => {
           </Typography>
         </Box>
 
-        {/* Contenedor de datos */}
+        {/* Datos */}
         <Box
           sx={{
             display: "flex",
@@ -121,7 +118,7 @@ export const OperatorPage = () => {
             mb: 3,
           }}
         >
-          {/* Card Operador */}
+          {/* Operador */}
           <Box sx={{ flex: { xs: "1 1 100%", md: "0 1 66%" } }}>
             <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
               <CardContent
@@ -161,7 +158,7 @@ export const OperatorPage = () => {
             </Card>
           </Box>
 
-          {/* Card Turno */}
+          {/* Turno */}
           <Box sx={{ flex: { xs: "1 1 100%", md: "0 1 34%" } }}>
             <Card
               sx={{
@@ -201,7 +198,7 @@ export const OperatorPage = () => {
           </Box>
         </Box>
 
-        {/* Contenedor de botones */}
+        {/* Botones */}
         <Box
           sx={{
             display: "grid",
@@ -213,7 +210,7 @@ export const OperatorPage = () => {
             gap: 3,
           }}
         >
-          {/* Generar Reporte */}
+          {/* Generacion de reporte */}
           <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
             <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
               <Button
@@ -232,7 +229,7 @@ export const OperatorPage = () => {
             </Stack>
           </Card>
 
-          {/* Generar Evidencia */}
+          {/* Generacion de evidencia */}
           <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
             <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
               <Button
@@ -251,7 +248,7 @@ export const OperatorPage = () => {
             </Stack>
           </Card>
 
-          {/* Generar Nota */}
+          {/* Generacion de nota */}
           <Card sx={{ bgcolor: "#eeeeee", borderRadius: 3, height: "100%" }}>
             <Stack alignItems="center" spacing={2} sx={{ p: 2 }}>
               <Button

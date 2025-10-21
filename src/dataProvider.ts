@@ -20,7 +20,7 @@ const baseDataProvider = jsonServerProvider(
   import.meta.env.VITE_JSON_SERVER_URL, fetchJsonUtil
 );
 
-// Extender el dataProvider para manejar endpoint de usuario actual
+// Extencion del dataProvider para adaptarlo con el endpoint
 export const dataProvider: DataProvider = {
   ...baseDataProvider,
 

@@ -23,7 +23,7 @@ export const AdminDashboard = () => {
     }
   );
 
-  // Calcular estadísticas directamente desde los datos
+  // Calculo de estadisticas
   const estadisticas = useMemo(() => {
     const ahora = new Date();
     const inicioTurno1 = new Date(ahora);
@@ -37,7 +37,7 @@ export const AdminDashboard = () => {
       return horaReporte >= inicioTurno1 && horaReporte <= finTurno1;
     });
 
-    // Calcular tiempo promedio (ejemplo básico)
+    // Calcular tiempo promedio de respuesta
     const tiemposRespuesta = reportesEH
       .filter((r: any) => r.tiempo_respuesta)
       .map((r: any) => r.tiempo_respuesta);
@@ -95,7 +95,7 @@ export const AdminDashboard = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      {/* Header con título y fecha */}
+      {/* Título y fecha */}
       <Box
         sx={{
           display: "flex",
@@ -115,7 +115,7 @@ export const AdminDashboard = () => {
 
       {/* Contenido del Dashboard */}
       <Grid container spacing={2}>
-        {/* Sección de estadísticas - Card principal con métricas */}
+        {/* Sección de estadísticas */}
         <Grid size={{ xs: 12, md: 7 }}>
           <Card
             sx={{
@@ -128,7 +128,7 @@ export const AdminDashboard = () => {
               justifyContent: "space-around",
             }}
           >
-            {/* Reportes en el Turno */}
+            {/* Reportes en el turno */}
             <Stack alignItems="center" spacing={1}>
               <Typography variant="h2" fontWeight={900} color="primary">
                 {estadisticas.reportesTurno1}

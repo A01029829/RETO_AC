@@ -15,7 +15,7 @@ import {
   DeleteButton,
   Edit,
 } from 'react-admin';
-import { Card, CardContent, Typography, Box } from '@mui/material';
+import { Typography } from '@mui/material';
 
 const turnoChoices = [
   { id: 'LV_0815', name: 'Lunes a viernes, 8:00 a 15:00 horas' },
