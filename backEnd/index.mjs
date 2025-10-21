@@ -6,16 +6,14 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import https from 'https';
 import fs from 'fs';
-import dotenv from 'dotenv';
 
 import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs"
 
-const { MongoClient } = mongodb;  // Desestructurar MongoClient
+const { MongoClient } = mongodb;
 
 const app = express();
 let db;  
 
-// Configurar CORS correctamente para HTTPS
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
@@ -36,13 +34,12 @@ const log = async (sujeto, objeto, accion)=>{
 // Funcion para calcular el turno actual basado en la hora y dia de la semana
 const calcularTurnoActual = () => {
     const ahora = new Date();
-    const diaSemana = ahora.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sabado
+    const diaSemana = ahora.getDay(); // 0 = Domingo...
     const hora = ahora.getHours();
     const minutos = ahora.getMinutes();
     const horaDecimal = hora + minutos / 60;
     
-    // Determinar si es dia festivo (esto deberia conectarse a una tabla de festivos)
-    // Por ahora, solo usamos sabados y domingos
+    // Sabados y domingos: Descanso
     const esFinDeSemana = diaSemana === 0 || diaSemana === 6;
     
     if (!esFinDeSemana) {
@@ -82,11 +79,11 @@ const calcularTurnoActual = () => {
             }
         }
     } else {
-        // Sabados, domingos y dias festivos
+        // Sabados y domingos
         if (horaDecimal >= 8 && horaDecimal < 20) {
             return {
                 nombre: "Turno Día SD",
-                descripcion: "Sábados, domingos y días festivos, de 8:00 a 20:00 horas",
+                descripcion: "Sábados y domingos, de 8:00 a 20:00 horas",
                 horario: "8:00 - 20:00",
                 codigo: "SD_0820"
             };
@@ -94,14 +91,14 @@ const calcularTurnoActual = () => {
             // De 20:00 a 8:00
             return {
                 nombre: "Turno Noche SD",
-                descripcion: "Sábados, domingos y días festivos, de 20:00 a 8:00 horas",
+                descripcion: "Sábados y domingos, de 20:00 a 8:00 horas",
                 horario: "20:00 - 8:00",
                 codigo: "SD_2008"
             };
         }
     }
     
-    // Fallback (no deberia llegar aqui)
+    // Fallback para evitar errores 
     return {
         nombre: "Sin turno definido",
         descripcion: "No se pudo determinar el turno",
@@ -109,84 +106,6 @@ const calcularTurnoActual = () => {
         codigo: "UNDEFINED"
     };
 }; 
-
-// Endpoint get reportes de la aplicacion
-// Requiere autenticacion con JWT
-// Soporta getList y getOne
- app.get('/reportes', async (req, res) => {
-    try {
-        let token = req.get("Authentication");
-            let verifedToken = await jwt.verify(token, process.env.JWTKEY);
-        let user = verifedToken.usuario;
-        if("_sort" in req.query){ // getList
-            let sortBy = req.query._sort;
-            let sortOrder = req.query._order === 'ASC' ? 1 : -1;
-            let inicio = Number(req.query._start) || 0; 
-            let fin = Number(req.query._end) || 10;
-            let sorter = {};
-            sorter[sortBy] = sortOrder;
-            let data= await db.collection("ejemplo402").find({}).sort(sorter).project({_id:0}).toArray();
-		    res.set("Access-Control-Expose-Headers", "X-Total-Count");
-		    res.set("X-Total-Count", data.length);
-		    data=data.slice(inicio,fin)
-		    log(user, "reportes", "leer");
-		    res.json(data)
-        }
-        else if("id" in req.query){ // getOne
-            let data = [];
-            for(let index in req.query.id){
-                let dataParcial = await db.collection("ejemplo402").find({id: Number(req.query.id[index])}).project({_id:0}).toArray();
-                data = await data.concat(dataParcial);
-            }
-            res.json(data); 
-        }
-        else{
-            let data = await db.collection("ejemplo402").find({}).project({_id:0}).toArray();  
-            // Los headers necesarios para que react-admin pueda interpretar la respuesta
-            res.set("Access-Control-Expose-Headers", "X-Total-Count");
-            res.set("X-Total-Count", data.length);
-            res.json(data);
-        }
-    }
-    catch (error) {
-        res.status(401).json({ message: 'No autorizado', error: error.message });
-    }
- });
-
- // getOne
-
-app.get("/reportes/:id", async (req, res) => {
-    let data = await db.collection("ejemplo402").find({id: Number(req.params.id)}).project({_id:0}).toArray();
-    res.json(data[0]);
-});
-
-// createOne 
-// la funcion createOne recibe un objeto JSON en el cuerpo de la solicitud
-// y lo inserta en la coleccion "ejemplo402"
-app.post('/reportes', async (req, res) => {
-    let valores = req.body;
-    valores["id"] = Number(valores["id"]);
-    let data = await db.collection("ejemplo402").insertOne(valores);
-    res.json(data);
-});
-
-//deleteOne
-// 
-app.delete("/reportes/:id", async (req, res) => {
-    let data = await db.collection("ejemplo402").deleteOne({id: Number(req.params.id)});
-    res.json(data);
-});
-
-//updateOne
-// la funcion updateOne recibe un objeto JSON en el cuerpo de la solicitud
-// y actualiza el documento con el id especificado en la URL
-app.put("/reportes/:id", async(req,res)=>{
-	let valores=req.body
-	valores["id"]=Number(valores["id"])
-	let data =await db.collection("ejemplo402").updateOne({"id":valores["id"]}, {"$set":valores})
-	data=await db.collection("ejemplo402").find({"id":valores["id"]}).project({_id:0}).toArray();
-	res.json(data[0]);
-})
 
 async function connectToDB(){
     try {
@@ -246,7 +165,6 @@ app.get('/usuarios', requirePermission('gestionar_usuarios'), async (req, res) =
 			.limit(parseInt(_end) - parseInt(_start) || 10)
 			.toArray();
 		
-		// Agregar campo 'id' para React Admin
 		const usuariosConId = usuarios.map(u => ({ ...u, id: u.usuario }));
 		
 		const total = await db.collection("usuarios402").countDocuments({});
@@ -269,7 +187,6 @@ app.get('/usuarios/:id', requirePermission('gestionar_usuarios'), async (req, re
 			return res.status(404).json({ message: 'Usuario no encontrado' });
 		}
 		
-		// Agregar campo 'id' para React Admin
 		const usuarioConId = { ...usuario, id: usuario.usuario };
 		
 		res.json(usuarioConId);
@@ -292,7 +209,6 @@ app.put('/usuarios/:id', requirePermission('gestionar_usuarios'), async (req, re
 		const usuario = await db.collection("usuarios402")
 			.findOne({ usuario: req.params.id }, { projection: { password: 0, _id: 0 } });
 		
-		// Agregar campo 'id' para React Admin
 		const usuarioConId = { ...usuario, id: usuario.usuario };
 		
 		log(req.user.usuario, "usuarios402", "actualizar");
@@ -307,7 +223,6 @@ app.delete('/usuarios/:id', requirePermission('gestionar_usuarios'), async (req,
 	try {
 		await db.collection("usuarios402").deleteOne({ usuario: req.params.id });
 		log(req.user.usuario, "usuarios402", "eliminar");
-		// React Admin espera que devuelvas el registro eliminado con su id
 		res.json({ id: req.params.id, usuario: req.params.id });
 	} catch (error) {
 		res.status(500).json({ message: 'Error al eliminar usuario', error: error.message });
@@ -353,7 +268,7 @@ app.get("/me", async (req, res) => {
 			return res.status(404).json({ message: 'Usuario no encontrado' });
 		}
 		
-		// Calcular turno actual basado en la hora y dia
+		// Calculo del turno actual
 		const turnoActual = calcularTurnoActual();
 		
 		res.json({
@@ -379,25 +294,8 @@ app.get('/reportesEU', async (req, res) => {
 		
 		// Aplicar filtro segun el rol del usuario
 		const filter = getReportFilter(verifiedToken);
-		let queryFilter = {};
-		
-		// Si es jefe de turno, necesitamos filtrar por usuarios del mismo turno
-		if(filter.role === 'jefeDeTurno' && filter.turno){
-			// Obtener todos los usuarios del mismo turno
-			const usuariosDelTurno = await db.collection("usuarios402")
-				.find({ turno: filter.turno })
-				.project({ usuario: 1, _id: 0 })
-				.toArray();
-			
-			const nombresUsuarios = usuariosDelTurno.map(u => u.usuario);
-			queryFilter = { creado_por: { $in: nombresUsuarios } };
-		} else if(filter.creado_por){
-			// Para operadores, filtrar por su propio usuario
-			queryFilter = { creado_por: filter.creado_por };
-		}
-		// Para administradores, queryFilter queda vacío (sin filtro)
-		
-		if("_sort" in req.query){//getList
+        // getList
+        if("_sort" in req.query){
 			let sortBy=req.query._sort;
 			let sortOrder=req.query._order=="ASC"?1:-1;
 			let inicio=Number(req.query._start);
@@ -406,7 +304,7 @@ app.get('/reportesEU', async (req, res) => {
 			sorter[sortBy]=sortOrder;
 			
 			// Aplicar filtro del usuario
-			let data= await db.collection("reportesEU").find(queryFilter).sort(sorter).project({_id:0}).toArray();
+			let data= await db.collection("reportesEU").find(filter).sort(sorter).project({_id:0}).toArray();
 			res.set("Access-Control-Expose-Headers", "X-Total-Count");
 			res.set("X-Total-Count", data.length);
 			data=data.slice(inicio,fin)
@@ -415,20 +313,19 @@ app.get('/reportesEU', async (req, res) => {
 		}else if("id" in req.query){
 			let data=[];
 			for(let index=0; index<req.query.id.length; index++){
-				let dataParcial=await db.collection("reportesEU").find({...queryFilter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
+				let dataParcial=await db.collection("reportesEU").find({...filter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
 				data= await data.concat(dataParcial);
 			}
 			res.json(data);
 		}else{
-			// Combinar filtro del usuario con query params
-			let combinedFilter = {...queryFilter, ...req.query};
+			// Combinar filtro del usuario con los parametros
+			let combinedFilter = {...filter, ...req.query};
 			let data=await db.collection("reportesEU").find(combinedFilter).project({_id:0}).toArray();
 			res.set("Access-Control-Expose-Headers", "X-Total-Count");
 			res.set("X-Total-Count", data.length);
 			res.json(data);
 		}
-	}catch(error){
-		console.error("Error en GET /reportesEU:", error);
+	}catch{
 		res.sendStatus(401);
 	}
 });
@@ -437,37 +334,13 @@ app.get('/reportesEU', async (req, res) => {
 app.get("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-		let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
+    let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
-		const filter = getReportFilter(verifiedToken);
-		let query = { id: Number(req.params.id) };
-		
-		// Si es jefe de turno, verificar que el reporte fue creado por alguien de su turno
-		if(filter.role === 'jefeDeTurno' && filter.turno){
-			const usuariosDelTurno = await db.collection("usuarios402")
-				.find({ turno: filter.turno })
-				.project({ usuario: 1, _id: 0 })
-				.toArray();
-			
-			const nombresUsuarios = usuariosDelTurno.map(u => u.usuario);
-			query.creado_por = { $in: nombresUsuarios };
-		} else if (filter.creado_por) {
-			// Para operadores, solo sus propios reportes
-			query.creado_por = filter.creado_por;
-		}
-		// Para administradores, no se agrega filtro adicional
-        
-        let data = await db.collection("reportesEU").find(query).project({_id:0}).toArray();
-        
-		if(data.length === 0) {
-			return res.status(404).json({ message: 'Reporte no encontrado o sin permisos para verlo' });
-		}
-		
-		log(user, "reportesEU", "leer");
+        let data = await db.collection("reportesEU").find({id: Number(req.params.id)}).project({_id:0}).toArray();
+        log(user, "reportesEU", "leer");
         res.json(data[0]);
-    } catch(error) {
-		console.error("Error en GET /reportesEU/:id:", error);
+    } catch {
         res.sendStatus(401);
     }
 });
@@ -484,8 +357,6 @@ app.post('/reportesEU', async (req, res) => {
         // Generar ID unico
         let ultimoReporte = await db.collection("reportesEU").find({}).sort({id: -1}).limit(1).toArray();
         valores["id"] = ultimoReporte.length > 0 ? ultimoReporte[0].id + 1 : 1;
-        
-        // Agregar metadatos
         valores["fecha_creacion"] = new Date();
         valores["creado_por"] = user;
         
@@ -543,23 +414,6 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
         let user=verifiedToken.usuario;
         
         const filter = getReportFilter(verifiedToken);
-        let queryFilter = {};
-        
-        // Si es jefe de turno, necesitamos filtrar por usuarios del mismo turno
-        if(filter.role === 'jefeDeTurno' && filter.turno){
-            // Obtener todos los usuarios del mismo turno
-            const usuariosDelTurno = await db.collection("usuarios402")
-                .find({ turno: filter.turno })
-                .project({ usuario: 1, _id: 0 })
-                .toArray();
-            
-            const nombresUsuarios = usuariosDelTurno.map(u => u.usuario);
-            queryFilter = { creado_por: { $in: nombresUsuarios } };
-        } else if(filter.creado_por){
-            // Para operadores, filtrar por su propio usuario
-            queryFilter = { creado_por: filter.creado_por };
-        }
-        // Para administradores, queryFilter queda vacío (sin filtro)
         
         if("_sort" in req.query){
             let sortBy=req.query._sort;
@@ -569,7 +423,7 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
             let sorter={}
             sorter[sortBy]=sortOrder;
 
-            let data= await db.collection("reportesEH").find(queryFilter).sort(sorter).project({_id:0}).toArray();
+            let data= await db.collection("reportesEH").find(filter).sort(sorter).project({_id:0}).toArray();
             res.set("Access-Control-Expose-Headers", "X-Total-Count");
             res.set("X-Total-Count", data.length);
             data=data.slice(inicio,fin)
@@ -578,18 +432,17 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
         }else if("id" in req.query){
             let data=[];
             for(let index=0; index<req.query.id.length; index++){
-                let dataParcial=await db.collection("reportesEH").find({...queryFilter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
+                let dataParcial=await db.collection("reportesEH").find({...filter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
                 data= await data.concat(dataParcial);
             }
             res.json(data);
         }else{
-            let data=await db.collection("reportesEH").find(queryFilter).project({_id:0}).toArray();
+            let data=await db.collection("reportesEH").find(filter).project({_id:0}).toArray();
             res.set("Access-Control-Expose-Headers", "X-Total-Count");
             res.set("X-Total-Count", data.length);
             res.json(data);
         }
-    }catch(error){
-        console.error("Error en GET /reportesEH:", error);
+    }catch{
         res.sendStatus(401);
     }
 });
@@ -604,31 +457,20 @@ app.get("/reportesEH/:id", async (req, res) => {
         const filter = getReportFilter(verifiedToken);
         let query = { id: Number(req.params.id) };
         
-        // Si es jefe de turno, verificar que el reporte fue creado por alguien de su turno
-        if(filter.role === 'jefeDeTurno' && filter.turno){
-            const usuariosDelTurno = await db.collection("usuarios402")
-                .find({ turno: filter.turno })
-                .project({ usuario: 1, _id: 0 })
-                .toArray();
-            
-            const nombresUsuarios = usuariosDelTurno.map(u => u.usuario);
-            query.creado_por = { $in: nombresUsuarios };
-        } else if (filter.creado_por) {
-            // Para operadores, solo sus propios reportes
+        // Si hay filtro, agregarlo
+        if (filter.creado_por) {
             query.creado_por = filter.creado_por;
         }
-        // Para administradores, no se agrega filtro adicional
         
         let data = await db.collection("reportesEH").find(query).project({_id:0}).toArray();
         
         if(data.length === 0) {
-            return res.status(404).json({ message: 'Reporte no encontrado o sin permisos para verlo' });
+            return res.status(404).json({ message: 'Reporte no encontrado' });
         }
 
         log(user, "reportesEH", "leer");
         res.json(data[0]);
-    } catch(error) {
-        console.error("Error en GET /reportesEH/:id:", error);
+    } catch {
         res.sendStatus(401);
     }
 });
@@ -830,34 +672,21 @@ app.delete("/notas/:id", async (req, res) => {
 });
 
 
-/* Endpoints para las graficas */
+// Endpoints para las graficas
 
 // GET /estadisticas/serie-temporal - Total de emergencias por fecha
-// Soporta filtros: fechaInicio, fechaFin, tipo (EH/EU), turno, gravedad
 app.get('/estadisticas/serie-temporal', requirePermission('ver_estadisticas'), async (req, res) => {
     try {
-        // El usuario ya fue verificado por el middleware requirePermission
+        // Permisos y parametros de query
         const user = req.user.usuario;
-        
-        // Obtener parametros de query
         const { fechaInicio, fechaFin, tipo, turno, gravedad, agrupacion = 'dia' } = req.query;
-        
-        // Construir filtro base
         let filter = {};
-        
-        // Filtro por turno
         if (turno) filter.turno = turno;
-        
-        // Filtro por gravedad (solo para reportesEU)
         if (gravedad && tipo === 'EU') filter.gravedad = gravedad;
-        
-        // Obtener datos de ambas colecciones
         let todosLosReportes = [];
         
-        // Reportes EH usan 'hora_llamada' como fecha
         if (!tipo || tipo === 'EH') {
             let filterEH = { ...filter };
-            // Para reportesEH, el filtro de fecha se aplica a hora_llamada
             if (fechaInicio || fechaFin) {
                 filterEH.hora_llamada = {};
                 if (fechaInicio) filterEH.hora_llamada.$gte = new Date(fechaInicio);
@@ -868,7 +697,6 @@ app.get('/estadisticas/serie-temporal', requirePermission('ver_estadisticas'), a
                 .find(filterEH)
                 .project({ hora_llamada: 1, _id: 0 })
                 .toArray();
-            // Normalizar el campo a 'fecha'
             reportesEH.forEach(r => {
                 if (r.hora_llamada) {
                     todosLosReportes.push({ fecha: r.hora_llamada });
@@ -876,10 +704,8 @@ app.get('/estadisticas/serie-temporal', requirePermission('ver_estadisticas'), a
             });
         }
         
-        // Reportes EU usan 'fecha'
         if (!tipo || tipo === 'EU') {
             let filterEU = { ...filter };
-            // Para reportesEU, el filtro de fecha se aplica a fecha
             if (fechaInicio || fechaFin) {
                 filterEU.fecha = {};
                 if (fechaInicio) filterEU.fecha.$gte = new Date(fechaInicio);
@@ -903,10 +729,9 @@ app.get('/estadisticas/serie-temporal', requirePermission('ver_estadisticas'), a
             
             switch (agrupacion) {
                 case 'dia':
-                    clave = fecha.toISOString().split('T')[0]; // YYYY-MM-DD
+                    clave = fecha.toISOString().split('T')[0]; // Año, mes, dia
                     break;
                 case 'semana':
-                    // Primera fecha de la semana
                     let primerDia = new Date(fecha);
                     primerDia.setDate(fecha.getDate() - fecha.getDay());
                     clave = primerDia.toISOString().split('T')[0];
@@ -924,7 +749,7 @@ app.get('/estadisticas/serie-temporal', requirePermission('ver_estadisticas'), a
             agrupado[clave]++;
         });
         
-        // Convertir a array y ordenar
+        // Conversion a array y ordenamiento
         let resultado = Object.keys(agrupado).map(fecha => ({
             fecha,
             count: agrupado[fecha]
@@ -938,15 +763,10 @@ app.get('/estadisticas/serie-temporal', requirePermission('ver_estadisticas'), a
 });
 
 // GET /estadisticas/distribucion-tipo - Conteo por tipo de emergencia
-// Soporta filtros: fechaInicio, fechaFin, turno
 app.get('/estadisticas/distribucion-tipo', requirePermission('ver_estadisticas'), async (req, res) => {
     try {
-        // El usuario ya fue verificado por el middleware requirePermission
         const user = req.user.usuario;
-        
         const { fechaInicio, fechaFin, turno } = req.query;
-        
-        // Construir filtro base
         let filter = {};
         if (fechaInicio || fechaFin) {
             filter.fecha = {};
@@ -954,14 +774,9 @@ app.get('/estadisticas/distribucion-tipo', requirePermission('ver_estadisticas')
             if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
         }
         if (turno) filter.turno = turno;
-        
-        // Contar reportes EH (Prehospitalaria)
+
         const countEH = await db.collection('reportesEH').countDocuments(filter);
-        
-        // Contar reportes EU (Urbana)
         const countEU = await db.collection('reportesEU').countDocuments(filter);
-        
-        // Contar notas sin folio
         const countNotas = await db.collection('notas').countDocuments(filter);
         
         let resultado = [
@@ -980,9 +795,7 @@ app.get('/estadisticas/distribucion-tipo', requirePermission('ver_estadisticas')
 // GET /estadisticas/tiempo-respuesta - Promedio de tiempo de respuesta por turno
 app.get('/estadisticas/tiempo-respuesta', requirePermission('ver_estadisticas'), async (req, res) => {
     try {
-        // El usuario ya fue verificado por el middleware requirePermission
         const user = req.user.usuario;
-        
         const { fechaInicio, fechaFin } = req.query;
         
         let filter = {};
@@ -992,7 +805,6 @@ app.get('/estadisticas/tiempo-respuesta', requirePermission('ver_estadisticas'),
             if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
         }
         
-        // Obtener reportes con tiempo de traslado de ambas colecciones
         let reportesEH = await db.collection('reportesEH')
             .find({ ...filter, tiempo_traslado: { $exists: true } })
             .project({ turno: 1, tiempo_traslado: 1, _id: 0 })
@@ -1004,8 +816,7 @@ app.get('/estadisticas/tiempo-respuesta', requirePermission('ver_estadisticas'),
             .toArray();
         
         let todosReportes = [...reportesEH, ...reportesEU];
-        
-        // Agrupar por turno y calcular promedio
+
         let agrupado = {};
         todosReportes.forEach(reporte => {
             let turnoKey = reporte.turno || 'Sin turno';
@@ -1016,7 +827,7 @@ app.get('/estadisticas/tiempo-respuesta', requirePermission('ver_estadisticas'),
             agrupado[turnoKey].cantidad++;
         });
         
-        // Calcular promedio y formatear resultado
+        // Calculo de promedios y formato
         let resultado = Object.keys(agrupado).map(turno => ({
             turno: turno === '1' ? 'Matutino' : turno === '2' ? 'Vespertino' : turno === '3' ? 'Nocturno' : turno,
             minutos: Math.round(agrupado[turno].suma / agrupado[turno].cantidad)
@@ -1032,9 +843,7 @@ app.get('/estadisticas/tiempo-respuesta', requirePermission('ver_estadisticas'),
 // GET /estadisticas/uso-unidades - Servicios y horas por unidad
 app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), async (req, res) => {
     try {
-        // El usuario ya fue verificado por el middleware requirePermission
         const user = req.user.usuario;
-        
         const { fechaInicio, fechaFin } = req.query;
         
         let filter = {};
@@ -1044,8 +853,6 @@ app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), asy
             if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
         }
         
-        // Obtener reportes con informacion de unidad
-        // En reportesEH el campo es 'numero_ambulancia'
         let reportesEH = await db.collection('reportesEH')
             .find({ ...filter, numero_ambulancia: { $exists: true } })
             .project({ 
@@ -1062,10 +869,7 @@ app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), asy
             .project({ num_unidad_legal: 1, tiempo_traslado: 1, _id: 0 })
             .toArray();
         
-        // Agrupar por unidad
         let agrupado = {};
-        
-        // Procesar reportes EH (hospitalarias)
         reportesEH.forEach(reporte => {
             let unidad = reporte.numero_ambulancia || 'Sin unidad';
             if (!agrupado[unidad]) {
@@ -1073,24 +877,20 @@ app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), asy
             }
             agrupado[unidad].servicios++;
             
-            // Calcular tiempo total del servicio (desde llamada hasta regreso a base)
             if (reporte.hora_llamada && reporte.hora_base) {
                 try {
-                    // hora_llamada es Date, hora_base es string "HH:MM:SS"
                     let horaLlamada = new Date(reporte.hora_llamada);
-                    
-                    // Parsear hora_base (formato "HH:MM:SS")
                     let [h, m, s] = reporte.hora_base.split(':').map(Number);
                     let horaBase = new Date(horaLlamada);
                     horaBase.setHours(h, m, s || 0);
                     
-                    // Si hora_base es antes que hora_llamada, probablemente es el día siguiente
+                    // Verificar si no es el dia siguiente
                     if (horaBase < horaLlamada) {
                         horaBase.setDate(horaBase.getDate() + 1);
                     }
                     
                     let diffMs = horaBase - horaLlamada;
-                    let diffHoras = diffMs / (1000 * 60 * 60); // Convertir a horas
+                    let diffHoras = diffMs / (1000 * 60 * 60);
                     
                     agrupado[unidad].horas += diffHoras;
                 } catch (error) {
@@ -1099,7 +899,6 @@ app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), asy
             }
         });
         
-        // Procesar reportes EU (urbanas) si tienen num_unidad_legal
         reportesEU.forEach(reporte => {
             let unidad = reporte.num_unidad_legal || null;
             if (unidad) {
@@ -1111,11 +910,11 @@ app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), asy
             }
         });
         
-        // Formatear resultado
+        // Formateo de resultado
         let resultado = Object.keys(agrupado).map(unidad => ({
             unidad,
             servicios: agrupado[unidad].servicios,
-            horas: Math.round(agrupado[unidad].horas * 10) / 10 // Redondear a 1 decimal
+            horas: Math.round(agrupado[unidad].horas * 10) / 10
         }));
         
         log(user, "estadisticas", "uso-unidades");
@@ -1129,11 +928,8 @@ app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), asy
 // GET /estadisticas/demografia - Distribucion de atendidos por edad y genero
 app.get('/estadisticas/demografia', requirePermission('ver_estadisticas'), async (req, res) => {
     try {
-        // El usuario ya fue verificado por el middleware requirePermission
         const user = req.user.usuario;
-        
         const { fechaInicio, fechaFin } = req.query;
-        
         let filter = {};
         if (fechaInicio || fechaFin) {
             filter.fecha = {};
@@ -1141,14 +937,12 @@ app.get('/estadisticas/demografia', requirePermission('ver_estadisticas'), async
             if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
         }
         
-        // Obtener reportes con datos demograficos
-        // NOTA: Los campos están en formato paciente_edad y paciente_sexo (no anidados)
+        // Obtener reportes con datos demograficos (edad y sexo)
         let reportesEH = await db.collection('reportesEH')
             .find({ ...filter, paciente_edad: { $exists: true }, paciente_sexo: { $exists: true } })
             .project({ paciente_edad: 1, paciente_sexo: 1, _id: 0 })
             .toArray();
-        
-        // Agrupar por rango de edad y sexo
+
         let rangos = {
             '0-17': { hombres: 0, mujeres: 0 },
             '18-30': { hombres: 0, mujeres: 0 },
@@ -1175,7 +969,7 @@ app.get('/estadisticas/demografia', requirePermission('ver_estadisticas'), async
             }
         });
         
-        // Formatear resultado
+        // Formateo de resultado
         let resultado = Object.keys(rangos).map(rango => ({
             rango,
             hombres: rangos[rango].hombres,
@@ -1192,37 +986,32 @@ app.get('/estadisticas/demografia', requirePermission('ver_estadisticas'), async
 // GET /estadisticas/ultimos-reportes - Ultimos 10 reportes para el listado lateral
 app.get('/estadisticas/ultimos-reportes', requirePermission('ver_estadisticas'), async (req, res) => {
     try {
-        // El usuario ya fue verificado por el middleware requirePermission
-        const user = req.user.usuario;
-        
+        const user = req.user.usuario; 
         const { limite = 10, tipo } = req.query;
-        
-        // Obtener ultimos reportes de cada tipo
+
         let reportes = [];
         
         if (!tipo || tipo === 'EH') {
             let reportesEH = await db.collection('reportesEH')
                 .find({})
-                .sort({ hora_llamada: -1 }) 
+                .sort({ fecha: -1 })
                 .limit(parseInt(limite))
                 .project({
                     id: 1,
-                    hora_llamada: 1,
+                    fecha: 1,
                     turno: 1,
-                    calle: 1,
-                    colonia: 1,
-                    alcaldia_municipio: 1,
-                    secciones_adicionales: 1,
+                    ubicacion_descripcion: 1,
+                    tipo_servicio: 1,
                     _id: 0
                 })
                 .toArray();
             
             reportes = reportes.concat(reportesEH.map(r => ({
                 folio: `EH-${r.id}`,
-                fecha: r.hora_llamada, 
-                tipo: r.secciones_adicionales || 'Prehospitalaria',
+                fecha: r.fecha,
+                tipo: r.tipo_servicio || 'Prehospitalaria',
                 turno: r.turno === '1' ? 'Matutino' : r.turno === '2' ? 'Vespertino' : 'Nocturno',
-                ubicacion: `${r.calle || ''}, ${r.colonia || ''}, ${r.alcaldia_municipio || ''}`.trim()
+                ubicacion: r.ubicacion_descripcion
             })));
         }
         
@@ -1250,7 +1039,7 @@ app.get('/estadisticas/ultimos-reportes', requirePermission('ver_estadisticas'),
             })));
         }
         
-        // Ordenar por fecha y limitar
+        // Ordenamiento por fecha 
         reportes.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
         reportes = reportes.slice(0, parseInt(limite));
         
@@ -1261,13 +1050,10 @@ app.get('/estadisticas/ultimos-reportes', requirePermission('ver_estadisticas'),
     }
 });
 
-// GET /estadisticas/distribucion-subtipo - Breakdown por subtipo de emergencia
-// Para el listado lateral de la grafica de distribucion
+// GET /estadisticas/distribucion-subtipo - Por tipo de emergencia
 app.get('/estadisticas/distribucion-subtipo', requirePermission('ver_estadisticas'), async (req, res) => {
     try {
-        // El usuario ya fue verificado por el middleware requirePermission
         const user = req.user.usuario;
-        
         const { fechaInicio, fechaFin, turno, tipo } = req.query;
         
         let filter = {};
@@ -1280,7 +1066,7 @@ app.get('/estadisticas/distribucion-subtipo', requirePermission('ver_estadistica
         
         let resultado = [];
         
-        // Obtener subtipos de reportes EH
+        // Tipos de reportes EH
         if (!tipo || tipo === 'EH') {
             let subtiposEH = await db.collection('reportesEH').aggregate([
                 { $match: filter },
@@ -1300,7 +1086,7 @@ app.get('/estadisticas/distribucion-subtipo', requirePermission('ver_estadistica
             })));
         }
         
-        // Obtener subtipos de reportes EU
+        // Obtener tipos de reportes EU
         if (!tipo || tipo === 'EU') {
             let subtiposEU = await db.collection('reportesEU').aggregate([
                 { $match: filter },
@@ -1345,5 +1131,3 @@ app.listen(PORT, '0.0.0.0', ()=>{
 	console.log(`aplicacion corriendo en puerto ${PORT} (accesible desde todas las interfaces)`);
 });
 */
-
-

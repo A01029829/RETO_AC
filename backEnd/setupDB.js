@@ -11,16 +11,16 @@ async function setupDatabase() {
         
         const db = client.db("proteccionCivil");
         
-        // Obtener colecciones existentes
+        // Ver si ya existen colecciones
         const collections = await db.listCollections().toArray();
         const existingCollections = collections.map(c => c.name);
         
-        // ==================== USUARIOS ====================
+        // USUARIOS
         if (!existingCollections.includes('usuarios402')) {
             await db.createCollection('usuarios402');
-            console.log("✅ Colección 'usuarios402' creada");
+            console.log("Colección 'usuarios402' creada");
             
-            // CORRECCION: Crear todos los usuarios a la vez sin duplicados
+            // Creacion de usuarios
             await db.collection('usuarios402').insertMany([
                 {
                     usuario: "admin",
@@ -89,20 +89,20 @@ async function setupDatabase() {
                 }
             ]);
             
-            console.log("✅ Usuarios creados exitosamente:");
+            console.log("Usuarios creados exitosamente:");
             console.log("   - admin / admin123 (Administrador)");
             console.log("   - operador1 / operador123 (Operador Turno Matutino)");
             console.log("   - operador2 / operador123 (Operador Turno Vespertino)");
             console.log("   - jefeTurno1 / jefe123 (Jefe de Turno Matutino)");
             console.log("   - jefeTurno2 / jefe123 (Jefe de Turno Vespertino)");
         } else {
-            console.log("⚠️  La colección 'usuarios402' ya existe");
+            console.log("La colección 'usuarios402' ya existe");
         }
         
-        // ==================== REPORTES EMERGENCIAS URBANAS ====================
+        // REPORTES EMERGENCIAS URBANAS
         if (!existingCollections.includes('reportesEU')) {
             await db.createCollection('reportesEU');
-            console.log("✅ Colección 'reportesEU' creada");
+            console.log("Colección 'reportesEU' creada");
             
             await db.collection('reportesEU').insertMany([
                 {
@@ -180,15 +180,15 @@ async function setupDatabase() {
             
             await db.collection('reportesEU').createIndex({ id: 1 }, { unique: true });
             await db.collection('reportesEU').createIndex({ fecha: -1 });
-            console.log("✅ Datos de prueba y índices de reportesEU creados");
+            console.log("Datos de prueba y índices de reportesEU creados");
         } else {
-            console.log("⚠️  La colección 'reportesEU' ya existe");
+            console.log("La colección 'reportesEU' ya existe");
         }
         
-        // ==================== REPORTES EMERGENCIAS HOSPITALARIAS ====================
+        // REPORTES EMERGENCIAS HOSPITALARIAS
         if (!existingCollections.includes('reportesEH')) {
             await db.createCollection('reportesEH');
-            console.log("✅ Colección 'reportesEH' creada");
+            console.log("Colección 'reportesEH' creada");
             
             await db.collection('reportesEH').insertMany([
                 {
@@ -218,8 +218,6 @@ async function setupDatabase() {
                     derechohabiente: "imss",
                     paciente_telefono: "8123456789",
                     paciente_ocupacion: "Empleado",
-                    
-                    // Sección adicional: Accidente automovilístico
                     secciones_adicionales: "accidente_automovilistico",
                     tipo_accidente: "colision",
                     tipo_impacto: "frontal",
@@ -559,15 +557,15 @@ async function setupDatabase() {
             
             await db.collection('reportesEH').createIndex({ id: 1 }, { unique: true });
             await db.collection('reportesEH').createIndex({ hora_llamada: -1 });
-            console.log("✅ Datos de prueba y índices de reportesEH creados");
+            console.log("Datos de prueba y índices de reportesEH creados");
         } else {
-            console.log("⚠️  La colección 'reportesEH' ya existe");
+            console.log("La colección 'reportesEH' ya existe");
         }
         
-        // ==================== NOTAS ====================
+        // NOTAS
         if (!existingCollections.includes('notas')) {
             await db.createCollection('notas');
-            console.log("✅ Colección 'notas' creada");
+            console.log("Colección 'notas' creada");
             
             await db.collection('notas').insertMany([
                 {
@@ -580,30 +578,30 @@ async function setupDatabase() {
                     id: 2,
                     contenido: "Importante: Capacitación de protocolos de emergencia el viernes a las 10:00 AM.",
                     creado_por: "jefeTurno1",
-                    fecha_creacion: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 horas antes
+                    fecha_creacion: new Date(Date.now() - 2 * 60 * 60 * 1000),
                 },
                 {
                     id: 3,
                     contenido: "Se actualizaron los procedimientos de traslado de pacientes críticos.",
                     creado_por: "operador1",
-                    fecha_creacion: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 horas antes
+                    fecha_creacion: new Date(Date.now() - 5 * 60 * 60 * 1000),
                 }
             ]);
             
             await db.collection('notas').createIndex({ id: 1 }, { unique: true });
             await db.collection('notas').createIndex({ fecha_creacion: -1 });
-            console.log("✅ Datos de prueba y índices de notas creados");
+            console.log("Datos de prueba y índices de notas creados");
         } else {
-            console.log("⚠️  La colección 'notas' ya existe");
+            console.log(" La colección 'notas' ya existe");
         }
         
-        console.log("\n🎉 Base de datos configurada exitosamente!");
-        console.log("\n📋 Credenciales de prueba:");
+        console.log("\n Base de datos configurada exitosamente!");
+        console.log("\n Credenciales de prueba:");
         console.log("   Usuario: admin");
         console.log("   Contraseña: admin123");
         
     } catch (error) {
-        console.error("❌ Error:", error);
+        console.error(" Error:", error);
     } finally {
         await client.close();
     }

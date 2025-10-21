@@ -6,7 +6,7 @@ const client = new MongoClient(uri);
 async function updateReports() {
     try {
         await client.connect();
-        console.log("✅ Conectado a MongoDB");
+        console.log("Conectado a MongoDB");
         
         const db = client.db("proteccionCivil");
         
@@ -16,7 +16,7 @@ async function updateReports() {
             { $set: { creado_por: "admin", turno: "matutino" } }
         );
         
-        console.log(`✅ Actualizados ${resultEH.modifiedCount} reportes EH`);
+        console.log(`Actualizados ${resultEH.modifiedCount} reportes EH`);
         
         // Actualizar reportes EU que no tengan creado_por
         const resultEU = await db.collection("reportesEU").updateMany(
@@ -24,12 +24,12 @@ async function updateReports() {
             { $set: { creado_por: "admin", turno: "matutino" } }
         );
         
-        console.log(`✅ Actualizados ${resultEU.modifiedCount} reportes EU`);
+        console.log(`Actualizados ${resultEU.modifiedCount} reportes EU`);
         
-        console.log("\n🎉 Reportes actualizados exitosamente!");
+        console.log("\n Reportes actualizados");
         
     } catch (error) {
-        console.error("❌ Error:", error);
+        console.error("Error:", error);
     } finally {
         await client.close();
     }

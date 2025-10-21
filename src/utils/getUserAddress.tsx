@@ -82,7 +82,6 @@ export const getUserAddressDetails = async (): Promise<AddressDetails> => {
         console.log(err);
         reject("No se pudo obtener geolocalización");
       },
-      // Opcional: mejora de precisión
       // { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   });
