@@ -1,9 +1,7 @@
 
 import jwt from 'jsonwebtoken';
 
-
-
-// Matriz de permisos
+// Permisos
 export const rolePermissions = {
     administrador: {
         ver_propios_reportes: true,
@@ -80,7 +78,7 @@ export const getReportFilter = (user) => {
         if(turno) {
             return { turno: turno };
         }
-        return {}; // Si no tiene turno asignado, ve todos
+        return {};
     }
     else if(role === 'operador'){
         return { creado_por: username }; // Solo puede ver sus propios reportes
