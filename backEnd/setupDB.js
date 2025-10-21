@@ -210,6 +210,7 @@ async function setupDatabase() {
                     tum: "Ana García",
                     socorrista: "Pedro Sánchez",
                     paciente_nombre: "Juan Pérez",
+                    paciente_edad: 35,
                     paciente_sexo: "masculino",
                     paciente_domicilio_calle: "Calle Morelos 123",
                     paciente_domicilio_colonia: "Del Valle",
@@ -336,6 +337,7 @@ async function setupDatabase() {
                     
                     // Datos del paciente
                     paciente_nombre: "Ana Martínez",
+                    paciente_edad: 28,
                     paciente_sexo: "femenino",
                     paciente_domicilio_calle: "Calle Zaragoza 789",
                     paciente_domicilio_colonia: "Obispado",
@@ -461,6 +463,7 @@ async function setupDatabase() {
                     
                     // Datos del paciente
                     paciente_nombre: "Luis Gómez",
+                    paciente_edad: 52,
                     paciente_sexo: "masculino",
                     paciente_domicilio_calle: "Calle Roble 345",
                     paciente_domicilio_colonia: "Residencial Santa María",

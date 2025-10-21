@@ -116,7 +116,7 @@ const calcularTurnoActual = () => {
  app.get('/reportes', async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifedToken = await jwt.verify(token, await process.env.JWTKEY);
+            let verifedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifedToken.usuario;
         if("_sort" in req.query){ // getList
             let sortBy = req.query._sort;
@@ -325,7 +325,7 @@ app.post("/login", async (req, res)=>{
 	if(data==null){
 		res.sendStatus(401);
 	}else if(await argon2.verify(data.password, pass)){
-		let token=jwt.sign({"usuario":data.usuario, "tipo":data.tipo, "turno":data.turno}, await process.env.JWTKEY, {expiresIn: 900})
+    let token=jwt.sign({"usuario":data.usuario, "tipo":data.tipo, "turno":data.turno}, process.env.JWTKEY, {expiresIn: 900})
 		res.json({"token":token, "id":data.usuario, "nombre":data.nombre, "tipo":data.tipo, "turno":data.turno});
 	}else{
 		res.sendStatus(401);
@@ -340,7 +340,7 @@ app.get("/me", async (req, res) => {
 			return res.status(401).json({ message: 'Token no proporcionado' });
 		}
 		
-		let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
 		let user = verifiedToken.usuario;
 		
 		// Buscar informacion completa del usuario
@@ -374,7 +374,7 @@ app.get("/me", async (req, res) => {
 app.get('/reportesEU', async (req, res) => {
     try{
 		let token=req.get("Authentication");
-		let verifiedToken=await jwt.verify(token, await process.env.JWTKEY);
+        let verifiedToken=await jwt.verify(token, process.env.JWTKEY);
 		let user=verifiedToken.usuario;
 		
 		// Aplicar filtro segun el rol del usuario
@@ -417,7 +417,7 @@ app.get('/reportesEU', async (req, res) => {
 app.get("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
+    let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let data = await db.collection("reportesEU").find({id: Number(req.params.id)}).project({_id:0}).toArray();
@@ -432,7 +432,7 @@ app.get("/reportesEU/:id", async (req, res) => {
 app.post('/reportesEU', async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -457,7 +457,7 @@ app.post('/reportesEU', async (req, res) => {
 app.put("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -478,7 +478,7 @@ app.put("/reportesEU/:id", async (req, res) => {
 app.delete("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token,await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token,process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let data = await db.collection("reportesEU").deleteOne({id: Number(req.params.id)});
@@ -495,7 +495,7 @@ app.delete("/reportesEU/:id", async (req, res) => {
 app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, res) => {
     try{
         let token=req.get("Authentication");
-        let verifiedToken=await jwt.verify(token,await process.env.JWTKEY);
+        let verifiedToken=await jwt.verify(token,process.env.JWTKEY);
         let user=verifiedToken.usuario;
         
         const filter = getReportFilter(verifiedToken);
@@ -536,7 +536,7 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
 app.get("/reportesEH/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
 
         const filter = getReportFilter(verifiedToken);
@@ -564,7 +564,7 @@ app.get("/reportesEH/:id", async (req, res) => {
 app.post('/reportesEH', requirePermission('crear_reportes'), async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -585,7 +585,7 @@ app.post('/reportesEH', requirePermission('crear_reportes'), async (req, res) =>
 app.put("/reportesEH/:id", requirePermission('editar_reportes'), async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token,await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token,process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -622,7 +622,7 @@ app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (re
 app.get('/notas', async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         if ("_sort" in req.query) {
@@ -670,7 +670,7 @@ app.get("/notas/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
 
-        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
+        let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let data = await db.collection("notas")
@@ -772,32 +772,52 @@ app.get('/estadisticas/serie-temporal', requirePermission('ver_estadisticas'), a
         // Construir filtro base
         let filter = {};
         
-        // Filtro por rango de fechas
-        if (fechaInicio || fechaFin) {
-            filter.fecha = {};
-            if (fechaInicio) filter.fecha.$gte = new Date(fechaInicio);
-            if (fechaFin) filter.fecha.$lte = new Date(fechaFin);
-        }
-        
         // Filtro por turno
         if (turno) filter.turno = turno;
         
         // Filtro por gravedad (solo para reportesEU)
         if (gravedad && tipo === 'EU') filter.gravedad = gravedad;
         
-        // Determinar colecciones a consultar
-        let colecciones = [];
-        if (!tipo || tipo === 'EH') colecciones.push('reportesEH');
-        if (!tipo || tipo === 'EU') colecciones.push('reportesEU');
-        
         // Obtener datos de ambas colecciones
         let todosLosReportes = [];
-        for (let coleccion of colecciones) {
-            let reportes = await db.collection(coleccion)
-                .find(filter)
+        
+        // Reportes EH usan 'hora_llamada' como fecha
+        if (!tipo || tipo === 'EH') {
+            let filterEH = { ...filter };
+            // Para reportesEH, el filtro de fecha se aplica a hora_llamada
+            if (fechaInicio || fechaFin) {
+                filterEH.hora_llamada = {};
+                if (fechaInicio) filterEH.hora_llamada.$gte = new Date(fechaInicio);
+                if (fechaFin) filterEH.hora_llamada.$lte = new Date(fechaFin);
+            }
+            
+            let reportesEH = await db.collection('reportesEH')
+                .find(filterEH)
+                .project({ hora_llamada: 1, _id: 0 })
+                .toArray();
+            // Normalizar el campo a 'fecha'
+            reportesEH.forEach(r => {
+                if (r.hora_llamada) {
+                    todosLosReportes.push({ fecha: r.hora_llamada });
+                }
+            });
+        }
+        
+        // Reportes EU usan 'fecha'
+        if (!tipo || tipo === 'EU') {
+            let filterEU = { ...filter };
+            // Para reportesEU, el filtro de fecha se aplica a fecha
+            if (fechaInicio || fechaFin) {
+                filterEU.fecha = {};
+                if (fechaInicio) filterEU.fecha.$gte = new Date(fechaInicio);
+                if (fechaFin) filterEU.fecha.$lte = new Date(fechaFin);
+            }
+            
+            let reportesEU = await db.collection('reportesEU')
+                .find(filterEU)
                 .project({ fecha: 1, _id: 0 })
                 .toArray();
-            todosLosReportes = todosLosReportes.concat(reportes);
+            todosLosReportes = todosLosReportes.concat(reportesEU);
         }
         
         // Agrupar por fecha segun el tipo de agrupacion
@@ -952,27 +972,70 @@ app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), asy
         }
         
         // Obtener reportes con informacion de unidad
+        // En reportesEH el campo es 'numero_ambulancia'
         let reportesEH = await db.collection('reportesEH')
-            .find({ ...filter, 'unidad.clave': { $exists: true } })
-            .project({ 'unidad.clave': 1, tiempo_traslado: 1, _id: 0 })
+            .find({ ...filter, numero_ambulancia: { $exists: true } })
+            .project({ 
+                numero_ambulancia: 1, 
+                hora_llamada: 1, 
+                hora_base: 1,
+                hora_salida: 1,
+                _id: 0 
+            })
             .toArray();
             
         let reportesEU = await db.collection('reportesEU')
-            .find({ ...filter, 'unidad.clave': { $exists: true } })
-            .project({ 'unidad.clave': 1, tiempo_traslado: 1, _id: 0 })
+            .find({ ...filter })
+            .project({ num_unidad_legal: 1, tiempo_traslado: 1, _id: 0 })
             .toArray();
-        
-        let todosReportes = [...reportesEH, ...reportesEU];
         
         // Agrupar por unidad
         let agrupado = {};
-        todosReportes.forEach(reporte => {
-            let unidad = reporte.unidad?.clave || 'Sin unidad';
+        
+        // Procesar reportes EH (hospitalarias)
+        reportesEH.forEach(reporte => {
+            let unidad = reporte.numero_ambulancia || 'Sin unidad';
             if (!agrupado[unidad]) {
                 agrupado[unidad] = { servicios: 0, horas: 0 };
             }
             agrupado[unidad].servicios++;
-            agrupado[unidad].horas += (reporte.tiempo_traslado || 0) / 60; // Convertir minutos a horas
+            
+            // Calcular tiempo total del servicio (desde llamada hasta regreso a base)
+            if (reporte.hora_llamada && reporte.hora_base) {
+                try {
+                    // hora_llamada es Date, hora_base es string "HH:MM:SS"
+                    let horaLlamada = new Date(reporte.hora_llamada);
+                    
+                    // Parsear hora_base (formato "HH:MM:SS")
+                    let [h, m, s] = reporte.hora_base.split(':').map(Number);
+                    let horaBase = new Date(horaLlamada);
+                    horaBase.setHours(h, m, s || 0);
+                    
+                    // Si hora_base es antes que hora_llamada, probablemente es el día siguiente
+                    if (horaBase < horaLlamada) {
+                        horaBase.setDate(horaBase.getDate() + 1);
+                    }
+                    
+                    let diffMs = horaBase - horaLlamada;
+                    let diffHoras = diffMs / (1000 * 60 * 60); // Convertir a horas
+                    
+                    agrupado[unidad].horas += diffHoras;
+                } catch (error) {
+                    console.error('Error calculando tiempo para ambulancia:', unidad, error);
+                }
+            }
+        });
+        
+        // Procesar reportes EU (urbanas) si tienen num_unidad_legal
+        reportesEU.forEach(reporte => {
+            let unidad = reporte.num_unidad_legal || null;
+            if (unidad) {
+                if (!agrupado[unidad]) {
+                    agrupado[unidad] = { servicios: 0, horas: 0 };
+                }
+                agrupado[unidad].servicios++;
+                agrupado[unidad].horas += (reporte.tiempo_traslado || 0) / 60;
+            }
         });
         
         // Formatear resultado
@@ -985,7 +1048,8 @@ app.get('/estadisticas/uso-unidades', requirePermission('ver_estadisticas'), asy
         log(user, "estadisticas", "uso-unidades");
         res.json(resultado);
     } catch (error) {
-        res.status(401).json({ message: 'No autorizado', error: error.message });
+        console.error('Error en /estadisticas/uso-unidades:', error);
+        res.status(500).json({ message: 'Error al calcular uso de unidades', error: error.message });
     }
 });
 
@@ -1005,9 +1069,10 @@ app.get('/estadisticas/demografia', requirePermission('ver_estadisticas'), async
         }
         
         // Obtener reportes con datos demograficos
+        // NOTA: Los campos están en formato paciente_edad y paciente_sexo (no anidados)
         let reportesEH = await db.collection('reportesEH')
-            .find({ ...filter, 'paciente.edad': { $exists: true }, 'paciente.sexo': { $exists: true } })
-            .project({ 'paciente.edad': 1, 'paciente.sexo': 1, _id: 0 })
+            .find({ ...filter, paciente_edad: { $exists: true }, paciente_sexo: { $exists: true } })
+            .project({ paciente_edad: 1, paciente_sexo: 1, _id: 0 })
             .toArray();
         
         // Agrupar por rango de edad y sexo
@@ -1019,8 +1084,8 @@ app.get('/estadisticas/demografia', requirePermission('ver_estadisticas'), async
         };
         
         reportesEH.forEach(reporte => {
-            let edad = reporte.paciente?.edad;
-            let sexo = reporte.paciente?.sexo?.toLowerCase();
+            let edad = reporte.paciente_edad;
+            let sexo = reporte.paciente_sexo?.toLowerCase();
             
             if (edad === undefined || !sexo) return;
             
