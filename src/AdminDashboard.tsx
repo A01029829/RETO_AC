@@ -1,35 +1,11 @@
-import { Button, useRedirect, useGetList,  } from "react-admin";
+import { Button, useRedirect, useGetList } from "react-admin";
 import { Card, Grid, Box, Typography, Stack, Avatar } from "@mui/material";
-import { dataProvider} from "./dataProvider"
 import { useMemo } from "react";
-=========
-import { useEffect, useState } from "react";
-
-interface Estadisticas {
-  reportesTurno1: number;
-  tiempoPromedio: string;
-}
-
-interface ReporteReciente {
-  id: number;
-  autor: string;
-  hora: string;
-  fecha: string;
-  preview: string;
-  tipo: string;
-}
-
-interface NotaReciente {
-  id: number;
-  autor: string;
-  contenido: string;
-}
->>>>>>>>> Temporary merge branch 2
 
 export const AdminDashboard = () => {
   const redirect = useRedirect();
 
-  // Uso de hooks de react Admin
+  // Obtener reportes de emergencias hospitalarias
   const { data: reportesEH = [], isLoading: loadingReportes } = useGetList(
     'reportesEH',
     {
@@ -38,65 +14,48 @@ export const AdminDashboard = () => {
     }
   );
 
-  const [estadisticas, setEstadisticas] = useState<Estadisticas>({
-    reportesTurno1: 0,
-    tiempoPromedio: "0 minutos",
-  });
+  // Obtener notas recientes
+  const { data: notas = [], isLoading: loadingNotas } = useGetList(
+    'notas',
+    {
+      pagination: { page: 1, perPage: 3 },
+      sort: { field: 'fecha_creacion', order: 'DESC' }
+    }
+  );
 
-  const [reportesRecientes, setReportesRecientes] = useState<ReporteReciente[]>([]);
-  const [notasRecientes, setNotasRecientes] = useState<NotaReciente[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Calcular estadísticas directamente desde los datos
+  const estadisticas = useMemo(() => {
+    const ahora = new Date();
+    const inicioTurno1 = new Date(ahora);
+    inicioTurno1.setHours(7, 0, 0, 0);
+    const finTurno1 = new Date(ahora);
+    finTurno1.setHours(15, 0, 0, 0);
 
-  useEffect(() => {
-    const cargarDatosDashboard = async () => {
-      try {
-        setLoading(true);
+    // Filtrar reportes del turno 1
+    const reportesTurno1 = reportesEH.filter((reporte: any) => {
+      const horaReporte = new Date(reporte.hora_llamada);
+      return horaReporte >= inicioTurno1 && horaReporte <= finTurno1;
+    });
 
-        const [estadisticasData, reportesData, notasData] = await Promise.all([
-          dataProvider.getOne('dashboard/estadisticas', { id: 'stats' })
-            .then(({ data }) => data)
-            .catch(err => {
-              console.error('Error cargando estadisticas:', err);
-              return { reportesTurno1: 0, tiempoPromedio: "0 minutos" };
-            }),
+    // Calcular tiempo promedio (ejemplo básico)
+    const tiemposRespuesta = reportesEH
+      .filter((r: any) => r.tiempo_respuesta)
+      .map((r: any) => r.tiempo_respuesta);
+    
+    const promedioMinutos = tiemposRespuesta.length > 0
+      ? Math.round(tiemposRespuesta.reduce((a: number, b: number) => a + b, 0) / tiemposRespuesta.length)
+      : 0;
 
-          dataProvider.getList('dashboard/reportes-recientes', {
-            pagination: { page: 1, perPage: 2 },
-            sort: { field: 'fecha', order: 'DESC' },
-            filter: {}
-          })
-            .then(({ data }) => data)
-            .catch(err => {
-              console.error('Error cargando reportes:', err);
-              return [];
-            }),
-
-          dataProvider.getList('dashboard/notas-recientes', {
-            pagination: { page: 1, perPage: 3 },
-            sort: { field: 'fecha', order: 'DESC' },
-            filter: {}
-          })
-            .then(({ data }) => data)
-            .catch(err => {
-              console.error('Error cargando notas:', err);
-              return [];
-            })
-        ]);
-
-        setEstadisticas(estadisticasData);
-        setReportesRecientes(reportesData);
-        setNotasRecientes(notasData);
-      } catch (err) {
-        console.error('Error general cargando dashboard:', err);
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-      } finally {
-        setLoading(false);
-      }
+    return {
+      reportesTurno1: reportesTurno1.length,
+      tiempoPromedio: `${promedioMinutos} minutos`
     };
+  }, [reportesEH]);
 
-    cargarDatosDashboard();
-  }, [dataProvider]);
+  // Obtener los 2 reportes más recientes para mostrar
+  const reportesRecientes = useMemo(() => {
+    return reportesEH.slice(0, 2);
+  }, [reportesEH]);
 
   // Obtener fecha actual formateada
   const fechaActual = new Date().toLocaleDateString("es-MX", {
@@ -125,7 +84,8 @@ export const AdminDashboard = () => {
     });
   };
 
-  if (loading) {
+  // Mostrar loading mientras se cargan los datos
+  if (loadingReportes || loadingNotas) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <Typography variant="h6">Cargando dashboard...</Typography>
@@ -235,7 +195,7 @@ export const AdminDashboard = () => {
               REPORTES RECIENTES:
             </Typography>
             <Grid container spacing={3}>
-              {estadisticas.reportesRecientes.map((reporte: any) => (
+              {reportesRecientes.map((reporte: any) => (
                 <Grid size={{ xs: 12, md: 6 }} key={reporte.id}>
                   <Card sx={{ bgcolor: "#fff", borderRadius: 2, p: 2 }}>
                     <Box sx={{ display: "flex", gap: 2 }}>
@@ -260,11 +220,8 @@ export const AdminDashboard = () => {
                         </Typography>
                         <Button
                           label="Presiona aquí para ver el reporte"
-<<<<<<<<< Temporary merge branch 1
                           onClick={() => redirect(`/reportesEH/${reporte.id}/show`)}
-=========
-                          onClick={() => redirect(obtenerRutaReporte(reporte))}
->>>>>>>>> Temporary merge branch 2
+
                           sx={{
                             mt: 1,
                             fontSize: "0.75rem",

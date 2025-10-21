@@ -15,6 +15,7 @@ const { MongoClient } = mongodb;  // Desestructurar MongoClient
 const app = express();
 let db;  
 
+// Configurar CORS correctamente para HTTPS
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;

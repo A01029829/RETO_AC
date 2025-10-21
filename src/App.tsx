@@ -89,7 +89,7 @@ export const App = () => (
 
           {/* Notas - Para jefeDeTurno y administrador */}
           {(permissions === "jefeDeTurno" ||
-            permissions === "administrador") && (
+            permissions === "administrador" || permissions === "operador" || permissions === "operatorU") && (
             <Resource
               name="notas"
               list={notaList}
