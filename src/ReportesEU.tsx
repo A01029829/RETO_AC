@@ -72,7 +72,7 @@ export const ReporteEUList = () => {
               },
             }}
           >
-            <TextField source="id" label="ID" />
+            <TextField source="id" label="Folio" />
             <TextField source="fecha" label="Fecha" />
             <TextField source="turno" label="Turno" />
             <TextField source="tipo_servicio" label="Servicio" />
@@ -85,7 +85,7 @@ export const ReporteEUList = () => {
         </Box>
       ) : (
         <Datagrid rowClick="show">
-          <TextField source="id" label="ID" />
+          <TextField source="id" label="Folio" />
           <TextField source="fecha" label="Fecha" />
           <TextField source="turno" label="Turno" />
           <TextField source="personal_cargo" label="Personal a Cargo" />
@@ -280,7 +280,7 @@ export const ReporteEUEdit = () => (
 export const ReporteEUShow = () => (
   <Show>
     <SimpleShowLayout>
-      <TextField source="id" />
+      <TextField source="id" label="Folio" />
       <TextField source="fecha_hora" label="Fecha y hora" />
       <TextField source="turno" label="Turno" />
       <TextField source="personal_cargo" label="Personal a cargo" />

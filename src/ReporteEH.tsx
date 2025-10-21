@@ -131,7 +131,7 @@ export const ReporteEHList = () => {
             },
           }}
         >
-          <TextField source="id" label="ID" />
+          <TextField source="id" label="Folio" />
           <TextField source="hora_llamada" label="Hora" />
           <TextField source="colonia" label="Ubicación" />
           <TextField source="prioridad" label="Prioridad" />
@@ -142,7 +142,7 @@ export const ReporteEHList = () => {
         </Datagrid>
       ) : (
         <Datagrid rowClick="show">
-          <TextField source="id" label="ID" />
+          <TextField source="id" label="Folio" />
           <TextField source="hora_llamada" label="Fecha/Hora Llamada" />
           <TextField source="secciones_adicionales" label="Tipo" />
           <TextField source="numero_ambulancia" label="Unidad" />
@@ -2071,7 +2071,7 @@ export const ReporteEHCreate = () => (
 export const ReporteEHShow = () => (
   <Show>
     <SimpleShowLayout>
-      <TextField source="id" label="ID" />
+      <TextField source="id" label="Folio" />
 
       {/* Cronometría */}
       <h2>Cronometría</h2>
