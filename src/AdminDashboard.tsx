@@ -2,6 +2,29 @@ import { Button, useRedirect, useGetList,  } from "react-admin";
 import { Card, Grid, Box, Typography, Stack, Avatar } from "@mui/material";
 import { dataProvider} from "./dataProvider"
 import { useMemo } from "react";
+=========
+import { useEffect, useState } from "react";
+
+interface Estadisticas {
+  reportesTurno1: number;
+  tiempoPromedio: string;
+}
+
+interface ReporteReciente {
+  id: number;
+  autor: string;
+  hora: string;
+  fecha: string;
+  preview: string;
+  tipo: string;
+}
+
+interface NotaReciente {
+  id: number;
+  autor: string;
+  contenido: string;
+}
+>>>>>>>>> Temporary merge branch 2
 
 export const AdminDashboard = () => {
   const redirect = useRedirect();
@@ -237,7 +260,11 @@ export const AdminDashboard = () => {
                         </Typography>
                         <Button
                           label="Presiona aquí para ver el reporte"
-                          onClick={() => redirect(`/comments/${reporte.id}`)}
+<<<<<<<<< Temporary merge branch 1
+                          onClick={() => redirect(`/reportesEH/${reporte.id}/show`)}
+=========
+                          onClick={() => redirect(obtenerRutaReporte(reporte))}
+>>>>>>>>> Temporary merge branch 2
                           sx={{
                             mt: 1,
                             fontSize: "0.75rem",

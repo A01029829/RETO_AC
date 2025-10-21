@@ -616,13 +616,6 @@ app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (re
     }
 });
 
-/*
-app.listen(PORT, async ()=>{
-	await connectToDB();
-	console.log("aplicacion corriendo en puerto 3000");
-});
-*/
-// ==================== NOTAS ====================
 
 // GET /notas - Listar notas
 app.get('/notas', async (req, res) => {
@@ -675,7 +668,8 @@ app.get('/notas', async (req, res) => {
 app.get("/notas/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let data = await db.collection("notas")
@@ -750,7 +744,7 @@ app.put("/notas/:id", async (req, res) => {
 app.delete("/notas/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let data = await db.collection("notas").deleteOne({id: Number(req.params.id)});
