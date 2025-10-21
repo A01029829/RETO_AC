@@ -1,5 +1,6 @@
-import { Button, useRedirect, useGetList } from "react-admin";
+import { Button, useRedirect, useGetList,  } from "react-admin";
 import { Card, Grid, Box, Typography, Stack, Avatar } from "@mui/material";
+import { dataProvider} from "./dataProvider"
 import { useMemo } from "react";
 
 export const AdminDashboard = () => {
@@ -14,89 +15,65 @@ export const AdminDashboard = () => {
     }
   );
 
-  const { data: notas = [], isLoading: loadingNotas } = useGetList(
-    'notas',
-    {
-      pagination: { page: 1, perPage: 3 },
-      sort: { field: 'fecha_creacion', order: 'DESC' }
-    }
-  );
+  const [estadisticas, setEstadisticas] = useState<Estadisticas>({
+    reportesTurno1: 0,
+    tiempoPromedio: "0 minutos",
+  });
 
-  // Calcular estadisticas
-  const estadisticas = useMemo(() => {
-    if (!reportesEH.length) {
-      return {
-        reportesTurno1: 0,
-        tiempoPromedio: "0 min",
-        reportesRecientes: []
-      };
-    }
+  const [reportesRecientes, setReportesRecientes] = useState<ReporteReciente[]>([]);
+  const [notasRecientes, setNotasRecientes] = useState<NotaReciente[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    // Calcular estadisticas del turno actual
-    const ahora = new Date();
-    const inicioTurno = new Date(ahora);
-    inicioTurno.setHours(8, 0, 0, 0); // Turno 1: 8:00 AM
+  useEffect(() => {
+    const cargarDatosDashboard = async () => {
+      try {
+        setLoading(true);
 
-    const reportesDelTurno = reportesEH.filter((r: any) => {
-      const fechaReporte = new Date(r.hora_llamada);
-      return fechaReporte >= inicioTurno && fechaReporte <= ahora;
-    });
+        const [estadisticasData, reportesData, notasData] = await Promise.all([
+          dataProvider.getOne('dashboard/estadisticas', { id: 'stats' })
+            .then(({ data }) => data)
+            .catch(err => {
+              console.error('Error cargando estadisticas:', err);
+              return { reportesTurno1: 0, tiempoPromedio: "0 minutos" };
+            }),
 
-    // Calcular tiempo promedio de respuesta
-    const tiemposRespuesta: number[] = [];
-    reportesDelTurno.forEach((r: any) => {
-      if (r.hora_llamada && r.hora_llegada) {
-        try {
-          console.log('Procesando reporte:', {
-            id: r.id,
-            hora_llamada: r.hora_llamada,
-            hora_llegada: r.hora_llegada,
-            tipo_hora_llamada: typeof r.hora_llamada,
-            tipo_hora_llegada: typeof r.hora_llegada
-          });
+          dataProvider.getList('dashboard/reportes-recientes', {
+            pagination: { page: 1, perPage: 2 },
+            sort: { field: 'fecha', order: 'DESC' },
+            filter: {}
+          })
+            .then(({ data }) => data)
+            .catch(err => {
+              console.error('Error cargando reportes:', err);
+              return [];
+            }),
 
-          const llamada = new Date(r.hora_llamada);
-          
-          // Verificar si hora_llegada es string o Date
-          let llegada: Date;
-          if (typeof r.hora_llegada === 'string') {
-            // Si es string en formato "HH:mm:ss"
-            const [horas, minutos, segundos] = r.hora_llegada.split(':').map(Number);
-            llegada = new Date(llamada);
-            llegada.setHours(horas, minutos, segundos || 0);
-            
-            // Si la hora de llegada es menor que la de llamada, probablemente cruzó la medianoche
-            if (llegada < llamada) {
-              llegada.setDate(llegada.getDate() + 1);
-            }
-          } else {
-            // Si es un objeto Date
-            llegada = new Date(r.hora_llegada);
-          }
-          
-          const diferencia = Math.abs(llegada.getTime() - llamada.getTime());
-          const minutos = diferencia / 60000;
-          
-          console.log('Tiempo calculado:', minutos, 'minutos');
-          tiemposRespuesta.push(minutos);
-        } catch (error) {
-          console.error('Error calculando tiempo de respuesta:', error, r);
-        }
+          dataProvider.getList('dashboard/notas-recientes', {
+            pagination: { page: 1, perPage: 3 },
+            sort: { field: 'fecha', order: 'DESC' },
+            filter: {}
+          })
+            .then(({ data }) => data)
+            .catch(err => {
+              console.error('Error cargando notas:', err);
+              return [];
+            })
+        ]);
+
+        setEstadisticas(estadisticasData);
+        setReportesRecientes(reportesData);
+        setNotasRecientes(notasData);
+      } catch (err) {
+        console.error('Error general cargando dashboard:', err);
+        setError(err instanceof Error ? err.message : 'Error desconocido');
+      } finally {
+        setLoading(false);
       }
-    });
-
-    const promedio = tiemposRespuesta.length > 0
-      ? tiemposRespuesta.reduce((a, b) => a + b, 0) / tiemposRespuesta.length
-      : 0;
-
-    return {
-      reportesTurno1: reportesDelTurno.length,
-      tiempoPromedio: `${Math.round(promedio)} min`,
-      reportesRecientes: reportesEH.slice(0, 2) // Solo los 2 mas recientes
     };
-  }, [reportesEH]);
 
-  const loading = loadingReportes || loadingNotas;
+    cargarDatosDashboard();
+  }, [dataProvider]);
 
   // Obtener fecha actual formateada
   const fechaActual = new Date().toLocaleDateString("es-MX", {
@@ -260,7 +237,7 @@ export const AdminDashboard = () => {
                         </Typography>
                         <Button
                           label="Presiona aquí para ver el reporte"
-                          onClick={() => redirect(`/reportesEH/${reporte.id}/show`)}
+                          onClick={() => redirect(`/comments/${reporte.id}`)}
                           sx={{
                             mt: 1,
                             fontSize: "0.75rem",

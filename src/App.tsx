@@ -3,7 +3,12 @@ import { Route } from "react-router-dom";
 import { Layout } from "./Layout";
 import { dataProvider } from "./dataProvider";
 import { UserList } from "./users";
-import { ReporteEHList, ReporteEHEdit, ReporteEHCreate, ReporteEHShow } from "./ReporteEH";
+import {
+  ReporteEHList,
+  ReporteEHEdit,
+  ReporteEHCreate,
+  ReporteEHShow,
+} from "./ReporteEH";
 import {
   ReporteEUCreate,
   ReporteEUEdit,
@@ -30,79 +35,83 @@ import { AccessibilityProvider } from "./Accessibility";
 
 export const App = () => (
   <AccessibilityProvider>
-  <Admin
-    dataProvider={dataProvider}
-    dashboard={Dashboard}
-    layout={Layout}
-    authProvider={authProvider}
-    i18nProvider={i18nProvider}
-    loginPage={MyLoginPage}
-    theme={customTheme}
-    
-  >
-    {(permissions) => (
-      <>
-        {/* Recurso de usuarios - Solo para administradores */}
-        {permissions === 'administrador' && (
-          <Resource
-            name="usuarios"
-            list={UsuarioList}
-            create={UsuarioCreate}
-            edit={UsuarioEdit}
-            icon={UserIcon}
-            options={{ label: 'Gestión de Usuarios' }}
-          />
-        )}
-
-        {/* Reportes Emergencias Hospitalarias - Solo para operador (EH), jefeDeTurno y administrador */}
-        {(permissions === 'operador' || permissions === 'jefeDeTurno' || permissions === 'administrador') && (
-          <Resource
-            name="reportesEH"
-            options={{ label: 'Reportes Emergencias Hospitalarias' }}
-            list={ReporteEHList}
-            edit={permissions === 'operador' ? undefined : ReporteEHEdit}
-            create={ReporteEHCreate}
-            show={ReporteEHShow}
-            icon={PostIcon}
-          />
-        )}
-
-        {/* Reportes Emergencias Urbanas - Solo para operatorU, jefeDeTurno y administrador */}
-        {(permissions === 'operatorU' || permissions === 'jefeDeTurno' || permissions === 'administrador') && (
-          <Resource
-            name="reportesEU"
-            options={{ label: 'Reportes Emergencias Urbanas' }}
-            list={ReporteEUList}
-            create={ReporteEUCreate}
-            edit={permissions === 'operatorU' ? undefined : ReporteEUEdit}
-            show={ReporteEUShow}
-          />
-        )}
-
-        {/* Notas - Para jefeDeTurno y administrador */}
-        {(permissions === 'jefeDeTurno' || permissions === 'administrador') && (
-          <Resource
-            name="Notas"
-            list={notaList}
-            edit={notaEdit}
-            create={notaCreate}
-            show={notaShow}
-            icon={CommentBankRounded}
-          />
-        )}
-
-        <CustomRoutes>
-          <Route path="/operator" element={<OperatorPage />}></Route>
-          <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
-          <Route path="/operatorU" element={<OperatorUPage />}></Route>
-          <Route path="/admin" element={<AdminDashboard />}></Route>
-          {/* Panel de Estadísticas - Solo para administrador */}
-          {permissions === 'administrador' && (
-            <Route path="/stats" element={<StatisticsPanel />} />
+    <Admin
+      dataProvider={dataProvider}
+      dashboard={Dashboard}
+      layout={Layout}
+      authProvider={authProvider}
+      i18nProvider={i18nProvider}
+      loginPage={MyLoginPage}
+      theme={customTheme}
+    >
+      {(permissions) => (
+        <>
+          {/* Recurso de usuarios - Solo para administradores */}
+          {permissions === "administrador" && (
+            <Resource
+              name="usuarios"
+              list={UsuarioList}
+              create={UsuarioCreate}
+              edit={UsuarioEdit}
+              icon={UserIcon}
+              options={{ label: "Gestión de Usuarios" }}
+            />
           )}
-        </CustomRoutes>
-      </>
-    )}
-  </Admin>
+
+          {/* Reportes Emergencias Hospitalarias - Solo para operador (EH), jefeDeTurno y administrador */}
+          {(permissions === "operador" ||
+            permissions === "jefeDeTurno" ||
+            permissions === "administrador") && (
+            <Resource
+              name="reportesEH"
+              options={{ label: "Reportes Emergencias Hospitalarias" }}
+              list={ReporteEHList}
+              edit={permissions === "operador" ? undefined : ReporteEHEdit}
+              create={ReporteEHCreate}
+              show={ReporteEHShow}
+              icon={PostIcon}
+            />
+          )}
+
+          {/* Reportes Emergencias Urbanas - Solo para operatorU, jefeDeTurno y administrador */}
+          {(permissions === "operatorU" ||
+            permissions === "jefeDeTurno" ||
+            permissions === "administrador") && (
+            <Resource
+              name="reportesEU"
+              options={{ label: "Reportes Emergencias Urbanas" }}
+              list={ReporteEUList}
+              create={ReporteEUCreate}
+              edit={permissions === "operatorU" ? undefined : ReporteEUEdit}
+              show={ReporteEUShow}
+            />
+          )}
+
+          {/* Notas - Para jefeDeTurno y administrador */}
+          {(permissions === "jefeDeTurno" ||
+            permissions === "administrador") && (
+            <Resource
+              name="notas"
+              list={notaList}
+              edit={notaEdit}
+              create={notaCreate}
+              show={notaShow}
+              icon={CommentBankRounded}
+            />
+          )}
+
+          <CustomRoutes>
+            <Route path="/operator" element={<OperatorPage />}></Route>
+            <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
+            <Route path="/operatorU" element={<OperatorUPage />}></Route>
+            <Route path="/admin" element={<AdminDashboard />}></Route>
+            {/* Panel de Estadísticas - Solo para administrador */}
+            {permissions === "administrador" && (
+              <Route path="/stats" element={<StatisticsPanel />} />
+            )}
+          </CustomRoutes>
+        </>
+      )}
+    </Admin>
   </AccessibilityProvider>
 );

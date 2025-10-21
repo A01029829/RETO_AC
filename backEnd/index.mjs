@@ -8,15 +8,15 @@ import https from 'https';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
-import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs";
+import {rolePermissions, requirePermission, getReportFilter} from "./Emergencias-PreHos/Authentication.mjs"
 
 const { MongoClient } = mongodb;  // Desestructurar MongoClient
 
 const app = express();
 let db;  
 
-// se usa cors para permitir solicitudes desde otros dominios
 app.use(cors());
+
 const PORT = process.env.PORT || 3000;
 
 // se usa body-parser para parsear el cuerpo de las solicitudes
@@ -115,7 +115,7 @@ const calcularTurnoActual = () => {
  app.get('/reportes', async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifedToken = await jwt.verify(token, 'secretKey');
+        let verifedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifedToken.usuario;
         if("_sort" in req.query){ // getList
             let sortBy = req.query._sort;
@@ -324,7 +324,7 @@ app.post("/login", async (req, res)=>{
 	if(data==null){
 		res.sendStatus(401);
 	}else if(await argon2.verify(data.password, pass)){
-		let token=jwt.sign({"usuario":data.usuario, "tipo":data.tipo, "turno":data.turno}, "secretKey", {expiresIn: 900})
+		let token=jwt.sign({"usuario":data.usuario, "tipo":data.tipo, "turno":data.turno}, await process.env.JWTKEY, {expiresIn: 900})
 		res.json({"token":token, "id":data.usuario, "nombre":data.nombre, "tipo":data.tipo, "turno":data.turno});
 	}else{
 		res.sendStatus(401);
@@ -339,7 +339,7 @@ app.get("/me", async (req, res) => {
 			return res.status(401).json({ message: 'Token no proporcionado' });
 		}
 		
-		let verifiedToken = await jwt.verify(token, "secretKey");
+		let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
 		let user = verifiedToken.usuario;
 		
 		// Buscar informacion completa del usuario
@@ -373,7 +373,7 @@ app.get("/me", async (req, res) => {
 app.get('/reportesEU', async (req, res) => {
     try{
 		let token=req.get("Authentication");
-        let verifiedToken=await jwt.verify(token, "secretKey");
+		let verifiedToken=await jwt.verify(token, await process.env.JWTKEY);
 		let user=verifiedToken.usuario;
 		
 		// Aplicar filtro segun el rol del usuario
@@ -416,7 +416,7 @@ app.get('/reportesEU', async (req, res) => {
 app.get("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let data = await db.collection("reportesEU").find({id: Number(req.params.id)}).project({_id:0}).toArray();
@@ -431,7 +431,7 @@ app.get("/reportesEU/:id", async (req, res) => {
 app.post('/reportesEU', async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -456,7 +456,7 @@ app.post('/reportesEU', async (req, res) => {
 app.put("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -477,7 +477,7 @@ app.put("/reportesEU/:id", async (req, res) => {
 app.delete("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token,await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let data = await db.collection("reportesEU").deleteOne({id: Number(req.params.id)});
@@ -494,7 +494,7 @@ app.delete("/reportesEU/:id", async (req, res) => {
 app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, res) => {
     try{
         let token=req.get("Authentication");
-        let verifiedToken=await jwt.verify(token, "secretKey");
+        let verifiedToken=await jwt.verify(token,await process.env.JWTKEY);
         let user=verifiedToken.usuario;
         
         const filter = getReportFilter(verifiedToken);
@@ -535,7 +535,7 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
 app.get("/reportesEH/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
 
         const filter = getReportFilter(verifiedToken);
@@ -563,7 +563,7 @@ app.get("/reportesEH/:id", async (req, res) => {
 app.post('/reportesEH', requirePermission('crear_reportes'), async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -584,7 +584,7 @@ app.post('/reportesEH', requirePermission('crear_reportes'), async (req, res) =>
 app.put("/reportesEH/:id", requirePermission('editar_reportes'), async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token,await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -605,7 +605,7 @@ app.put("/reportesEH/:id", requirePermission('editar_reportes'), async (req, res
 app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token,await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let data = await db.collection("reportesEH").deleteOne({id: Number(req.params.id)});
@@ -616,13 +616,19 @@ app.delete("/reportesEH/:id", requirePermission('eliminar_reportes'),  async (re
     }
 });
 
+/*
+app.listen(PORT, async ()=>{
+	await connectToDB();
+	console.log("aplicacion corriendo en puerto 3000");
+});
+*/
 // ==================== NOTAS ====================
 
 // GET /notas - Listar notas
 app.get('/notas', async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         if ("_sort" in req.query) {
@@ -688,7 +694,7 @@ app.get("/notas/:id", async (req, res) => {
 app.post('/notas', async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -717,7 +723,7 @@ app.post('/notas', async (req, res) => {
 app.put("/notas/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-        let verifiedToken = await jwt.verify(token, "secretKey");
+        let verifiedToken = await jwt.verify(token, await process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
         let valores = req.body;
@@ -1186,9 +1192,23 @@ app.get('/estadisticas/distribucion-subtipo', requirePermission('ver_estadistica
     }
 });
 
+
+const options = {
+      key: fs.readFileSync('backend.key'),
+      cert: fs.readFileSync('backend.crt')
+    };
+
+https.createServer(options, app).listen(3000, async () => {
+	await process.loadEnvFile(".env");
+	connectToDB();
+	console.log('HTTPS Server running on port 3000');
+});
+
+/*
 app.listen(PORT, '0.0.0.0', ()=>{
 	connectToDB();
 	console.log(`aplicacion corriendo en puerto ${PORT} (accesible desde todas las interfaces)`);
 });
+*/
 
 
