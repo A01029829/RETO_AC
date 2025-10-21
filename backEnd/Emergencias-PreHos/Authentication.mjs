@@ -76,11 +76,9 @@ export const getReportFilter = (user) => {
         return {}; // Sin filtro, puede ver todos los reportes
     }
     else if(role === 'jefeDeTurno'){
-        // Puede ver todos los reportes de su turno
-        if(turno) {
-            return { turno: turno };
-        }
-        return {}; // Si no tiene turno asignado, ve todos
+        // El jefe de turno debe ver reportes creados por operadores de su mismo turno
+        // Esto se manejará con un lookup en el endpoint
+        return { role: 'jefeDeTurno', turno: turno };
     }
     else if(role === 'operador'){
         return { creado_por: username }; // Solo puede ver sus propios reportes
