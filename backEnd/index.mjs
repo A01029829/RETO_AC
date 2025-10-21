@@ -15,8 +15,8 @@ const { MongoClient } = mongodb;  // Desestructurar MongoClient
 const app = express();
 let db;  
 
-// se usa cors para permitir solicitudes desde otros dominios
 app.use(cors());
+
 const PORT = process.env.PORT || 3000;
 
 // se usa body-parser para parsear el cuerpo de las solicitudes
@@ -622,7 +622,7 @@ app.listen(PORT, async ()=>{
 	console.log("aplicacion corriendo en puerto 3000");
 });
 */
-=======
+
 /* DASHBOARD endpoints */
 
 app.get("/dashboard/estadisticas", requirePermission("ver_estadisticas"), async (req, res) =>{
