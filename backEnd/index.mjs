@@ -259,7 +259,7 @@ app.get('/usuarios', requirePermission('gestionar_usuarios'), async (req, res) =
 	}
 })
 
-// GET /usuarios/:id - Obtener un usuario especifico (solo admin)
+// GET /usuarios/:id - Obtener un usuario especifico 
 app.get('/usuarios/:id', requirePermission('gestionar_usuarios'), async (req, res) => {
 	try {
 		const usuario = await db.collection("usuarios402")

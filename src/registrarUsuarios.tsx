@@ -40,7 +40,8 @@ export const UsuarioCreate = () => {
   const handleSubmit = async (data: any) => {
     try {
       const token = sessionStorage.getItem('auth');
-      const response = await fetch('http://127.0.0.1:3000/registrarse', {
+      const apiUrl = import.meta.env.VITE_JSON_SERVER_URL || 'https://localhost:3000';
+      const response = await fetch(`${apiUrl}/registrarse`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

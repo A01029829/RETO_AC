@@ -24,6 +24,8 @@ export const rolePermissions = {
         ver_estadisticas: true,
         exportar_datos: true,
         editar_reportes: true,
+        ver_usuarios: true,
+        gestionar_usuarios: true,
     },
     operador: {
         ver_propios_reportes: true,
