@@ -1130,24 +1130,26 @@ app.get('/estadisticas/ultimos-reportes', requirePermission('ver_estadisticas'),
         if (!tipo || tipo === 'EH') {
             let reportesEH = await db.collection('reportesEH')
                 .find({})
-                .sort({ fecha: -1 })
+                .sort({ hora_llamada: -1 }) 
                 .limit(parseInt(limite))
                 .project({
                     id: 1,
-                    fecha: 1,
+                    hora_llamada: 1,
                     turno: 1,
-                    ubicacion_descripcion: 1,
-                    tipo_servicio: 1,
+                    calle: 1,
+                    colonia: 1,
+                    alcaldia_municipio: 1,
+                    secciones_adicionales: 1,
                     _id: 0
                 })
                 .toArray();
             
             reportes = reportes.concat(reportesEH.map(r => ({
                 folio: `EH-${r.id}`,
-                fecha: r.fecha,
-                tipo: r.tipo_servicio || 'Prehospitalaria',
+                fecha: r.hora_llamada, 
+                tipo: r.secciones_adicionales || 'Prehospitalaria',
                 turno: r.turno === '1' ? 'Matutino' : r.turno === '2' ? 'Vespertino' : 'Nocturno',
-                ubicacion: r.ubicacion_descripcion
+                ubicacion: `${r.calle || ''}, ${r.colonia || ''}, ${r.alcaldia_municipio || ''}`.trim()
             })));
         }
         
