@@ -2,7 +2,7 @@ import { AuthProvider } from "react-admin";
 
 export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
-    const apiUrl = import.meta.env.VITE_JSON_SERVER_URL || "http://127.0.0.1:3000";
+    const apiUrl = import.meta.env.VITE_JSON_SERVER_URL || "https://127.0.0.1:3000";
     const request = new Request(`${apiUrl}/login`, {
       method: "POST",
       body: JSON.stringify({ usuario: username, password }), // ← CAMBIO AQUÍ

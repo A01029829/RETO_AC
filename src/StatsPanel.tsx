@@ -6,7 +6,7 @@ import { Card, CardContent, Typography, Box, List, ListItem, ListItemText, Divid
 const COLORS = ["#236eb1", "#f19102", "#b7cde4"];
 
 // Configuracion de la API
-const API_URL = "http://localhost:3000";
+const API_URL = "https://localhost:3000";
 
 // Funcion helper para obtener el token de autenticacion
 const getAuthToken = () => {
