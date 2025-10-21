@@ -45,7 +45,7 @@ export const requirePermission = (permission) => {
                 return res.status(401).json({ message: 'Token no proporcionado' });
             }
 
-            const verifiedToken = await jwt.verify(token, 'secretKey');
+            const verifiedToken = await jwt.verify(token, process.env.JWTKEY);
             const userRole = verifiedToken.tipo;
 
             if (!rolePermissions[userRole] || !rolePermissions[userRole][permission]) {

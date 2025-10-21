@@ -2,6 +2,7 @@ import { Button, useRedirect, useGetList } from "react-admin";
 import { Card, Grid, Box, Typography, Stack, Avatar } from "@mui/material";
 import { useMemo } from "react";
 
+
 export const AdminDashboard = () => {
   const redirect = useRedirect();
 
@@ -97,6 +98,16 @@ export const AdminDashboard = () => {
   }, [reportesEH]);
 
   const loading = loadingReportes || loadingNotas;
+
+    const obtenerRutaReporte = (reporte: ReporteReciente): string => {
+    if (reporte.tipo === 'EH') {
+      return `/reportesEH/${reporte.id}/show`;
+    }
+    if (reporte.tipo === 'EU') {
+      return `/reportesEU/${reporte.id}/show`;
+    }
+    return `/reportesEH/${reporte.id}/show`;
+  };
 
   // Obtener fecha actual formateada
   const fechaActual = new Date().toLocaleDateString("es-MX", {
@@ -261,6 +272,8 @@ export const AdminDashboard = () => {
                         <Button
                           label="Presiona aquí para ver el reporte"
                           onClick={() => redirect(`/reportesEH/${reporte.id}/show`)}
+
+
                           sx={{
                             mt: 1,
                             fontSize: "0.75rem",
