@@ -2109,6 +2109,7 @@ export const ReporteEHShow = () => (
       {/* Datos del Paciente */}
       <h2>Datos del Paciente</h2>
       <TextField source="paciente_nombre" label="Nombre Completo" />
+      <NumberField source="paciente_edad" label="Edad" />
       <TextField source="paciente_sexo" label="Sexo" />
       <TextField source="paciente_domicilio_calle" label="Domicilio - Calle" />
       <TextField
