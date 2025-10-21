@@ -378,7 +378,26 @@ app.get('/reportesEU', async (req, res) => {
 		let user=verifiedToken.usuario;
 		
 		// Aplicar filtro segun el rol del usuario
-		const filter = getReportFilter(verifiedToken);		if("_sort" in req.query){//getList
+		const filter = getReportFilter(verifiedToken);
+		let queryFilter = {};
+		
+		// Si es jefe de turno, necesitamos filtrar por usuarios del mismo turno
+		if(filter.role === 'jefeDeTurno' && filter.turno){
+			// Obtener todos los usuarios del mismo turno
+			const usuariosDelTurno = await db.collection("usuarios402")
+				.find({ turno: filter.turno })
+				.project({ usuario: 1, _id: 0 })
+				.toArray();
+			
+			const nombresUsuarios = usuariosDelTurno.map(u => u.usuario);
+			queryFilter = { creado_por: { $in: nombresUsuarios } };
+		} else if(filter.creado_por){
+			// Para operadores, filtrar por su propio usuario
+			queryFilter = { creado_por: filter.creado_por };
+		}
+		// Para administradores, queryFilter queda vacío (sin filtro)
+		
+		if("_sort" in req.query){//getList
 			let sortBy=req.query._sort;
 			let sortOrder=req.query._order=="ASC"?1:-1;
 			let inicio=Number(req.query._start);
@@ -387,7 +406,7 @@ app.get('/reportesEU', async (req, res) => {
 			sorter[sortBy]=sortOrder;
 			
 			// Aplicar filtro del usuario
-			let data= await db.collection("reportesEU").find(filter).sort(sorter).project({_id:0}).toArray();
+			let data= await db.collection("reportesEU").find(queryFilter).sort(sorter).project({_id:0}).toArray();
 			res.set("Access-Control-Expose-Headers", "X-Total-Count");
 			res.set("X-Total-Count", data.length);
 			data=data.slice(inicio,fin)
@@ -396,19 +415,20 @@ app.get('/reportesEU', async (req, res) => {
 		}else if("id" in req.query){
 			let data=[];
 			for(let index=0; index<req.query.id.length; index++){
-				let dataParcial=await db.collection("reportesEU").find({...filter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
+				let dataParcial=await db.collection("reportesEU").find({...queryFilter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
 				data= await data.concat(dataParcial);
 			}
 			res.json(data);
 		}else{
 			// Combinar filtro del usuario con query params
-			let combinedFilter = {...filter, ...req.query};
+			let combinedFilter = {...queryFilter, ...req.query};
 			let data=await db.collection("reportesEU").find(combinedFilter).project({_id:0}).toArray();
 			res.set("Access-Control-Expose-Headers", "X-Total-Count");
 			res.set("X-Total-Count", data.length);
 			res.json(data);
 		}
-	}catch{
+	}catch(error){
+		console.error("Error en GET /reportesEU:", error);
 		res.sendStatus(401);
 	}
 });
@@ -417,13 +437,37 @@ app.get('/reportesEU', async (req, res) => {
 app.get("/reportesEU/:id", async (req, res) => {
     try {
         let token = req.get("Authentication");
-    let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
+		let verifiedToken = await jwt.verify(token, process.env.JWTKEY);
         let user = verifiedToken.usuario;
         
-        let data = await db.collection("reportesEU").find({id: Number(req.params.id)}).project({_id:0}).toArray();
-        log(user, "reportesEU", "leer");
+		const filter = getReportFilter(verifiedToken);
+		let query = { id: Number(req.params.id) };
+		
+		// Si es jefe de turno, verificar que el reporte fue creado por alguien de su turno
+		if(filter.role === 'jefeDeTurno' && filter.turno){
+			const usuariosDelTurno = await db.collection("usuarios402")
+				.find({ turno: filter.turno })
+				.project({ usuario: 1, _id: 0 })
+				.toArray();
+			
+			const nombresUsuarios = usuariosDelTurno.map(u => u.usuario);
+			query.creado_por = { $in: nombresUsuarios };
+		} else if (filter.creado_por) {
+			// Para operadores, solo sus propios reportes
+			query.creado_por = filter.creado_por;
+		}
+		// Para administradores, no se agrega filtro adicional
+        
+        let data = await db.collection("reportesEU").find(query).project({_id:0}).toArray();
+        
+		if(data.length === 0) {
+			return res.status(404).json({ message: 'Reporte no encontrado o sin permisos para verlo' });
+		}
+		
+		log(user, "reportesEU", "leer");
         res.json(data[0]);
-    } catch {
+    } catch(error) {
+		console.error("Error en GET /reportesEU/:id:", error);
         res.sendStatus(401);
     }
 });
@@ -499,6 +543,23 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
         let user=verifiedToken.usuario;
         
         const filter = getReportFilter(verifiedToken);
+        let queryFilter = {};
+        
+        // Si es jefe de turno, necesitamos filtrar por usuarios del mismo turno
+        if(filter.role === 'jefeDeTurno' && filter.turno){
+            // Obtener todos los usuarios del mismo turno
+            const usuariosDelTurno = await db.collection("usuarios402")
+                .find({ turno: filter.turno })
+                .project({ usuario: 1, _id: 0 })
+                .toArray();
+            
+            const nombresUsuarios = usuariosDelTurno.map(u => u.usuario);
+            queryFilter = { creado_por: { $in: nombresUsuarios } };
+        } else if(filter.creado_por){
+            // Para operadores, filtrar por su propio usuario
+            queryFilter = { creado_por: filter.creado_por };
+        }
+        // Para administradores, queryFilter queda vacío (sin filtro)
         
         if("_sort" in req.query){
             let sortBy=req.query._sort;
@@ -508,7 +569,7 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
             let sorter={}
             sorter[sortBy]=sortOrder;
 
-            let data= await db.collection("reportesEH").find(filter).sort(sorter).project({_id:0}).toArray();
+            let data= await db.collection("reportesEH").find(queryFilter).sort(sorter).project({_id:0}).toArray();
             res.set("Access-Control-Expose-Headers", "X-Total-Count");
             res.set("X-Total-Count", data.length);
             data=data.slice(inicio,fin)
@@ -517,17 +578,18 @@ app.get('/reportesEH', requirePermission('ver_propios_reportes'), async (req, re
         }else if("id" in req.query){
             let data=[];
             for(let index=0; index<req.query.id.length; index++){
-                let dataParcial=await db.collection("reportesEH").find({...filter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
+                let dataParcial=await db.collection("reportesEH").find({...queryFilter, id: Number(req.query.id[index])}).project({_id:0}).toArray()
                 data= await data.concat(dataParcial);
             }
             res.json(data);
         }else{
-            let data=await db.collection("reportesEH").find(filter).project({_id:0}).toArray();
+            let data=await db.collection("reportesEH").find(queryFilter).project({_id:0}).toArray();
             res.set("Access-Control-Expose-Headers", "X-Total-Count");
             res.set("X-Total-Count", data.length);
             res.json(data);
         }
-    }catch{
+    }catch(error){
+        console.error("Error en GET /reportesEH:", error);
         res.sendStatus(401);
     }
 });
@@ -542,20 +604,31 @@ app.get("/reportesEH/:id", async (req, res) => {
         const filter = getReportFilter(verifiedToken);
         let query = { id: Number(req.params.id) };
         
-        // Si hay filtro, agregarlo
-        if (filter.creado_por) {
+        // Si es jefe de turno, verificar que el reporte fue creado por alguien de su turno
+        if(filter.role === 'jefeDeTurno' && filter.turno){
+            const usuariosDelTurno = await db.collection("usuarios402")
+                .find({ turno: filter.turno })
+                .project({ usuario: 1, _id: 0 })
+                .toArray();
+            
+            const nombresUsuarios = usuariosDelTurno.map(u => u.usuario);
+            query.creado_por = { $in: nombresUsuarios };
+        } else if (filter.creado_por) {
+            // Para operadores, solo sus propios reportes
             query.creado_por = filter.creado_por;
         }
+        // Para administradores, no se agrega filtro adicional
         
         let data = await db.collection("reportesEH").find(query).project({_id:0}).toArray();
         
         if(data.length === 0) {
-            return res.status(404).json({ message: 'Reporte no encontrado' });
+            return res.status(404).json({ message: 'Reporte no encontrado o sin permisos para verlo' });
         }
 
         log(user, "reportesEH", "leer");
         res.json(data[0]);
-    } catch {
+    } catch(error) {
+        console.error("Error en GET /reportesEH/:id:", error);
         res.sendStatus(401);
     }
 });
