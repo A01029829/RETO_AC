@@ -57,7 +57,7 @@ export const customTheme = createTheme({
       styleOverrides: {
         root: {
           "& .RaLayout-contentWithSidebar": {
-            marginLeft: "16px", // Compensar el espacio de la sidebar
+            marginLeft: "16px",
           },
         },
       },

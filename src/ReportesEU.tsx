@@ -1,6 +1,5 @@
 import {
   List,
-  DataTable,
   EditButton,
   Edit,
   SimpleForm,

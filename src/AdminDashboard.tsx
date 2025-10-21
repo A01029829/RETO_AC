@@ -129,7 +129,7 @@ export const AdminDashboard = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      {/* Header con título y fecha */}
+      {/* Título y fecha */}
       <Box
         sx={{
           display: "flex",
@@ -149,6 +149,7 @@ export const AdminDashboard = () => {
 
       {/* Contenido del Dashboard */}
       <Grid container spacing={2}>
+        {/* Sección de estadísticas */}
         <Grid size={{ xs: 12, md: 7 }}>
           <Card
             sx={{

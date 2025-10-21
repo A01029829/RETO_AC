@@ -5,7 +5,7 @@ import { MyBar } from "./Bar";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import BarChartIcon from "@mui/icons-material/BarChart";
 
-// Custom Sidebar with styling
+// Customizacion del sidebar
 const CustomSidebar = (props: any) => {
   const isSmall = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
   const isMedium = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
@@ -53,7 +53,7 @@ const CustomSidebar = (props: any) => {
       }}
       {...props}
     >
-      {/* Logo en la parte superior */}
+      {/* Logo */}
       <Box
         sx={{
           display: "flex",
@@ -74,7 +74,7 @@ const CustomSidebar = (props: any) => {
           }}
         />
       </Box>
-      {/* Contenedor/Grid grande para el menú */}
+      {/* Menu */}
       <Box
         sx={{
           backgroundColor: "#B8D8E8",

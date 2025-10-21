@@ -1,11 +1,9 @@
 import {
   List,
-  DataTable,
   Edit,
   SimpleForm,
   TextInput,
   Create,
-  EditButton,
   Show,
   SimpleShowLayout,
   TextField,
@@ -1218,7 +1216,6 @@ export const ReporteEHCreate = () => (
           />
         </Grid>
 
-        {/* Columna derecha: mapa */}
         <Grid size={{ xs: 12, md: 7 }}>
           <CreateMap />
         </Grid>
@@ -1293,9 +1290,6 @@ export const ReporteEHCreate = () => (
 
       <FormDataConsumer>
         {({ formData }) => {
-          /*El componente proporciona un mecanismo para acceder 
-                                        y utilizar los datos del formulario actual dentro de un formulario, 
-                                        lo que permite un comportamiento dinámico basado en la entrada del usuario.*/
           const seccionSeleccionada = formData.secciones_adicionales;
 
           return (
@@ -1370,9 +1364,6 @@ export const ReporteEHCreate = () => (
 
                   <FormDataConsumer>
                     {({ formData }) => {
-                      /*El componente proporciona un mecanismo para acceder 
-                                                                    y utilizar los datos del formulario actual dentro de un formulario, 
-                                                                    lo que permite un comportamiento dinámico basado en la entrada del usuario.*/
                       const seccionSeleccionada = formData.apgar;
 
                       return (

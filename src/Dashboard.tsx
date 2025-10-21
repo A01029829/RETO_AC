@@ -4,7 +4,7 @@ import { OperatorPage } from "./operador";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
 import { OperatorUPage } from "./operatorU";
 import { AdminDashboard } from "./AdminDashboard.tsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 export const Dashboard = () => {

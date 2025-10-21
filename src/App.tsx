@@ -1,8 +1,7 @@
-import { Admin, Resource, ShowGuesser, CustomRoutes } from "react-admin";
+import { Admin, Resource, CustomRoutes } from "react-admin";
 import { Route } from "react-router-dom";
 import { Layout } from "./Layout";
 import { dataProvider } from "./dataProvider";
-import { UserList } from "./users";
 import {
   ReporteEHList,
   ReporteEHEdit,
@@ -15,7 +14,6 @@ import {
   ReporteEUShow,
   ReporteEUList,
 } from "./ReportesEU";
-import PostIcon from "@mui/icons-material/Book";
 import UserIcon from "@mui/icons-material/Group";
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
@@ -25,7 +23,6 @@ import { i18nProvider } from "./i18nProvider";
 import { MyLoginPage } from "./MyLoginPage";
 import { notaCreate, notaEdit, notaList, notaShow } from "./notas";
 import { OperatorPage } from "./operador";
-import { UserCreateForm, UserEditForm } from "./useUnique";
 import { CommentBankRounded } from "@mui/icons-material";
 import { JefeDeTurnoPage } from "./JefeDeTurno";
 import { AdminDashboard } from "./AdminDashboard";
@@ -90,7 +87,6 @@ export const App = () => (
             />
           )}
 
-          {/* Notas - Para jefeDeTurno y administrador */}
           {(permissions === "jefeDeTurno" ||
             permissions === "administrador" || permissions === "operador" || permissions === "operatorU") && (
             <Resource
@@ -108,7 +104,7 @@ export const App = () => (
             <Route path="/jefeDeTurno" element={<JefeDeTurnoPage />}></Route>
             <Route path="/operatorU" element={<OperatorUPage />}></Route>
             <Route path="/admin" element={<AdminDashboard />}></Route>
-            {/* Panel de Estadísticas - Solo para administrador */}
+            {/* Panel de estadisticas - Solo para administrador */}
             {permissions === "administrador" && (
               <Route path="/stats" element={<StatisticsPanel />} />
             )}
