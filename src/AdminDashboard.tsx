@@ -1,11 +1,18 @@
 import { Button, useRedirect, useGetList } from "react-admin";
 import { Card, Grid, Box, Typography, Stack, Avatar } from "@mui/material";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
+
+const API_URL = import.meta.env.VITE_JSON_SERVER_URL || "https://localhost:3000";
+
+
+const getAuthToken = () => {
+  return sessionStorage.getItem("auth");
+};
 
 export const AdminDashboard = () => {
   const redirect = useRedirect();
 
-  // Obtener reportes de emergencias hospitalarias
+  
   const { data: reportesEH = [], isLoading: loadingReportes } = useGetList(
     'reportesEH',
     {
@@ -14,7 +21,7 @@ export const AdminDashboard = () => {
     }
   );
 
-  // Obtener notas recientes
+  
   const { data: notas = [], isLoading: loadingNotas } = useGetList(
     'notas',
     {
@@ -23,41 +30,68 @@ export const AdminDashboard = () => {
     }
   );
 
-  // Calcular estadísticas directamente desde los datos
+  
+  const [tiempoPromedioTotal, setTiempoPromedioTotal] = useState<number>(0);
+
+  
+  useEffect(() => {
+    const loadTiempoPromedio = async () => {
+      try {
+        const token = getAuthToken();
+        if (!token) return;
+
+        const response = await fetch(`${API_URL}/estadisticas/tiempo-respuesta`, {
+          headers: { 
+            "Authentication": token,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data && data.length > 0) {
+            const totalMinutos = data.reduce((acc: number, item: any) => acc + (item.minutos || 0), 0);
+            const promedio = Math.round(totalMinutos / data.length);
+            setTiempoPromedioTotal(promedio);
+          }
+        }
+      } catch (error) {
+        console.error('Error al cargar tiempo promedio:', error);
+      }
+    };
+
+    loadTiempoPromedio();
+    const interval = setInterval(loadTiempoPromedio, 60000); 
+    return () => clearInterval(interval);
+  }, []);
+
+  
   const estadisticas = useMemo(() => {
     const ahora = new Date();
-    const inicioTurno1 = new Date(ahora);
-    inicioTurno1.setHours(7, 0, 0, 0);
-    const finTurno1 = new Date(ahora);
-    finTurno1.setHours(15, 0, 0, 0);
+    const inicioHoy = new Date(ahora);
+    inicioHoy.setHours(0, 0, 0, 0);
+    const finHoy = new Date(ahora);
+    finHoy.setHours(23, 59, 59, 999);
 
-    // Filtrar reportes del turno 1
-    const reportesTurno1 = reportesEH.filter((reporte: any) => {
+    
+    const reportesHoy = reportesEH.filter((reporte: any) => {
       const horaReporte = new Date(reporte.hora_llamada);
-      return horaReporte >= inicioTurno1 && horaReporte <= finTurno1;
+      return horaReporte >= inicioHoy && horaReporte <= finHoy;
     });
 
-    // Calcular tiempo promedio (ejemplo básico)
-    const tiemposRespuesta = reportesEH
-      .filter((r: any) => r.tiempo_respuesta)
-      .map((r: any) => r.tiempo_respuesta);
-    
-    const promedioMinutos = tiemposRespuesta.length > 0
-      ? Math.round(tiemposRespuesta.reduce((a: number, b: number) => a + b, 0) / tiemposRespuesta.length)
-      : 0;
-
     return {
-      reportesTurno1: reportesTurno1.length,
-      tiempoPromedio: `${promedioMinutos} minutos`
+      reportesHoy: reportesHoy.length,
+      tiempoPromedio: `${tiempoPromedioTotal} minutos`
     };
-  }, [reportesEH]);
+  }, [reportesEH, tiempoPromedioTotal]);
 
-  // Obtener los 2 reportes más recientes para mostrar
+  
   const reportesRecientes = useMemo(() => {
     return reportesEH.slice(0, 2);
   }, [reportesEH]);
 
-  // Obtener fecha actual formateada
+ 
   const fechaActual = new Date().toLocaleDateString("es-MX", {
     weekday: "long",
     day: "numeric",
@@ -115,7 +149,6 @@ export const AdminDashboard = () => {
 
       {/* Contenido del Dashboard */}
       <Grid container spacing={2}>
-        {/* Sección de estadísticas - Card principal con métricas */}
         <Grid size={{ xs: 12, md: 7 }}>
           <Card
             sx={{
@@ -128,15 +161,15 @@ export const AdminDashboard = () => {
               justifyContent: "space-around",
             }}
           >
-            {/* Reportes en el Turno */}
+            {/* Reportes del día de hoy */}
             <Stack alignItems="center" spacing={1}>
               <Typography variant="h2" fontWeight={900} color="primary">
-                {estadisticas.reportesTurno1}
+                {estadisticas.reportesHoy}
               </Typography>
               <Typography variant="h6" fontWeight={700} textAlign="center">
-                Reportes en
+                Reportes
                 <br />
-                el Turno 1
+                de Hoy
               </Typography>
             </Stack>
 
